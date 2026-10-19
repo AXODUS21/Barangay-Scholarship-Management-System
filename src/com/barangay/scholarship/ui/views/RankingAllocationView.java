@@ -68,9 +68,8 @@ public class RankingAllocationView extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // Top Metrics
-        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
         statsGrid.setOpaque(false);
-        statsGrid.setMaximumSize(new Dimension(2000, 90));
 
         cardBudgetSlots = new StatCard("Funded Slots Limit", "0 Slots", "Based on ₱150,000 Budget", Theme.PRIMARY);
         cardEligibleCandidates = new StatCard("Verified Candidates", "0 Students", "Ready for ranking & slot allocation", Theme.ACCENT);
@@ -78,24 +77,23 @@ public class RankingAllocationView extends JPanel {
         statsGrid.add(cardBudgetSlots);
         statsGrid.add(cardEligibleCandidates);
         centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Controls Card
         JPanel controlsCard = Theme.createCardPanel();
-        controlsCard.setMaximumSize(new Dimension(2000, 110));
-        JPanel ctrlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 16, 8));
+        JPanel ctrlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
         ctrlRow.setOpaque(false);
 
         JLabel lblCrit = new JLabel("Ranking Algorithm:");
         lblCrit.setFont(Theme.FONT_BODY_BOLD);
         cmbCriteria = new JComboBox<>(ScholarshipManager.RankingCriteria.values());
-        cmbCriteria.setPreferredSize(new Dimension(320, 32));
+        cmbCriteria.setPreferredSize(new Dimension(280, 32));
         cmbCriteria.addActionListener(e -> previewRanking());
 
-        JLabel lblSlots = new JLabel("Max Slot Quota:");
+        JLabel lblSlots = new JLabel("Max Slots:");
         lblSlots.setFont(Theme.FONT_BODY_BOLD);
         spnSlots = new JSpinner(new SpinnerNumberModel(10, 1, 500, 1));
-        spnSlots.setPreferredSize(new Dimension(80, 32));
+        spnSlots.setPreferredSize(new Dimension(75, 32));
         spnSlots.addChangeListener(e -> previewRanking());
 
         JButton btnPreview = new JButton("Refresh Ranking");
@@ -114,7 +112,7 @@ public class RankingAllocationView extends JPanel {
 
         controlsCard.add(ctrlRow, BorderLayout.CENTER);
         centerPanel.add(controlsCard);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Ranking Table Card
         JPanel tableCard = Theme.createCardPanel();

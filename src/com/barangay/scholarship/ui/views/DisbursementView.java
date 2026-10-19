@@ -68,9 +68,8 @@ public class DisbursementView extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // Metric Cards
-        JPanel statsGrid = new JPanel(new GridLayout(1, 3, 16, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 3, 16, 12));
         statsGrid.setOpaque(false);
-        statsGrid.setMaximumSize(new Dimension(2000, 90));
 
         cardBudgetRemaining = new StatCard("Remaining SK Funds", "₱0.00", "Available for release", Theme.ACCENT);
         cardDisbursed = new StatCard("Total Disbursed", "₱0.00", "Successfully claimed by scholars", Theme.PRIMARY);
@@ -80,21 +79,18 @@ public class DisbursementView extends JPanel {
         statsGrid.add(cardDisbursed);
         statsGrid.add(cardClaimedRatio);
         centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Action Toolbar Card
         JPanel toolbarCard = Theme.createCardPanel();
-        toolbarCard.setMaximumSize(new Dimension(2000, 70));
-        JPanel toolRow = new JPanel(new BorderLayout(12, 0));
+        JPanel toolRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
         toolRow.setOpaque(false);
 
-        // Search Bar on Left
-        JPanel searchBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        searchBox.setOpaque(false);
+        // Search Bar
         JLabel lblSearch = new JLabel("Search Scholar:");
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
-        txtSearch = new JTextField(18);
-        txtSearch.setPreferredSize(new Dimension(200, 32));
+        txtSearch = new JTextField(14);
+        txtSearch.setPreferredSize(new Dimension(160, 32));
         JButton btnSearch = new JButton("Filter");
         btnSearch.addActionListener(e -> applyFilter());
         JButton btnReset = new JButton("Reset");
@@ -103,29 +99,25 @@ public class DisbursementView extends JPanel {
             refreshData();
         });
 
-        searchBox.add(lblSearch);
-        searchBox.add(txtSearch);
-        searchBox.add(btnSearch);
-        searchBox.add(btnReset);
-        toolRow.add(searchBox, BorderLayout.WEST);
+        toolRow.add(lblSearch);
+        toolRow.add(txtSearch);
+        toolRow.add(btnSearch);
+        toolRow.add(btnReset);
+        toolRow.add(Box.createHorizontalStrut(12));
 
-        // Disbursement & Export Buttons on Right
-        JPanel btnGrp = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        btnGrp.setOpaque(false);
-
+        // Disbursement & Export Buttons
         JButton btnClaim = Theme.createStyledButton("💰 Disburse Selected Stipend", Theme.ACCENT, Color.WHITE);
         btnClaim.addActionListener(e -> disburseSelected());
 
         JButton btnExport = Theme.createStyledButton("📄 Export Payout Attendance Sheet", Theme.PRIMARY, Color.WHITE);
         btnExport.addActionListener(e -> exportAttendanceSheet());
 
-        btnGrp.add(btnClaim);
-        btnGrp.add(btnExport);
-        toolRow.add(btnGrp, BorderLayout.EAST);
+        toolRow.add(btnClaim);
+        toolRow.add(btnExport);
 
         toolbarCard.add(toolRow, BorderLayout.CENTER);
         centerPanel.add(toolbarCard);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Table Card
         JPanel tableCard = Theme.createCardPanel();

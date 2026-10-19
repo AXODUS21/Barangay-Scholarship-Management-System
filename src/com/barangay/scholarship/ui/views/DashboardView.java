@@ -102,9 +102,8 @@ public class DashboardView extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // 1. KPI Metric Cards
-        JPanel cardsGrid = new JPanel(new GridLayout(1, 4, 16, 0));
+        cardsGrid = new JPanel(new GridLayout(1, 4, 14, 12));
         cardsGrid.setOpaque(false);
-        cardsGrid.setMaximumSize(new Dimension(2000, 100));
 
         cardBudget = new StatCard("Remaining Budget", "₱0.00", "Total: ₱0.00", Theme.ACCENT);
         cardScholars = new StatCard("Approved Scholars", "0", "0 Payouts Claimed", Theme.PRIMARY);
@@ -116,11 +115,10 @@ public class DashboardView extends JPanel {
         cardsGrid.add(cardWaitlist);
         cardsGrid.add(cardScreening);
         centerPanel.add(cardsGrid);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // 2. Budget Tracker Progress Card
         JPanel budgetCard = Theme.createCardPanel();
-        budgetCard.setMaximumSize(new Dimension(2000, 100));
         JPanel budgetHeader = new JPanel(new BorderLayout());
         budgetHeader.setOpaque(false);
 
@@ -157,10 +155,10 @@ public class DashboardView extends JPanel {
 
         budgetCard.add(budgetBody, BorderLayout.CENTER);
         centerPanel.add(budgetCard);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // 3. Lower Section: Quick Workflows + Recent Activity Stack
-        JPanel lowerPanel = new JPanel(new GridLayout(1, 2, 16, 0));
+        lowerPanel = new JPanel(new GridLayout(1, 2, 16, 16));
         lowerPanel.setOpaque(false);
 
         // Left: Workflow Launcher Card
@@ -199,6 +197,7 @@ public class DashboardView extends JPanel {
 
         // Right: Recent Activity Log (ActionStack snapshot)
         JPanel activityCard = Theme.createCardPanel();
+        activityCard.setPreferredSize(new Dimension(350, 240));
         JLabel actTitle = new JLabel("Audit Log / Recent Transactions (LIFO Stack)");
         actTitle.setFont(Theme.FONT_HEADER_SM);
         actTitle.setForeground(Theme.TEXT_TITLE);
@@ -219,6 +218,42 @@ public class DashboardView extends JPanel {
         centerPanel.add(lowerPanel);
 
         add(centerPanel, BorderLayout.CENTER);
+
+        // Responsive resize listener
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                updateResponsiveLayout();
+            }
+        });
+    }
+
+    private JPanel cardsGrid;
+    private JPanel lowerPanel;
+
+    private void updateResponsiveLayout() {
+        int w = getWidth();
+        if (w <= 0) return;
+
+        if (w < 880) {
+            if (cardsGrid != null && ((GridLayout) cardsGrid.getLayout()).getRows() != 2) {
+                cardsGrid.setLayout(new GridLayout(2, 2, 10, 10));
+                cardsGrid.revalidate();
+            }
+            if (lowerPanel != null && ((GridLayout) lowerPanel.getLayout()).getRows() != 2) {
+                lowerPanel.setLayout(new GridLayout(2, 1, 12, 14));
+                lowerPanel.revalidate();
+            }
+        } else {
+            if (cardsGrid != null && ((GridLayout) cardsGrid.getLayout()).getRows() != 1) {
+                cardsGrid.setLayout(new GridLayout(1, 4, 14, 0));
+                cardsGrid.revalidate();
+            }
+            if (lowerPanel != null && ((GridLayout) lowerPanel.getLayout()).getRows() != 1) {
+                lowerPanel.setLayout(new GridLayout(1, 2, 16, 0));
+                lowerPanel.revalidate();
+            }
+        }
     }
 
     public void refreshData() {

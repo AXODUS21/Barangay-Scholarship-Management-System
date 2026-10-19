@@ -32,8 +32,8 @@ public class MainFrame extends JFrame {
         this.manager = manager;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1280, 800);
-        setMinimumSize(new Dimension(1024, 700));
+        setSize(1200, 760);
+        setMinimumSize(new Dimension(860, 560));
         setLocationRelativeTo(null);
 
         // CardLayout container for views
@@ -54,15 +54,15 @@ public class MainFrame extends JFrame {
         auditLogView = new AuditLogView(manager);
         settingsView = new SettingsView(manager);
 
-        // Add to CardLayout
-        contentArea.add(dashboardView, "DASHBOARD");
-        contentArea.add(registrationView, "REGISTRATION");
-        contentArea.add(screeningQueueView, "SCREENING");
-        contentArea.add(rankingAllocationView, "RANKING");
-        contentArea.add(disbursementView, "DISBURSEMENT");
-        contentArea.add(scholarDirectoryView, "DIRECTORY");
-        contentArea.add(auditLogView, "AUDIT");
-        contentArea.add(settingsView, "SETTINGS");
+        // Add to CardLayout wrapped in responsive borderless scrollpanes
+        contentArea.add(Theme.createBorderlessScrollPane(dashboardView), "DASHBOARD");
+        contentArea.add(Theme.createBorderlessScrollPane(registrationView), "REGISTRATION");
+        contentArea.add(Theme.createBorderlessScrollPane(screeningQueueView), "SCREENING");
+        contentArea.add(Theme.createBorderlessScrollPane(rankingAllocationView), "RANKING");
+        contentArea.add(Theme.createBorderlessScrollPane(disbursementView), "DISBURSEMENT");
+        contentArea.add(Theme.createBorderlessScrollPane(scholarDirectoryView), "DIRECTORY");
+        contentArea.add(Theme.createBorderlessScrollPane(auditLogView), "AUDIT");
+        contentArea.add(Theme.createBorderlessScrollPane(settingsView), "SETTINGS");
 
         // Layout Assembly
         setLayout(new BorderLayout());

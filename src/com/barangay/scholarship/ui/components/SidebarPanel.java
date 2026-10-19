@@ -24,7 +24,8 @@ public class SidebarPanel extends JPanel {
         this.navButtons = new ArrayList<>();
         this.currentView = "DASHBOARD";
 
-        setPreferredSize(new Dimension(240, 700));
+        setPreferredSize(new Dimension(230, 650));
+        setMinimumSize(new Dimension(200, 350));
         setBackground(Theme.PRIMARY);
         setLayout(new BorderLayout());
 
@@ -32,7 +33,7 @@ public class SidebarPanel extends JPanel {
         JPanel headerPanel = new JPanel();
         headerPanel.setOpaque(false);
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBorder(new EmptyBorder(24, 20, 24, 20));
+        headerPanel.setBorder(new EmptyBorder(18, 16, 16, 16));
 
         JLabel titleBadge = new JLabel("BARANGAY SK");
         titleBadge.setFont(Theme.FONT_SMALL_BOLD);
@@ -42,12 +43,12 @@ public class SidebarPanel extends JPanel {
         titleMain.setFont(Theme.FONT_HEADER_MD);
         titleMain.setForeground(Color.WHITE);
 
-        JLabel subtitle = new JLabel("Educational Assistance System");
+        JLabel subtitle = new JLabel("Educational Assistance");
         subtitle.setFont(Theme.FONT_SMALL);
         subtitle.setForeground(new Color(203, 213, 225));
 
         headerPanel.add(titleBadge);
-        headerPanel.add(Box.createVerticalStrut(4));
+        headerPanel.add(Box.createVerticalStrut(2));
         headerPanel.add(titleMain);
         headerPanel.add(Box.createVerticalStrut(2));
         headerPanel.add(subtitle);
@@ -58,24 +59,32 @@ public class SidebarPanel extends JPanel {
         JPanel menuPanel = new JPanel();
         menuPanel.setOpaque(false);
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBorder(new EmptyBorder(10, 0, 10, 0));
+        menuPanel.setBorder(new EmptyBorder(6, 0, 6, 0));
 
         addNavItem(menuPanel, "📊  Dashboard", "DASHBOARD");
         addNavItem(menuPanel, "📝  Registration", "REGISTRATION");
-        addNavItem(menuPanel, "📋  Screening Queue (FIFO)", "SCREENING");
-        addNavItem(menuPanel, "⚖️  Slot Allocation & Rank", "RANKING");
-        addNavItem(menuPanel, "💰  Payout & Disbursement", "DISBURSEMENT");
-        addNavItem(menuPanel, "🌳  Scholar Directory (BST)", "DIRECTORY");
-        addNavItem(menuPanel, "⏪  Audit Log & Undo (Stack)", "AUDIT");
-        addNavItem(menuPanel, "⚙️  Settings & Export", "SETTINGS");
+        addNavItem(menuPanel, "📋  Screening Queue", "SCREENING");
+        addNavItem(menuPanel, "⚖️  Slot Allocation", "RANKING");
+        addNavItem(menuPanel, "💰  Disbursement", "DISBURSEMENT");
+        addNavItem(menuPanel, "🌳  Scholar Directory", "DIRECTORY");
+        addNavItem(menuPanel, "⏪  Audit & Undo Log", "AUDIT");
+        addNavItem(menuPanel, "⚙️  Settings & Rubric", "SETTINGS");
 
         menuPanel.add(Box.createVerticalGlue());
-        add(menuPanel, BorderLayout.CENTER);
+
+        JScrollPane menuScroll = new JScrollPane(menuPanel);
+        menuScroll.setBorder(null);
+        menuScroll.setOpaque(false);
+        menuScroll.getViewport().setOpaque(false);
+        menuScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        menuScroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        add(menuScroll, BorderLayout.CENTER);
 
         // Footer version info
         JPanel footerPanel = new JPanel();
         footerPanel.setOpaque(false);
-        footerPanel.setBorder(new EmptyBorder(16, 20, 16, 20));
+        footerPanel.setBorder(new EmptyBorder(12, 16, 12, 16));
         footerPanel.setLayout(new BoxLayout(footerPanel, BoxLayout.Y_AXIS));
 
         JLabel verLbl = new JLabel("Barangay Edition v2.0");
@@ -98,9 +107,9 @@ public class SidebarPanel extends JPanel {
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setOpaque(true);
-        btn.setMaximumSize(new Dimension(240, 42));
-        btn.setPreferredSize(new Dimension(240, 42));
-        btn.setBorder(new EmptyBorder(0, 20, 0, 12));
+        btn.setMaximumSize(new Dimension(230, 38));
+        btn.setPreferredSize(new Dimension(230, 38));
+        btn.setBorder(new EmptyBorder(0, 16, 0, 12));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addActionListener(e -> {

@@ -78,4 +78,23 @@ public class Theme {
         panel.setLayout(new BorderLayout());
         return panel;
     }
+
+    public static JScrollPane createBorderlessScrollPane(Component view) {
+        JScrollPane sp = new JScrollPane(view);
+        sp.setBorder(null);
+        sp.getViewport().setBackground(BG_APP);
+        sp.getVerticalScrollBar().setUnitIncrement(16);
+        sp.getHorizontalScrollBar().setUnitIncrement(16);
+        return sp;
+    }
+
+    public static JSplitPane createSplitPane(int orientation, Component left, Component right, double resizeWeight) {
+        JSplitPane split = new JSplitPane(orientation, left, right);
+        split.setDividerSize(8);
+        split.setBorder(null);
+        split.setOpaque(false);
+        split.setContinuousLayout(true);
+        split.setResizeWeight(resizeWeight);
+        return split;
+    }
 }

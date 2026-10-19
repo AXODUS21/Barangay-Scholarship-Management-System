@@ -64,9 +64,8 @@ public class AuditLogView extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // Top Metrics
-        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
         statsGrid.setOpaque(false);
-        statsGrid.setMaximumSize(new Dimension(2000, 90));
 
         cardStackSize = new StatCard("Undo Stack Depth", "0 Actions", "Last-In, First-Out (LIFO)", Theme.PRIMARY);
         cardTopAction = new StatCard("Top of Stack (Next to Undo)", "None", "Most recent operation", Theme.WARNING);
@@ -74,27 +73,27 @@ public class AuditLogView extends JPanel {
         statsGrid.add(cardStackSize);
         statsGrid.add(cardTopAction);
         centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Action Toolbar
         JPanel toolbarCard = Theme.createCardPanel();
-        toolbarCard.setMaximumSize(new Dimension(2000, 75));
-        JPanel toolRow = new JPanel(new BorderLayout());
+        JPanel toolRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
         toolRow.setOpaque(false);
 
         JLabel lblInfo = new JLabel("Staff accident protection: Reverses accidental approvals, status updates, and stipend disbursements.");
         lblInfo.setFont(Theme.FONT_BODY);
         lblInfo.setForeground(Theme.TEXT_MUTED);
-        toolRow.add(lblInfo, BorderLayout.WEST);
 
         JButton btnUndo = Theme.createStyledButton("⏪ 1-Click Undo Last Action", Theme.PRIMARY, Color.WHITE);
         btnUndo.setFont(Theme.FONT_HEADER_SM);
         btnUndo.addActionListener(e -> executeUndo());
-        toolRow.add(btnUndo, BorderLayout.EAST);
+
+        toolRow.add(btnUndo);
+        toolRow.add(lblInfo);
 
         toolbarCard.add(toolRow, BorderLayout.CENTER);
         centerPanel.add(toolbarCard);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Table Card
         JPanel tableCard = Theme.createCardPanel();

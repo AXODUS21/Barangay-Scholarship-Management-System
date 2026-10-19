@@ -73,9 +73,8 @@ public class ScholarDirectoryView extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // BST Metrics
-        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
         statsGrid.setOpaque(false);
-        statsGrid.setMaximumSize(new Dimension(2000, 90));
 
         cardTreeSize = new StatCard("BST Active Nodes", "0 Scholars", "Indexed in Binary Search Tree", Theme.PRIMARY);
         cardTreeRoot = new StatCard("BST Root Node", "None", "Balanced Key Anchor", Theme.ACCENT);
@@ -83,45 +82,38 @@ public class ScholarDirectoryView extends JPanel {
         statsGrid.add(cardTreeSize);
         statsGrid.add(cardTreeRoot);
         centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Toolbar Card: Search + Traversal Selector + Drop Scholar Button
         JPanel toolbarCard = Theme.createCardPanel();
-        toolbarCard.setMaximumSize(new Dimension(2000, 75));
-        JPanel toolRow = new JPanel(new BorderLayout(12, 0));
+        JPanel toolRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
         toolRow.setOpaque(false);
 
-        // Left: Binary Search Input
-        JPanel leftBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        leftBox.setOpaque(false);
-
+        // Binary Search Input
         JLabel lblSearch = new JLabel("Binary Search (ID / Name):");
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
         txtSearchId = new JTextField(12);
-        txtSearchId.setPreferredSize(new Dimension(140, 32));
+        txtSearchId.setPreferredSize(new Dimension(130, 32));
 
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> executeBinarySearch());
 
-        JLabel lblTrav = new JLabel("Tree Traversal:");
+        JLabel lblTrav = new JLabel("Traversal:");
         lblTrav.setFont(Theme.FONT_BODY_BOLD);
         String[] traversals = {"In-Order (Sorted by ID)", "Pre-Order (Root First)", "Post-Order (Leaves First)"};
         cmbTraversal = new JComboBox<>(traversals);
-        cmbTraversal.setPreferredSize(new Dimension(190, 32));
+        cmbTraversal.setPreferredSize(new Dimension(175, 32));
         cmbTraversal.addActionListener(e -> refreshDirectory());
 
-        leftBox.add(lblSearch);
-        leftBox.add(txtSearchId);
-        leftBox.add(btnSearch);
-        leftBox.add(Box.createHorizontalStrut(10));
-        leftBox.add(lblTrav);
-        leftBox.add(cmbTraversal);
-        toolRow.add(leftBox, BorderLayout.WEST);
+        toolRow.add(lblSearch);
+        toolRow.add(txtSearchId);
+        toolRow.add(btnSearch);
+        toolRow.add(Box.createHorizontalStrut(8));
+        toolRow.add(lblTrav);
+        toolRow.add(cmbTraversal);
+        toolRow.add(Box.createHorizontalStrut(8));
 
-        // Right: Drop & Auto-Promote Button
-        JPanel rightBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        rightBox.setOpaque(false);
-
+        // Drop & Auto-Promote Button
         JButton btnDrop = Theme.createStyledButton("Drop & Promote Waitlist", Theme.DANGER, Color.WHITE);
         btnDrop.addActionListener(e -> dropSelectedScholar());
 
@@ -131,13 +123,12 @@ public class ScholarDirectoryView extends JPanel {
             refreshDirectory();
         });
 
-        rightBox.add(btnDrop);
-        rightBox.add(btnReset);
-        toolRow.add(rightBox, BorderLayout.EAST);
+        toolRow.add(btnDrop);
+        toolRow.add(btnReset);
 
         toolbarCard.add(toolRow, BorderLayout.CENTER);
         centerPanel.add(toolbarCard);
-        centerPanel.add(Box.createVerticalStrut(16));
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Directory Table Card
         JPanel tableCard = Theme.createCardPanel();

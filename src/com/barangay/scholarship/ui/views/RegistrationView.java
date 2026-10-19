@@ -178,10 +178,11 @@ public class RegistrationView extends JPanel {
         JScrollPane formScroll = new JScrollPane(formScrollContainer);
         formScroll.setBorder(null);
         formScroll.getViewport().setBackground(Color.WHITE);
-        formCard.add(formScroll, BorderLayout.CENTER);
+        formCard.setMinimumSize(new Dimension(320, 320));
 
         // RIGHT: Recent Registrations Table Card
         JPanel tableCard = Theme.createCardPanel();
+        tableCard.setMinimumSize(new Dimension(340, 320));
         JLabel tableTitle = new JLabel("Master Applicant Registry");
         tableTitle.setFont(Theme.FONT_HEADER_SM);
         tableTitle.setForeground(Theme.TEXT_TITLE);
@@ -197,10 +198,8 @@ public class RegistrationView extends JPanel {
         tableCard.add(tableTitle, BorderLayout.NORTH);
         tableCard.add(tblScroll, BorderLayout.CENTER);
 
-        centerGrid.add(formCard);
-        centerGrid.add(tableCard);
-
-        add(centerGrid, BorderLayout.CENTER);
+        JSplitPane splitPane = Theme.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, formCard, tableCard, 0.48);
+        add(splitPane, BorderLayout.CENTER);
     }
 
     private JPanel createField(String labelText, JComponent field) {

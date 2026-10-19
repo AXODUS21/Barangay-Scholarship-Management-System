@@ -78,9 +78,8 @@ public class ScreeningQueueView extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // Queue Stats
-        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 0));
+        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
         statsGrid.setOpaque(false);
-        statsGrid.setMaximumSize(new Dimension(2000, 90));
 
         cardQueueSize = new StatCard("Screening Queue Length", "0 Applicants", "First-In, First-Out (FIFO)", Theme.INFO);
         cardFrontApplicant = new StatCard("Front of Line (Next to Process)", "None", "Will be evaluated first", Theme.PRIMARY);
@@ -88,14 +87,11 @@ public class ScreeningQueueView extends JPanel {
         statsGrid.add(cardQueueSize);
         statsGrid.add(cardFrontApplicant);
         centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(16));
-
-        // Main Workspace: Queue Table (Left) + Document Inspector (Right)
-        JPanel workGrid = new JPanel(new GridLayout(1, 2, 20, 0));
-        workGrid.setOpaque(false);
+        centerPanel.add(Box.createVerticalStrut(14));
 
         // Left: Queue Table
         JPanel tableCard = Theme.createCardPanel();
+        tableCard.setMinimumSize(new Dimension(320, 260));
         JLabel tblTitle = new JLabel("Live Screening Line (Front to Rear)");
         tblTitle.setFont(Theme.FONT_HEADER_SM);
         tblTitle.setForeground(Theme.TEXT_TITLE);
@@ -122,6 +118,7 @@ public class ScreeningQueueView extends JPanel {
 
         // Right: Document Inspector Card
         JPanel inspectorCard = Theme.createCardPanel();
+        inspectorCard.setMinimumSize(new Dimension(280, 260));
         inspectorCard.setLayout(new BorderLayout());
 
         JPanel insHeader = new JPanel();
@@ -145,7 +142,7 @@ public class ScreeningQueueView extends JPanel {
         insHeader.add(lblSelectedName);
         insHeader.add(Box.createVerticalStrut(4));
         insHeader.add(lblSelectedDetails);
-        insHeader.add(Box.createVerticalStrut(16));
+        insHeader.add(Box.createVerticalStrut(14));
 
         inspectorCard.add(insHeader, BorderLayout.NORTH);
 
@@ -168,7 +165,11 @@ public class ScreeningQueueView extends JPanel {
         chkPanel.add(chkId);
         chkPanel.add(Box.createVerticalGlue());
 
-        inspectorCard.add(chkPanel, BorderLayout.CENTER);
+        JScrollPane chkScroll = new JScrollPane(chkPanel);
+        chkScroll.setBorder(null);
+        chkScroll.setOpaque(false);
+        chkScroll.getViewport().setOpaque(false);
+        inspectorCard.add(chkScroll, BorderLayout.CENTER);
 
         // Action Buttons
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -186,9 +187,8 @@ public class ScreeningQueueView extends JPanel {
 
         inspectorCard.add(btnPanel, BorderLayout.SOUTH);
 
-        workGrid.add(tableCard);
-        workGrid.add(inspectorCard);
-        centerPanel.add(workGrid);
+        JSplitPane workSplit = Theme.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, tableCard, inspectorCard, 0.55);
+        centerPanel.add(workSplit);
 
         add(centerPanel, BorderLayout.CENTER);
     }

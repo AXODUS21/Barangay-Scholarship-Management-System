@@ -49,18 +49,14 @@ public class SettingsView extends JPanel {
         headerPanel.add(subtitle);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Center Content: 2 Columns
-        JPanel grid = new JPanel(new GridLayout(1, 2, 20, 0));
-        grid.setOpaque(false);
-
         // Column 1: Budget & Data Operations
         JPanel col1 = new JPanel();
         col1.setOpaque(false);
         col1.setLayout(new BoxLayout(col1, BoxLayout.Y_AXIS));
+        col1.setMinimumSize(new Dimension(320, 320));
 
         // Budget Config Card
         JPanel budgetCard = Theme.createCardPanel();
-        budgetCard.setMaximumSize(new Dimension(2000, 260));
 
         JPanel bHeader = new JPanel(new BorderLayout());
         bHeader.setOpaque(false);
@@ -99,11 +95,10 @@ public class SettingsView extends JPanel {
         budgetCard.add(btnSaveBudget, BorderLayout.SOUTH);
 
         col1.add(budgetCard);
-        col1.add(Box.createVerticalStrut(16));
+        col1.add(Box.createVerticalStrut(14));
 
         // Data Reset & Seeder Card
         JPanel dataCard = Theme.createCardPanel();
-        dataCard.setMaximumSize(new Dimension(2000, 180));
 
         JLabel dTitle = new JLabel("PRESENTATION & DEMO CONTROLS");
         dTitle.setFont(Theme.FONT_SMALL_BOLD);
@@ -141,10 +136,10 @@ public class SettingsView extends JPanel {
         dataCard.add(dBody, BorderLayout.CENTER);
         col1.add(dataCard);
 
-        grid.add(col1);
-
         // Column 2: Academic Rubric Alignment Card
         JPanel col2 = Theme.createCardPanel();
+        col2.setMinimumSize(new Dimension(340, 320));
+
         JLabel rTitle = new JLabel("Course Project Rubric Alignment");
         rTitle.setFont(Theme.FONT_HEADER_SM);
         rTitle.setForeground(Theme.TEXT_TITLE);
@@ -188,9 +183,9 @@ public class SettingsView extends JPanel {
 
         col2.add(rTitle, BorderLayout.NORTH);
         col2.add(scrollRubric, BorderLayout.CENTER);
-        grid.add(col2);
 
-        add(grid, BorderLayout.CENTER);
+        JSplitPane split = Theme.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, col1, col2, 0.48);
+        add(split, BorderLayout.CENTER);
     }
 
     private void saveBudget() {
