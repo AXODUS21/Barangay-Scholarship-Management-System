@@ -57,16 +57,32 @@ public class Theme {
     }
 
     public static JButton createStyledButton(String text, Color bg, Color fg) {
-        JButton btn = new JButton(text);
+        JButton btn = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D buttonGraphics = (Graphics2D) g.create();
+                try {
+                    Color buttonColor = getModel().isPressed() && getModel().isArmed()
+                            ? bg.darker()
+                            : bg;
+                    buttonGraphics.setColor(buttonColor);
+                    buttonGraphics.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                } finally {
+                    buttonGraphics.dispose();
+                }
+                super.paintComponent(g);
+            }
+        };
         btn.setFont(FONT_BODY_BOLD);
         btn.setBackground(bg);
         btn.setForeground(fg);
         btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
         btn.setBorder(new CompoundBorder(
                 new LineBorder(bg.darker(), 1, true),
                 new EmptyBorder(8, 16, 8, 16)
         ));
-        btn.setOpaque(true);
+        btn.setOpaque(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
