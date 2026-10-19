@@ -114,19 +114,46 @@ com.barangay.scholarship
 ## 🚀 Running the Project
 
 ### Prerequisites
-- Java SE JDK 17, 21, or 26.
-- No Maven or Gradle required (uses standard Java SE runtime with Swing and AWT).
+- **Java SE JDK**: Version 17, 21, or 26.
+- **Zero Third-Party Dependencies**: No Maven, Gradle, or external libraries required. The application runs natively using standard Java SE, Swing, and AWT.
 
-### 1. Build and Run the GUI
+---
+
+### 🚀 Quick Start: Easy Compilation & Run Guide
+
+To compile and launch the entire application in a single step, simply run the root **`run.sh`** script:
+
 ```bash
 ./run.sh
 ```
-Or manually:
-```bash
-./build.sh run
+
+#### What `run.sh` Does Automatically:
+1. **JDK Detection**: Checks `$JAVA_HOME`, standard system paths, and `/Library/Java/JavaVirtualMachines/jdk-26.jdk/Contents/Home/bin` to locate your Java compiler (`javac`) and runtime (`java`).
+2. **Directory Setup**: Creates the `bin/` output directory if it doesn't already exist.
+3. **Fresh Source Compilation**: Compiles all `.java` files from `src/` directly into `bin/`.
+4. **GUI Launch**: Launches the graphical interface (`com.barangay.scholarship.Main`) with macOS/Windows anti-aliasing and high-DPI scaling enabled.
+
+#### Expected Terminal Output:
+```text
+===================================================================
+   BARANGAY SCHOLARSHIP & EDUCATIONAL ASSISTANCE MANAGEMENT SYSTEM 
+===================================================================
+[INFO] Using Java Compiler: /Library/Java/JavaVirtualMachines/jdk-26.jdk/Contents/Home/bin/javac
+java version "26.0.2" 2026-07-21
+
+[1/2] Compiling all source code from src/...
+[✔] Compilation successful! Classes compiled into bin/
+
+[2/2] Launching Graphical User Interface (GUI)...
+-------------------------------------------------------------------
 ```
 
-### 2. Run Automated Unit Tests
+---
+
+### 🧪 Running the Automated Test Suite
+
+To verify all custom data structures, sorting algorithms, searching algorithms, budget deduction logic, and undo mechanics:
+
 ```bash
 ./build.sh test
 ```
