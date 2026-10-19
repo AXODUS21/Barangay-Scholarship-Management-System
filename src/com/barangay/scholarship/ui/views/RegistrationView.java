@@ -75,14 +75,11 @@ public class RegistrationView extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // Center: Form on Left, Live Table on Right
-        JPanel centerGrid = new JPanel(new GridLayout(1, 2, 20, 0));
-        centerGrid.setOpaque(false);
-
         // LEFT: Registration Form Card
         JPanel formCard = Theme.createCardPanel();
         formCard.setLayout(new BorderLayout());
 
-        JPanel formScrollContainer = new JPanel();
+        Theme.ScrollablePanel formScrollContainer = new Theme.ScrollablePanel();
         formScrollContainer.setLayout(new BoxLayout(formScrollContainer, BoxLayout.Y_AXIS));
         formScrollContainer.setOpaque(false);
 
@@ -90,6 +87,7 @@ public class RegistrationView extends JPanel {
         JLabel sec1 = new JLabel("STUDENT PROFILE");
         sec1.setFont(Theme.FONT_SMALL_BOLD);
         sec1.setForeground(Theme.TEXT_MUTED);
+        sec1.setAlignmentX(Component.LEFT_ALIGNMENT);
         formScrollContainer.add(sec1);
         formScrollContainer.add(Box.createVerticalStrut(8));
 
@@ -125,8 +123,10 @@ public class RegistrationView extends JPanel {
 
         JPanel dualRow = new JPanel(new GridLayout(1, 2, 12, 0));
         dualRow.setOpaque(false);
+        dualRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         dualRow.add(createField("GWA (1.00-5.00 or %)", txtGwa));
         dualRow.add(createField("Monthly Income (₱)", txtIncome));
+        dualRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, dualRow.getPreferredSize().height));
         formScrollContainer.add(dualRow);
         formScrollContainer.add(Box.createVerticalStrut(12));
 
@@ -134,11 +134,14 @@ public class RegistrationView extends JPanel {
         eligibilityBanner = new JPanel(new BorderLayout());
         eligibilityBanner.setBorder(new EmptyBorder(10, 14, 10, 14));
         eligibilityBanner.setBackground(Theme.INFO_BG);
+        eligibilityBanner.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblEligibilityText = new JLabel("Enter GWA and Monthly Income to auto-evaluate eligibility.");
         lblEligibilityText.setFont(Theme.FONT_BODY_BOLD);
         lblEligibilityText.setForeground(Theme.INFO);
+        lblEligibilityText.setAlignmentX(Component.LEFT_ALIGNMENT);
         eligibilityBanner.add(lblEligibilityText, BorderLayout.CENTER);
+        eligibilityBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, eligibilityBanner.getPreferredSize().height));
 
         formScrollContainer.add(eligibilityBanner);
         formScrollContainer.add(Box.createVerticalStrut(16));
@@ -147,6 +150,7 @@ public class RegistrationView extends JPanel {
         JLabel sec2 = new JLabel("PHYSICAL DOCUMENT REQUIREMENTS CHECKLIST");
         sec2.setFont(Theme.FONT_SMALL_BOLD);
         sec2.setForeground(Theme.TEXT_MUTED);
+        sec2.setAlignmentX(Component.LEFT_ALIGNMENT);
         formScrollContainer.add(sec2);
         formScrollContainer.add(Box.createVerticalStrut(8));
 
@@ -155,6 +159,10 @@ public class RegistrationView extends JPanel {
         chkEnrollment = new JCheckBox("Certificate of Registration / Official Enrollment Form");
         chkId = new JCheckBox("Valid Barangay ID or Valid Student ID");
 
+        chkIndigency.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkGrades.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkEnrollment.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkId.setAlignmentX(Component.LEFT_ALIGNMENT);
         formScrollContainer.add(chkIndigency);
         formScrollContainer.add(chkGrades);
         formScrollContainer.add(chkEnrollment);
@@ -164,6 +172,7 @@ public class RegistrationView extends JPanel {
         // Submit & Clear Buttons
         JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionRow.setOpaque(false);
+        actionRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JButton btnClear = new JButton("Clear Form");
         btnClear.addActionListener(e -> clearForm());
@@ -173,11 +182,14 @@ public class RegistrationView extends JPanel {
 
         actionRow.add(btnClear);
         actionRow.add(btnSubmit);
+        actionRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, actionRow.getPreferredSize().height));
         formScrollContainer.add(actionRow);
 
         JScrollPane formScroll = new JScrollPane(formScrollContainer);
         formScroll.setBorder(null);
+        formScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         formScroll.getViewport().setBackground(Color.WHITE);
+        formCard.add(formScroll, BorderLayout.CENTER);
         formCard.setMinimumSize(new Dimension(320, 320));
 
         // RIGHT: Recent Registrations Table Card
@@ -208,12 +220,14 @@ public class RegistrationView extends JPanel {
         JLabel lbl = new JLabel(labelText);
         lbl.setFont(Theme.FONT_SMALL_BOLD);
         lbl.setForeground(Theme.TEXT_TITLE);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(lbl, BorderLayout.NORTH);
 
         field.setPreferredSize(new Dimension(field.getPreferredSize().width, 36));
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         p.add(field, BorderLayout.CENTER);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
         p.setBorder(new EmptyBorder(0, 0, 8, 0));
         return p;
