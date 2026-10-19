@@ -70,7 +70,7 @@ A desktop Java application with a graphical user interface (GUI) designed for Ph
 
 ```
 com.barangay.scholarship
-├── Main.java                        # System entry point
+├── Main.java                        # System entry point (supports portal selection)
 ├── model/
 │   ├── ApplicationStatus.java       # Status lifecycle enum
 │   ├── DocumentChecklist.java       # Tracks 4 required verification documents
@@ -87,15 +87,21 @@ com.barangay.scholarship
 │   └── ScholarshipManager.java      # Central transaction controller and budget tracker
 ├── ui/
 │   ├── Theme.java                   # Color palette and modern Swing tokens
-│   ├── MainFrame.java               # Main application window with CardLayout
+│   ├── PortalSelectorFrame.java     # Gateway hub separating Student & Staff Portals
+│   ├── MainFrame.java               # Barangay Staff & Admin Management Suite
+│   ├── student/                     # Dedicated Student Self-Service Portal (No Admin Controls)
+│   │   ├── StudentPortalFrame.java  # Isolated student application & tracking window
+│   │   ├── StudentApplicationView.java # Dedicated student registration & auto-checker
+│   │   ├── StudentStatusTrackerView.java # Self-service status & queue position inquiry
+│   │   └── StudentGuidelinesView.java # Criteria, documents checklist, and FAQs
 │   ├── components/
-│   │   ├── SidebarPanel.java        # Left navigation sidebar with active tabs
+│   │   ├── SidebarPanel.java        # Left navigation sidebar with portal switcher
 │   │   ├── StatCard.java            # KPI metric cards with accent borders
 │   │   ├── ModernTable.java         # Alternating row table with custom headers
 │   │   └── StatusBadgeRenderer.java # Colored status badge pill renderer
 │   └── views/
 │       ├── DashboardView.java       # Overview stats, budget meter, recent actions
-│       ├── RegistrationView.java    # Student form with real-time auto-eligibility
+│       ├── RegistrationView.java    # Staff walk-in intake & master registry
 │       ├── ScreeningQueueView.java  # FIFO queue visualizer and document screening
 │       ├── RankingAllocationView.java # Merge / Quick Sort ranking & slot allocator
 │       ├── DisbursementView.java    # Payout tracker, budget deduction, payroll export
@@ -106,7 +112,7 @@ com.barangay.scholarship
 │   ├── SampleDataSeeder.java        # Preloads 20 realistic Filipino student records
 │   └── DataPersistence.java         # Official printable payroll sheet generator
 └── test/
-    └── TestRunner.java              # Standalone automated unit test suite (12 tests)
+    └── TestRunner.java              # Standalone automated unit test suite (13 tests)
 ```
 
 ---

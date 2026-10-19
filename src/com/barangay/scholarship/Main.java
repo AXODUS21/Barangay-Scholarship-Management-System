@@ -2,6 +2,8 @@ package com.barangay.scholarship;
 
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.MainFrame;
+import com.barangay.scholarship.ui.PortalSelectorFrame;
+import com.barangay.scholarship.ui.student.StudentPortalFrame;
 import com.barangay.scholarship.util.SampleDataSeeder;
 
 import javax.swing.*;
@@ -32,9 +34,17 @@ public class Main {
             // Preload presentation demo dataset (20 realistic Filipino student applicants)
             SampleDataSeeder.seedDemoData(manager);
 
-            // Launch Main UI Frame
-            MainFrame frame = new MainFrame(manager);
-            frame.setVisible(true);
+            // Launch designated portal or default landing gateway
+            if (args.length > 0 && "student".equalsIgnoreCase(args[0])) {
+                StudentPortalFrame studentFrame = new StudentPortalFrame(manager);
+                studentFrame.setVisible(true);
+            } else if (args.length > 0 && "admin".equalsIgnoreCase(args[0])) {
+                MainFrame adminFrame = new MainFrame(manager);
+                adminFrame.setVisible(true);
+            } else {
+                PortalSelectorFrame portalSelector = new PortalSelectorFrame(manager);
+                portalSelector.setVisible(true);
+            }
         });
     }
 }

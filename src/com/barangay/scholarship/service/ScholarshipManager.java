@@ -558,6 +558,57 @@ public class ScholarshipManager implements Serializable {
         return null;
     }
 
+    /**
+     * Searches applicants by ID, Scholar ID, or full name (case-insensitive substring match).
+     * Used by the Student Portal Status Tracker.
+     */
+    public synchronized List<Applicant> findApplicantsByIdOrName(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        String q = query.trim().toLowerCase();
+        List<Applicant> results = new ArrayList<>();
+        for (Applicant a : masterList) {
+            boolean matchId = a.getApplicantId().toLowerCase().contains(q);
+            boolean matchName = a.getFullName().toLowerCase().contains(q);
+            boolean matchSchId = (a instanceof Scholar) && ((Scholar) a).getScholarId().toLowerCase().contains(q);
+            if (matchId || matchName || matchSchId) {
+                results.add(a);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Finds the 1-based FIFO queue position in the screening queue.
+     * Returns -1 if the applicant is not currently in the screening queue.
+     */
+    public synchronized int getQueuePosition(String applicantId) {
+        if (applicantId == null) return -1;
+        List<Applicant> list = screeningQueue.toList();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getApplicantId().equalsIgnoreCase(applicantId.trim())) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds the 1-based FIFO waitlist position in the waitlist queue.
+     * Returns -1 if the applicant is not currently in the waitlist queue.
+     */
+    public synchronized int getWaitlistPosition(String applicantId) {
+        if (applicantId == null) return -1;
+        List<Applicant> list = waitlistQueue.toList();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getApplicantId().equalsIgnoreCase(applicantId.trim())) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
     public synchronized int getCountByStatus(ApplicationStatus status) {
         int count = 0;
         for (Applicant a : masterList) {

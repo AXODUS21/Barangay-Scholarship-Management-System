@@ -61,11 +61,11 @@ public class RegistrationView extends JPanel {
         headerPanel.setOpaque(false);
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
-        JLabel title = new JLabel("Applicant Registration & Profiling");
+        JLabel title = new JLabel("Staff Applicant Intake & Master Registry");
         title.setFont(Theme.FONT_HEADER_LG);
         title.setForeground(Theme.TEXT_TITLE);
 
-        JLabel subtitle = new JLabel("Encode student details, verify requirements, and evaluate initial scholarship eligibility");
+        JLabel subtitle = new JLabel("Administrative walk-in student encoding and master records. (Students self-register via the dedicated Student Portal)");
         subtitle.setFont(Theme.FONT_BODY);
         subtitle.setForeground(Theme.TEXT_MUTED);
 

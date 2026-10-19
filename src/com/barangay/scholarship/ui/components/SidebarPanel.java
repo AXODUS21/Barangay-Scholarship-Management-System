@@ -81,15 +81,45 @@ public class SidebarPanel extends JPanel {
 
         add(menuScroll, BorderLayout.CENTER);
 
-        // Footer version info
+        // Footer version info and portal quick switcher
         JPanel footerPanel = new JPanel();
         footerPanel.setOpaque(false);
-        footerPanel.setBorder(new EmptyBorder(12, 16, 12, 16));
+        footerPanel.setBorder(new EmptyBorder(10, 14, 12, 14));
         footerPanel.setLayout(new BoxLayout(footerPanel, BoxLayout.Y_AXIS));
+
+        JButton btnStudentPortal = Theme.createStyledButton("🎓  Student Portal", Theme.ACCENT, Color.WHITE);
+        btnStudentPortal.setFont(Theme.FONT_SMALL_BOLD);
+        btnStudentPortal.setMaximumSize(new Dimension(200, 34));
+        btnStudentPortal.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnStudentPortal.addActionListener(e -> {
+            if (onNavigate != null) {
+                onNavigate.accept("STUDENT_PORTAL");
+            }
+        });
+
+        JButton btnSwitchRole = new JButton("🔄  Switch Role");
+        btnSwitchRole.setFont(Theme.FONT_SMALL);
+        btnSwitchRole.setForeground(new Color(203, 213, 225));
+        btnSwitchRole.setBackground(Theme.PRIMARY_HOVER);
+        btnSwitchRole.setFocusPainted(false);
+        btnSwitchRole.setBorderPainted(false);
+        btnSwitchRole.setMaximumSize(new Dimension(200, 28));
+        btnSwitchRole.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnSwitchRole.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSwitchRole.addActionListener(e -> {
+            if (onNavigate != null) {
+                onNavigate.accept("SWITCH_ROLE");
+            }
+        });
 
         JLabel verLbl = new JLabel("Barangay Edition v2.0");
         verLbl.setFont(Theme.FONT_SMALL);
         verLbl.setForeground(new Color(148, 163, 184));
+
+        footerPanel.add(btnStudentPortal);
+        footerPanel.add(Box.createVerticalStrut(6));
+        footerPanel.add(btnSwitchRole);
+        footerPanel.add(Box.createVerticalStrut(8));
         footerPanel.add(verLbl);
 
         add(footerPanel, BorderLayout.SOUTH);

@@ -77,6 +77,25 @@ public class MainFrame extends JFrame {
     }
 
     public void navigateTo(String viewKey) {
+        if ("STUDENT_PORTAL".equals(viewKey)) {
+            dispose();
+            SwingUtilities.invokeLater(() -> {
+                com.barangay.scholarship.ui.student.StudentPortalFrame studentFrame =
+                        new com.barangay.scholarship.ui.student.StudentPortalFrame(manager);
+                studentFrame.setVisible(true);
+            });
+            return;
+        }
+
+        if ("SWITCH_ROLE".equals(viewKey)) {
+            dispose();
+            SwingUtilities.invokeLater(() -> {
+                PortalSelectorFrame selector = new PortalSelectorFrame(manager);
+                selector.setVisible(true);
+            });
+            return;
+        }
+
         sidebar.setActiveView(viewKey);
         cardLayout.show(contentArea, viewKey);
 

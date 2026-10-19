@@ -36,6 +36,7 @@ public class TestRunner {
         runTest("Budget Deduction & Stipend Disbursement", TestRunner::testBudgetDeduction);
         runTest("Waitlist Queue Auto-Promotion on Scholar Drop", TestRunner::testWaitlistAutoPromotion);
         runTest("ActionStack 1-Click Undo Rollback", TestRunner::testUndoRollback);
+        runTest("Student Inquiry Lookup & Queue Positioning", TestRunner::testStudentInquiryLookup);
 
         System.out.println("\n-----------------------------------------------------------------");
         System.out.printf("TEST SUMMARY: %d Passed, %d Failed (Total: %d)%n", passed, failed, (passed + failed));
@@ -299,5 +300,28 @@ public class TestRunner {
         assertTrue(undone, "Undo should succeed");
         assertEquals(150000.0, mgr.getRemainingBudget(), "Budget should be rolled back to 150,000");
         assertTrue(!s.isStipendDisbursed(), "Scholar stipend should be reversed to unclaimed");
+    }
+
+    // 13. Student Inquiry Lookup & Queue Positioning Test
+    private static void testStudentInquiryLookup() {
+        ScholarshipManager mgr = new ScholarshipManager(150000.0, 3000.0);
+
+        Applicant a1 = mgr.registerApplicant("Alice Guo", "alice@school.edu", "0911", "PLM", "1st Year College", 1.50, 10000, "Purok 1 Maligaya", null);
+        Applicant a2 = mgr.registerApplicant("Bob Ong", "bob@school.edu", "0922", "PUP", "2nd Year College", 1.75, 12000, "Purok 2 Pag-asa", null);
+
+        // Queue positions
+        assertEquals(1, mgr.getQueuePosition(a1.getApplicantId()), "Alice should be #1 in screening queue");
+        assertEquals(2, mgr.getQueuePosition(a2.getApplicantId()), "Bob should be #2 in screening queue");
+        assertEquals(-1, mgr.getQueuePosition("APP-NONEXISTENT"), "Non-existent applicant should return -1");
+
+        // Search by substring name
+        List<Applicant> searchAlice = mgr.findApplicantsByIdOrName("Alice");
+        assertEquals(1, searchAlice.size(), "Search 'Alice' should return 1 applicant");
+        assertEquals(a1.getApplicantId(), searchAlice.get(0).getApplicantId(), "Applicant ID should match");
+
+        // Search by exact ID
+        List<Applicant> searchId = mgr.findApplicantsByIdOrName(a2.getApplicantId());
+        assertEquals(1, searchId.size(), "Search by ID should return Bob");
+        assertEquals("Bob Ong", searchId.get(0).getFullName(), "Applicant name should match");
     }
 }

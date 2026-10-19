@@ -55,4 +55,4 @@ echo -e "${GREEN}[OK] Compilation successful! Classes compiled into bin/${NC}"
 echo -e "\n${YELLOW}[2/2] Launching Graphical User Interface (GUI)...${NC}"
 echo -e "${CYAN}-------------------------------------------------------------------${NC}"
 
-exec "$JAVA" -cp bin com.barangay.scholarship.Main
+exec "$JAVA" -cp bin com.barangay.scholarship.Main "$@"
