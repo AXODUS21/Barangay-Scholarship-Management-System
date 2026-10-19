@@ -58,8 +58,9 @@ public class StudentGuidelinesView extends JPanel {
         JLabel h1 = new JLabel("1. Who Can Apply? (Eligibility Criteria)");
         h1.setFont(Theme.FONT_HEADER_SM);
         h1.setForeground(Theme.PRIMARY);
+        h1.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardEligibility.add(h1);
-        cardEligibility.add(Box.createVerticalStrut(10));
+        cardEligibility.add(Theme.createVerticalStrut(10));
 
         cardEligibility.add(createBulletItem("Barangay Residency:", "Must be a bona fide resident of the Barangay (any recognized Purok/Zone) for at least 6 months."));
         cardEligibility.add(createBulletItem("Enrolled Student:", "Must be currently enrolled in an accredited Senior High School (Grade 11/12) or College / State University."));
@@ -69,7 +70,7 @@ public class StudentGuidelinesView extends JPanel {
         cardEligibility.add(createBulletItem("Financial Need Threshold:", "Gross monthly household family income must not exceed <b>₱25,000.00</b>."));
 
         container.add(cardEligibility);
-        container.add(Box.createVerticalStrut(16));
+        container.add(Theme.createVerticalStrut(16));
 
         // 2. Required Documents Card
         JPanel cardDocs = Theme.createFullWidthCardPanel();
@@ -78,8 +79,9 @@ public class StudentGuidelinesView extends JPanel {
         JLabel h2 = new JLabel("2. Required Physical Documents for Screening");
         h2.setFont(Theme.FONT_HEADER_SM);
         h2.setForeground(Theme.PRIMARY);
+        h2.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardDocs.add(h2);
-        cardDocs.add(Box.createVerticalStrut(10));
+        cardDocs.add(Theme.createVerticalStrut(10));
 
         cardDocs.add(createDocRequirement("1. Certificate of Indigency", "Issued by the Barangay Hall proving economic qualification."));
         cardDocs.add(createDocRequirement("2. Certified Copy of Grades / Transcript (TOR)", "Form 138 or Certified True Copy of Grades from previous semester."));
@@ -87,7 +89,7 @@ public class StudentGuidelinesView extends JPanel {
         cardDocs.add(createDocRequirement("4. Valid ID", "School ID with current school year validation or Barangay Resident ID."));
 
         container.add(cardDocs);
-        container.add(Box.createVerticalStrut(16));
+        container.add(Theme.createVerticalStrut(16));
 
         // 3. Transparent Selection Process Card
         JPanel cardProcess = Theme.createFullWidthCardPanel();
@@ -96,8 +98,9 @@ public class StudentGuidelinesView extends JPanel {
         JLabel h3 = new JLabel("3. How Applications Are Processed (Transparent Algorithmic Evaluation)");
         h3.setFont(Theme.FONT_HEADER_SM);
         h3.setForeground(Theme.PRIMARY);
+        h3.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardProcess.add(h3);
-        cardProcess.add(Box.createVerticalStrut(10));
+        cardProcess.add(Theme.createVerticalStrut(10));
 
         cardProcess.add(createBulletItem("Document Screening (FIFO Queue):", "Applications are screened strictly on a first-come, first-served basis using a custom Queue data structure."));
         cardProcess.add(createBulletItem("Merit Ranking (Merge Sort):", "Evaluates and ranks applicants by General Weighted Average, prioritizing top academic achievers."));
@@ -105,7 +108,7 @@ public class StudentGuidelinesView extends JPanel {
         cardProcess.add(createBulletItem("Automated Waitlist Promotion:", "Excess qualified candidates are queued in the Waitlist. If an approved scholar drops out or fails to claim, the next applicant is automatically promoted!"));
 
         container.add(cardProcess);
-        container.add(Box.createVerticalStrut(16));
+        container.add(Theme.createVerticalStrut(16));
 
         // 4. Contact & Schedule Card
         JPanel cardContact = Theme.createFullWidthCardPanel();
@@ -139,6 +142,8 @@ public class StudentGuidelinesView extends JPanel {
     private JPanel createBulletItem(String label, String desc) {
         JPanel p = new JPanel(new BorderLayout(8, 0));
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
         p.setBorder(new EmptyBorder(0, 0, 10, 0));
 
         JLabel l = new JLabel("• " + label);
@@ -158,6 +163,8 @@ public class StudentGuidelinesView extends JPanel {
     private JPanel createDocRequirement(String title, String desc) {
         JPanel p = new JPanel(new BorderLayout(8, 2));
         p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         p.setBorder(new EmptyBorder(0, 0, 8, 0));
 
         JLabel t = new JLabel(title);

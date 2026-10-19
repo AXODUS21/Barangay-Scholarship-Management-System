@@ -97,8 +97,9 @@ public class StudentApplicationView extends JPanel {
         JLabel titleSec1 = new JLabel("1. PERSONAL & RESIDENCE INFORMATION");
         titleSec1.setFont(Theme.FONT_HEADER_SM);
         titleSec1.setForeground(Theme.PRIMARY);
+        titleSec1.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardPersonal.add(titleSec1);
-        cardPersonal.add(Box.createVerticalStrut(12));
+        cardPersonal.add(Theme.createVerticalStrut(12));
 
         txtName = new JTextField();
         txtEmail = new JTextField();
@@ -112,18 +113,22 @@ public class StudentApplicationView extends JPanel {
 
         JPanel row1 = new JPanel(new GridLayout(1, 2, 16, 0));
         row1.setOpaque(false);
+        row1.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row1.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
         row1.add(createField("Full Name (Last, First M.I.) *", txtName, "e.g., Dela Cruz, Juan M."));
         row1.add(createField("Barangay Zone / Purok *", cmbPurok, "Select your residential purok"));
         cardPersonal.add(row1);
 
         JPanel row2 = new JPanel(new GridLayout(1, 2, 16, 0));
         row2.setOpaque(false);
+        row2.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
         row2.add(createField("Email Address *", txtEmail, "student@example.edu.ph"));
         row2.add(createField("Mobile Contact Number *", txtPhone, "09XXXXXXXXX"));
         cardPersonal.add(row2);
 
         mainFormContainer.add(cardPersonal);
-        mainFormContainer.add(Box.createVerticalStrut(16));
+        mainFormContainer.add(Theme.createVerticalStrut(16));
 
         // CARD 2: Academic Background & Financial Profile
         JPanel cardAcademic = Theme.createFullWidthCardPanel();
@@ -132,8 +137,9 @@ public class StudentApplicationView extends JPanel {
         JLabel titleSec2 = new JLabel("2. ACADEMIC & FINANCIAL PROFILE");
         titleSec2.setFont(Theme.FONT_HEADER_SM);
         titleSec2.setForeground(Theme.PRIMARY);
+        titleSec2.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardAcademic.add(titleSec2);
-        cardAcademic.add(Box.createVerticalStrut(12));
+        cardAcademic.add(Theme.createVerticalStrut(12));
 
         txtSchool = new JTextField();
         String[] years = {"1st Year College", "2nd Year College", "3rd Year College", "4th Year College", "Grade 11", "Grade 12"};
@@ -153,12 +159,16 @@ public class StudentApplicationView extends JPanel {
 
         JPanel row3 = new JPanel(new GridLayout(1, 2, 16, 0));
         row3.setOpaque(false);
+        row3.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row3.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
         row3.add(createField("Current School / University / College *", txtSchool, "e.g., Polytechnic University of the Philippines"));
         row3.add(createField("Year Level *", cmbYear, "Select your current educational level"));
         cardAcademic.add(row3);
 
         JPanel row4 = new JPanel(new GridLayout(1, 2, 16, 0));
         row4.setOpaque(false);
+        row4.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row4.setMaximumSize(new Dimension(Integer.MAX_VALUE, 58));
         row4.add(createField("General Weighted Average (GWA) *", txtGwa, "1.00 - 5.00 (College) or 75 - 100 (Senior High)"));
         row4.add(createField("Estimated Monthly Household Income (₱) *", txtIncome, "Combined monthly earnings of parents/guardians"));
         cardAcademic.add(row4);
@@ -167,17 +177,20 @@ public class StudentApplicationView extends JPanel {
         eligibilityBanner = new JPanel(new BorderLayout());
         eligibilityBanner.setBorder(new EmptyBorder(10, 14, 10, 14));
         eligibilityBanner.setBackground(Theme.INFO_BG);
+        eligibilityBanner.setAlignmentX(Component.LEFT_ALIGNMENT);
+        eligibilityBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
         lblEligibilityText = new JLabel("ℹ️ Enter your GWA and Monthly Income above to view real-time eligibility evaluation.");
         lblEligibilityText.setFont(Theme.FONT_BODY_BOLD);
         lblEligibilityText.setForeground(Theme.INFO);
+        lblEligibilityText.setAlignmentX(Component.LEFT_ALIGNMENT);
         eligibilityBanner.add(lblEligibilityText, BorderLayout.CENTER);
 
-        cardAcademic.add(Box.createVerticalStrut(6));
+        cardAcademic.add(Theme.createVerticalStrut(6));
         cardAcademic.add(eligibilityBanner);
 
         mainFormContainer.add(cardAcademic);
-        mainFormContainer.add(Box.createVerticalStrut(16));
+        mainFormContainer.add(Theme.createVerticalStrut(16));
 
         // CARD 3: Physical Document Checklist & Data Consent
         JPanel cardDocs = Theme.createFullWidthCardPanel();
@@ -186,14 +199,16 @@ public class StudentApplicationView extends JPanel {
         JLabel titleSec3 = new JLabel("3. DOCUMENT REQUIREMENTS & DECLARATION");
         titleSec3.setFont(Theme.FONT_HEADER_SM);
         titleSec3.setForeground(Theme.PRIMARY);
+        titleSec3.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardDocs.add(titleSec3);
-        cardDocs.add(Box.createVerticalStrut(6));
+        cardDocs.add(Theme.createVerticalStrut(6));
 
         JLabel docNote = new JLabel("<html>Check the physical documents you currently have available. <i>(You can submit your application online now, then bring original hardcopies to the Barangay Hall for document screening)</i>:</html>");
         docNote.setFont(Theme.FONT_BODY);
         docNote.setForeground(Theme.TEXT_MUTED);
+        docNote.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardDocs.add(docNote);
-        cardDocs.add(Box.createVerticalStrut(10));
+        cardDocs.add(Theme.createVerticalStrut(10));
 
         chkIndigency = new JCheckBox("Certificate of Indigency (Issued by Barangay Hall)");
         chkGrades = new JCheckBox("Certified True Copy of Grades / Transcript of Records / Form 138");
@@ -207,23 +222,28 @@ public class StudentApplicationView extends JPanel {
 
         JPanel chkGrid = new JPanel(new GridLayout(2, 2, 8, 8));
         chkGrid.setOpaque(false);
+        chkGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
         chkGrid.add(chkIndigency);
         chkGrid.add(chkGrades);
         chkGrid.add(chkEnrollment);
         chkGrid.add(chkId);
         cardDocs.add(chkGrid);
-        cardDocs.add(Box.createVerticalStrut(16));
+        cardDocs.add(Theme.createVerticalStrut(16));
 
         // Consent Checkbox
         chkConsent = new JCheckBox("<html><b>Data Privacy & Truthfulness Certification:</b> I hereby certify that the information provided is true, accurate, and complete. I consent to the processing of this data by the Barangay Council and SK under the Data Privacy Act of 2012 for the purpose of scholarship evaluation.</html>");
         chkConsent.setFont(Theme.FONT_SMALL);
         chkConsent.setForeground(Theme.TEXT_TITLE);
+        chkConsent.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardDocs.add(chkConsent);
-        cardDocs.add(Box.createVerticalStrut(16));
+        cardDocs.add(Theme.createVerticalStrut(16));
 
         // Action Buttons
         JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         actionRow.setOpaque(false);
+        actionRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        actionRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
 
         JButton btnClear = new JButton("Clear Form");
         btnClear.setFont(Theme.FONT_BODY);

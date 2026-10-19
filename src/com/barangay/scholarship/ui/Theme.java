@@ -104,6 +104,16 @@ public class Theme {
     }
 
     /**
+     * Creates a vertical strut with Component.LEFT_ALIGNMENT so it does not cause
+     * BoxLayout horizontal alignment shifts when mixed with left-aligned components.
+     */
+    public static Component createVerticalStrut(int height) {
+        JComponent strut = (JComponent) Box.createVerticalStrut(height);
+        strut.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return strut;
+    }
+
+    /**
      * A panel that implements Scrollable and forces width tracking in a JViewport,
      * ensuring child components span 100% of the horizontal scroll viewport width.
      */
