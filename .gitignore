@@ -1,0 +1,4 @@
+bin/
+*.class
+*.txt
+.DS_Store
