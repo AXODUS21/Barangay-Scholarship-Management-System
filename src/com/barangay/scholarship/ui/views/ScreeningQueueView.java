@@ -86,6 +86,8 @@ public class ScreeningQueueView extends JPanel {
 
         statsGrid.add(cardQueueSize);
         statsGrid.add(cardFrontApplicant);
+        statsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, statsGrid.getPreferredSize().height));
         centerPanel.add(statsGrid);
         centerPanel.add(Box.createVerticalStrut(14));
 
@@ -128,14 +130,17 @@ public class ScreeningQueueView extends JPanel {
         JLabel insTitle = new JLabel("PHYSICAL DOCUMENT SCREENING DESK");
         insTitle.setFont(Theme.FONT_SMALL_BOLD);
         insTitle.setForeground(Theme.TEXT_MUTED);
+        insTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblSelectedName = new JLabel("Select an applicant from queue");
         lblSelectedName.setFont(Theme.FONT_HEADER_MD);
         lblSelectedName.setForeground(Theme.TEXT_TITLE);
+        lblSelectedName.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblSelectedDetails = new JLabel("Click any row or peek at the front of line to inspect requirements.");
         lblSelectedDetails.setFont(Theme.FONT_BODY);
         lblSelectedDetails.setForeground(Theme.TEXT_MUTED);
+        lblSelectedDetails.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         insHeader.add(insTitle);
         insHeader.add(Box.createVerticalStrut(6));
@@ -150,11 +155,16 @@ public class ScreeningQueueView extends JPanel {
         JPanel chkPanel = new JPanel();
         chkPanel.setOpaque(false);
         chkPanel.setLayout(new BoxLayout(chkPanel, BoxLayout.Y_AXIS));
+        chkPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         chkIndigency = new JCheckBox("1. Certificate of Indigency (Barangay)");
         chkGrades = new JCheckBox("2. Certified Copy of Grades (Form 138 / TOR)");
         chkEnrollment = new JCheckBox("3. Certificate of Registration / Enrollment Form");
         chkId = new JCheckBox("4. Valid Barangay ID or Student ID");
+        chkIndigency.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkGrades.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkEnrollment.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chkId.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         chkPanel.add(chkIndigency);
         chkPanel.add(Box.createVerticalStrut(8));
@@ -188,6 +198,8 @@ public class ScreeningQueueView extends JPanel {
         inspectorCard.add(btnPanel, BorderLayout.SOUTH);
 
         JSplitPane workSplit = Theme.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, tableCard, inspectorCard, 0.55);
+        workSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
+        workSplit.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         centerPanel.add(workSplit);
 
         add(centerPanel, BorderLayout.CENTER);

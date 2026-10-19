@@ -180,7 +180,7 @@ public class StudentApplicationView extends JPanel {
         eligibilityBanner.setAlignmentX(Component.LEFT_ALIGNMENT);
         eligibilityBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-        lblEligibilityText = new JLabel("ℹ️ Enter your GWA and Monthly Income above to view real-time eligibility evaluation.");
+        lblEligibilityText = new JLabel("INFO: Enter your GWA and Monthly Income above to view real-time eligibility evaluation.");
         lblEligibilityText.setFont(Theme.FONT_BODY_BOLD);
         lblEligibilityText.setForeground(Theme.INFO);
         lblEligibilityText.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -304,7 +304,7 @@ public class StudentApplicationView extends JPanel {
         if (gwaStr.isEmpty() || incStr.isEmpty()) {
             eligibilityBanner.setBackground(Theme.INFO_BG);
             lblEligibilityText.setForeground(Theme.INFO);
-            lblEligibilityText.setText("ℹ️ Enter your GWA and Monthly Income above to view real-time eligibility evaluation.");
+            lblEligibilityText.setText("INFO: Enter your GWA and Monthly Income above to view real-time eligibility evaluation.");
             return;
         }
 
@@ -319,11 +319,11 @@ public class StudentApplicationView extends JPanel {
             if (gwaOk && incomeOk) {
                 eligibilityBanner.setBackground(Theme.ACCENT_BG);
                 lblEligibilityText.setForeground(Theme.ACCENT_HOVER);
-                lblEligibilityText.setText("✔ AUTO-CHECK: ELIGIBLE! You meet both academic standing and household income criteria (₱25k max).");
+                lblEligibilityText.setText("AUTO-CHECK: ELIGIBLE! You meet both academic standing and household income criteria (₱25k max).");
             } else {
                 eligibilityBanner.setBackground(Theme.WARNING_BG);
                 lblEligibilityText.setForeground(new Color(180, 83, 9)); // Dark amber
-                StringBuilder sb = new StringBuilder("⚠ AUTO-CHECK NOTICE: ");
+                StringBuilder sb = new StringBuilder("AUTO-CHECK NOTICE: ");
                 if (!incomeOk) sb.append("Income exceeds ₱25,000 threshold. ");
                 if (!gwaOk) {
                     if (isCollege) sb.append("College GWA exceeds 2.50 cut-off. ");
@@ -335,7 +335,7 @@ public class StudentApplicationView extends JPanel {
         } catch (NumberFormatException ex) {
             eligibilityBanner.setBackground(Theme.DANGER_BG);
             lblEligibilityText.setForeground(Theme.DANGER);
-            lblEligibilityText.setText("⚠ Please input valid numerical values for GWA and Monthly Income.");
+            lblEligibilityText.setText("ERROR: Please input valid numerical values for GWA and Monthly Income.");
         }
     }
 
@@ -463,7 +463,7 @@ public class StudentApplicationView extends JPanel {
                 new EmptyBorder(10, 12, 10, 12)
         ));
 
-        JLabel noteTitle = new JLabel("📌 NEXT STEPS FOR DOCUMENT SCREENING:");
+        JLabel noteTitle = new JLabel("NEXT STEPS FOR DOCUMENT SCREENING:");
         noteTitle.setFont(Theme.FONT_SMALL_BOLD);
         noteTitle.setForeground(Theme.INFO);
 

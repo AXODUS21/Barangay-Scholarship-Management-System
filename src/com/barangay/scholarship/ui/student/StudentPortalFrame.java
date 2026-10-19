@@ -101,9 +101,9 @@ public class StudentPortalFrame extends JFrame {
         JPanel tabs = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         tabs.setOpaque(false);
 
-        addTabButton(tabs, "📝  Scholarship Application", "APPLICATION");
-        addTabButton(tabs, "🔍  Track Application Status", "TRACKER");
-        addTabButton(tabs, "ℹ️  Requirements & Guidelines", "GUIDELINES");
+        addTabButton(tabs, "Scholarship Application", "APPLICATION");
+        addTabButton(tabs, "Track Application Status", "TRACKER");
+        addTabButton(tabs, "Requirements & Guidelines", "GUIDELINES");
 
         nav.add(tabs, BorderLayout.CENTER);
 
@@ -111,7 +111,7 @@ public class StudentPortalFrame extends JFrame {
         JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         rightActions.setOpaque(false);
 
-        JButton btnSwitchPortal = new JButton("🔄 Switch Role");
+        JButton btnSwitchPortal = new JButton("Switch Role");
         btnSwitchPortal.setFont(Theme.FONT_SMALL_BOLD);
         btnSwitchPortal.setForeground(new Color(203, 213, 225));
         btnSwitchPortal.setBackground(Theme.PRIMARY_HOVER);
@@ -123,7 +123,7 @@ public class StudentPortalFrame extends JFrame {
         btnSwitchPortal.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSwitchPortal.addActionListener(e -> returnToPortalGateway());
 
-        JButton btnStaffLogin = Theme.createStyledButton("🔒 Staff / Admin Login", new Color(30, 64, 175), Color.WHITE);
+        JButton btnStaffLogin = Theme.createStyledButton("Staff / Admin Login", new Color(30, 64, 175), Color.WHITE);
         btnStaffLogin.setFont(Theme.FONT_SMALL_BOLD);
         btnStaffLogin.addActionListener(e -> promptStaffLogin());
 

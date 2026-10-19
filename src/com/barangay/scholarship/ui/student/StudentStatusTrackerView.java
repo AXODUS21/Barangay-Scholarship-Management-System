@@ -91,7 +91,7 @@ public class StudentStatusTrackerView extends JPanel {
         ));
         txtSearch.addActionListener(e -> performSearch());
 
-        JButton btnSearch = Theme.createStyledButton("🔍 Check Application Status", Theme.PRIMARY, Color.WHITE);
+        JButton btnSearch = Theme.createStyledButton("Check Application Status", Theme.PRIMARY, Color.WHITE);
         btnSearch.setFont(Theme.FONT_BODY_BOLD);
         btnSearch.setPreferredSize(new Dimension(220, 38));
         btnSearch.setMaximumSize(new Dimension(220, 38));
@@ -322,10 +322,6 @@ public class StudentStatusTrackerView extends JPanel {
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(40, 20, 40, 20));
 
-        JLabel icon = new JLabel("📋", SwingConstants.CENTER);
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
-        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         JLabel h = new JLabel("No Application Record Loaded", SwingConstants.CENTER);
         h.setFont(Theme.FONT_HEADER_MD);
         h.setForeground(Theme.TEXT_TITLE);
@@ -336,8 +332,6 @@ public class StudentStatusTrackerView extends JPanel {
         desc.setForeground(Theme.TEXT_MUTED);
         desc.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        p.add(icon);
-        p.add(Box.createVerticalStrut(8));
         p.add(h);
         p.add(Box.createVerticalStrut(4));
         p.add(desc);
@@ -350,10 +344,6 @@ public class StudentStatusTrackerView extends JPanel {
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(32, 20, 32, 20));
 
-        JLabel icon = new JLabel("🔍", SwingConstants.CENTER);
-        icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 42));
-        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         JLabel h = new JLabel("No Record Found for \"" + query + "\"", SwingConstants.CENTER);
         h.setFont(Theme.FONT_HEADER_MD);
         h.setForeground(Theme.DANGER);
@@ -364,8 +354,6 @@ public class StudentStatusTrackerView extends JPanel {
         desc.setForeground(Theme.TEXT_MUTED);
         desc.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        p.add(icon);
-        p.add(Box.createVerticalStrut(8));
         p.add(h);
         p.add(Box.createVerticalStrut(4));
         p.add(desc);
@@ -383,32 +371,32 @@ public class StudentStatusTrackerView extends JPanel {
             case APPROVED:
                 badge.setBackground(Theme.ACCENT_BG);
                 badge.setForeground(Theme.ACCENT_HOVER);
-                badge.setText("✔ OFFICIAL SCHOLAR");
+                badge.setText("OFFICIAL SCHOLAR");
                 break;
             case DISBURSED:
                 badge.setBackground(new Color(224, 242, 254));
                 badge.setForeground(new Color(3, 105, 161));
-                badge.setText("💰 STIPEND DISBURSED");
+                badge.setText("STIPEND DISBURSED");
                 break;
             case VERIFIED:
                 badge.setBackground(Theme.INFO_BG);
                 badge.setForeground(Theme.INFO);
-                badge.setText("📋 DOCUMENTS VERIFIED");
+                badge.setText("DOCUMENTS VERIFIED");
                 break;
             case WAITLISTED:
                 badge.setBackground(new Color(243, 232, 255));
                 badge.setForeground(new Color(126, 34, 206));
-                badge.setText("⏳ ON WAITLIST QUEUE");
+                badge.setText("ON WAITLIST QUEUE");
                 break;
             case PENDING_VERIFICATION:
                 badge.setBackground(Theme.WARNING_BG);
                 badge.setForeground(new Color(180, 83, 9));
-                badge.setText("🔍 PENDING SCREENING");
+                badge.setText("PENDING SCREENING");
                 break;
             case REJECTED:
                 badge.setBackground(Theme.DANGER_BG);
                 badge.setForeground(Theme.DANGER);
-                badge.setText("✖ NOT APPROVED");
+                badge.setText("NOT APPROVED");
                 break;
         }
         return badge;
@@ -428,7 +416,7 @@ public class StudentStatusTrackerView extends JPanel {
             case APPROVED:
                 Scholar sch = (a instanceof Scholar) ? (Scholar) a : null;
                 String schId = sch != null ? sch.getScholarId() : "Assigned";
-                return "🎉 <b>Congratulations!</b> You have been awarded an official Barangay Scholarship Slot! (Scholar ID: <b>" + schId + "</b>, Grant: <b>₱3,000.00</b>). Please stay tuned for barangay announcements regarding payout day.";
+                return "<b>Congratulations!</b> You have been awarded an official Barangay Scholarship Slot! (Scholar ID: <b>" + schId + "</b>, Grant: <b>₱3,000.00</b>). Please stay tuned for barangay announcements regarding payout day.";
 
             case WAITLISTED:
                 int wPos = manager.getWaitlistPosition(a.getApplicantId());
@@ -436,7 +424,7 @@ public class StudentStatusTrackerView extends JPanel {
                 return wText + "You qualified for the scholarship, but the initial slot quota was filled by higher-ranking applicants. If any current scholar drops out or fails to claim their grant, you will be <b>automatically promoted</b> in order!";
 
             case DISBURSED:
-                return "✔ <b>Grant Successfully Claimed!</b> Your scholarship allowance of ₱3,000.00 has been officially released and logged in the Barangay Treasury payroll registry.";
+                return "<b>Grant Successfully Claimed!</b> Your scholarship allowance of ₱3,000.00 has been officially released and logged in the Barangay Treasury payroll registry.";
 
             case REJECTED:
                 return "Your application does not meet the current rubric criteria (" + a.getEligibilityReason() + "). You may visit the Barangay Hall for inquiries or apply during the next semester.";
@@ -482,7 +470,7 @@ public class StudentStatusTrackerView extends JPanel {
         title.setFont(Theme.FONT_SMALL_BOLD);
         title.setForeground(Theme.TEXT_TITLE);
 
-        JLabel status = new JLabel(isSubmitted ? "✔ Received" : "⏳ Pending");
+        JLabel status = new JLabel(isSubmitted ? "Received" : "Pending");
         status.setFont(Theme.FONT_SMALL_BOLD);
         status.setForeground(isSubmitted ? Theme.ACCENT_HOVER : new Color(180, 83, 9));
 

@@ -4,7 +4,7 @@ A desktop Java application with a graphical user interface (GUI) designed for Ph
 
 ---
 
-## 🏛️ System Features & Core Transactions
+## System Features & Core Transactions
 
 ### 1. Applicant Registration & Profiling (Transaction Stage 1)
 - Encodes resident student details: Applicant ID, Full Name, School/University, Year Level, GWA, Monthly Household Income, and Barangay Zone/Purok.
@@ -45,11 +45,11 @@ A desktop Java application with a graphical user interface (GUI) designed for Ph
 
 ### 6. Staff Accident Protection: 1-Click Action Undo (LIFO Stack)
 - Every transaction is recorded in a custom **ActionStack (`ActionStack<ActionRecord>`)**.
-- A single click on **"⏪ 1-Click Undo Last Action"** rolls back accidental disbursements (restoring the budget balance), status changes, or registrations.
+- A single click on **"1-Click Undo Last Action"** rolls back accidental disbursements (restoring the budget balance), status changes, or registrations.
 
 ---
 
-## 📐 Data Structure & Algorithm Mapping
+## Data Structure & Algorithm Mapping
 
 | Rubric Requirement | Implementation Class | Time Complexity | Workflow Role |
 | :--- | :--- | :--- | :--- |
@@ -66,7 +66,7 @@ A desktop Java application with a graphical user interface (GUI) designed for Ph
 
 ---
 
-## 🏗️ Project Architecture & OOP Class Diagram
+## Project Architecture & OOP Class Diagram
 
 ```
 com.barangay.scholarship
@@ -117,7 +117,7 @@ com.barangay.scholarship
 
 ---
 
-## 🚀 Running the Project
+## Running the Project
 
 ### Prerequisites
 - **Java SE JDK**: Version 17, 21, or 26.
@@ -126,7 +126,7 @@ com.barangay.scholarship
 
 ---
 
-### 🚀 Quick Start: Easy Compilation & Run Guide
+### Quick Start: Easy Compilation & Run Guide
 
 To compile and launch the entire application in a single step, simply run the root **`run.sh`** script:
 
@@ -149,7 +149,7 @@ To compile and launch the entire application in a single step, simply run the ro
 java version "26.0.2" 2026-07-21
 
 [1/2] Compiling all source code from src/...
-[✔] Compilation successful! Classes compiled into bin/
+[OK] Compilation successful! Classes compiled into bin/
 
 [2/2] Launching Graphical User Interface (GUI)...
 -------------------------------------------------------------------
@@ -157,7 +157,7 @@ java version "26.0.2" 2026-07-21
 
 ---
 
-### 🧪 Running the Automated Test Suite
+### Running the Automated Test Suite
 
 To verify all custom data structures, sorting algorithms, searching algorithms, budget deduction logic, and undo mechanics:
 
@@ -191,15 +191,15 @@ TEST SUMMARY: 12 Passed, 0 Failed (Total: 12)
 
 ---
 
-## 👥 Presentation & Classroom Demonstration Guide
+## Presentation & Classroom Demonstration Guide
 1. **Launch the App**: Run `./run.sh`. The app opens with **20 realistic Filipino student applicants** pre-loaded.
 2. **Dashboard**: View the **Remaining SK Budget meter (₱105,000 / ₱150,000)**, active scholars, and recent transactions.
-3. **Screening Queue (FIFO)**: Click the **Screening Queue** tab. Demonstrate inspecting requirements for the student at the front of the line and clicking **"Save & Mark Verified ✔"**.
+3. **Screening Queue (FIFO)**: Click the **Screening Queue** tab. Demonstrate inspecting requirements for the student at the front of the line and clicking **"Save & Mark Verified"**.
 4. **Ranking & Slot Allocation**:
    - Switch between **Merge Sort (Merit by GWA)** and **Quick Sort (Need by Income)**.
-   - Adjust slot quota and click **"Confirm & Allocate Slots ✔"**. Watch the cutoff preview separate official scholars from the waitlist!
+   - Adjust slot quota and click **"Confirm & Allocate Slots"**. Watch the cutoff preview separate official scholars from the waitlist!
 5. **Payout & Disbursement**: Click **Disburse Selected Stipend**. The budget instantly deducts by ₱3,000. Click **"Export Payout Attendance Sheet"** to generate the official printable payroll.
-6. **1-Click Undo**: Click **"⏪ 1-Click Undo Last Action"**. The stipend disbursement is rolled back, and ₱3,000 is refunded to the remaining budget!
+6. **1-Click Undo**: Click **"1-Click Undo Last Action"**. The stipend disbursement is rolled back, and ₱3,000 is refunded to the remaining budget!
 7. **Scholar Directory & BST**:
    - Search by Scholar ID or Name using **Binary Search**.
    - Toggle **In-Order**, **Pre-Order**, and **Post-Order** tree traversals.

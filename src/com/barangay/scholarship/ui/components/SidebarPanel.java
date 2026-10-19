@@ -87,7 +87,7 @@ public class SidebarPanel extends JPanel {
         footerPanel.setBorder(new EmptyBorder(10, 14, 12, 14));
         footerPanel.setLayout(new BoxLayout(footerPanel, BoxLayout.Y_AXIS));
 
-        JButton btnStudentPortal = Theme.createStyledButton("🎓  Student Portal", Theme.ACCENT, Color.WHITE);
+        JButton btnStudentPortal = Theme.createStyledButton("Student Portal", Theme.ACCENT, Color.WHITE);
         btnStudentPortal.setFont(Theme.FONT_SMALL_BOLD);
         btnStudentPortal.setMaximumSize(new Dimension(200, 34));
         btnStudentPortal.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -97,7 +97,7 @@ public class SidebarPanel extends JPanel {
             }
         });
 
-        JButton btnSwitchRole = new JButton("🔄  Switch Role");
+        JButton btnSwitchRole = new JButton("Switch Role");
         btnSwitchRole.setFont(Theme.FONT_SMALL);
         btnSwitchRole.setForeground(new Color(203, 213, 225));
         btnSwitchRole.setBackground(Theme.PRIMARY_HOVER);

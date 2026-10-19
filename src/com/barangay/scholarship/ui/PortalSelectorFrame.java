@@ -67,34 +67,32 @@ public class PortalSelectorFrame extends JFrame {
 
         // LEFT CARD: Student Portal
         JPanel studentCard = createRoleCard(
-                "🎓",
                 "Student Applicant Portal",
                 "For resident students submitting applications & tracking evaluation status",
                 new String[]{
-                        "✔  Online Scholarship Registration Form",
-                        "✔  Instant Dual-Scale Eligibility Auto-Check",
-                        "✔  Document Requirements Checklist",
-                        "✔  Personal Application & Queue Tracker",
-                        "🔒  Zero Administrative Controls Exposed"
+                        "-  Online Scholarship Registration Form",
+                        "-  Instant Dual-Scale Eligibility Auto-Check",
+                        "-  Document Requirements Checklist",
+                        "-  Personal Application & Queue Tracker",
+                        "-  Zero Administrative Controls Exposed"
                 },
-                "Enter Student Portal  ➔",
+                "Enter Student Portal",
                 Theme.ACCENT,
                 e -> launchStudentPortal()
         );
 
         // RIGHT CARD: Barangay Staff / Admin Portal
         JPanel adminCard = createRoleCard(
-                "🏛️",
                 "Barangay Staff & Admin",
                 "For SK officials, evaluators, and treasurers managing scholarship records",
                 new String[]{
-                        "📋  FIFO Document Screening Queue",
-                        "⚖️  Merge & Quick Sort Slot Allocator",
-                        "💰  Stipend Payout Desk & Payroll Export",
-                        "🌳  Scholar Directory (Binary Search Tree)",
-                        "⏪  1-Click Transaction Undo ActionStack"
+                        "-  FIFO Document Screening Queue",
+                        "-  Merge & Quick Sort Slot Allocator",
+                        "-  Stipend Payout Desk & Payroll Export",
+                        "-  Scholar Directory (Binary Search Tree)",
+                        "-  1-Click Transaction Undo ActionStack"
                 },
-                "Access Staff Portal  ➔",
+                "Access Staff Portal",
                 Theme.PRIMARY,
                 e -> launchAdminPortal()
         );
@@ -119,7 +117,7 @@ public class PortalSelectorFrame extends JFrame {
         setContentPane(root);
     }
 
-    private JPanel createRoleCard(String emoji, String title, String subtitle,
+    private JPanel createRoleCard(String title, String subtitle,
                                   String[] highlights, String btnText, Color accentColor,
                                   java.awt.event.ActionListener onAction) {
         JPanel card = new JPanel();
@@ -130,10 +128,6 @@ public class PortalSelectorFrame extends JFrame {
         ));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
-        // Icon Header
-        JLabel iconLbl = new JLabel(emoji);
-        iconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 40));
-
         JLabel titleLbl = new JLabel(title);
         titleLbl.setFont(Theme.FONT_HEADER_MD);
         titleLbl.setForeground(Theme.TEXT_TITLE);
@@ -143,8 +137,6 @@ public class PortalSelectorFrame extends JFrame {
         descLbl.setForeground(Theme.TEXT_MUTED);
         descLbl.setPreferredSize(new Dimension(300, 36));
 
-        card.add(iconLbl);
-        card.add(Box.createVerticalStrut(8));
         card.add(titleLbl);
         card.add(Box.createVerticalStrut(4));
         card.add(descLbl);
