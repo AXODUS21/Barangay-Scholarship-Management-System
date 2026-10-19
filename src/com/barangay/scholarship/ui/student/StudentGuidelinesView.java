@@ -47,12 +47,12 @@ public class StudentGuidelinesView extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // Content
-        JPanel container = new JPanel();
+        JPanel container = new Theme.ScrollablePanel();
         container.setOpaque(false);
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
         // 1. Eligibility Criteria Card
-        JPanel cardEligibility = Theme.createCardPanel();
+        JPanel cardEligibility = Theme.createFullWidthCardPanel();
         cardEligibility.setLayout(new BoxLayout(cardEligibility, BoxLayout.Y_AXIS));
 
         JLabel h1 = new JLabel("1. Who Can Apply? (Eligibility Criteria)");
@@ -72,7 +72,7 @@ public class StudentGuidelinesView extends JPanel {
         container.add(Box.createVerticalStrut(16));
 
         // 2. Required Documents Card
-        JPanel cardDocs = Theme.createCardPanel();
+        JPanel cardDocs = Theme.createFullWidthCardPanel();
         cardDocs.setLayout(new BoxLayout(cardDocs, BoxLayout.Y_AXIS));
 
         JLabel h2 = new JLabel("2. Required Physical Documents for Screening");
@@ -90,7 +90,7 @@ public class StudentGuidelinesView extends JPanel {
         container.add(Box.createVerticalStrut(16));
 
         // 3. Transparent Selection Process Card
-        JPanel cardProcess = Theme.createCardPanel();
+        JPanel cardProcess = Theme.createFullWidthCardPanel();
         cardProcess.setLayout(new BoxLayout(cardProcess, BoxLayout.Y_AXIS));
 
         JLabel h3 = new JLabel("3. How Applications Are Processed (Transparent Algorithmic Evaluation)");
@@ -108,7 +108,7 @@ public class StudentGuidelinesView extends JPanel {
         container.add(Box.createVerticalStrut(16));
 
         // 4. Contact & Schedule Card
-        JPanel cardContact = Theme.createCardPanel();
+        JPanel cardContact = Theme.createFullWidthCardPanel();
         cardContact.setLayout(new BorderLayout());
         cardContact.setBackground(Theme.PRIMARY_LIGHT);
         cardContact.setBorder(new CompoundBorder(

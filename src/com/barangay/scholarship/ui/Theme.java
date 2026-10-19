@@ -79,6 +79,69 @@ public class Theme {
         return panel;
     }
 
+    /**
+     * Card panel that spans 100% of the parent container's width in a BoxLayout(Y_AXIS)
+     * while preserving its natural preferred height.
+     */
+    public static JPanel createFullWidthCardPanel() {
+        JPanel panel = new JPanel() {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+            }
+        };
+        panel.setBackground(CARD_BG);
+        panel.setBorder(createCardBorder());
+        panel.setLayout(new BorderLayout());
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return panel;
+    }
+
+    public static JPanel createFullWidthCardPanel(LayoutManager layout) {
+        JPanel panel = createFullWidthCardPanel();
+        panel.setLayout(layout);
+        return panel;
+    }
+
+    /**
+     * A panel that implements Scrollable and forces width tracking in a JViewport,
+     * ensuring child components span 100% of the horizontal scroll viewport width.
+     */
+    public static class ScrollablePanel extends JPanel implements Scrollable {
+        public ScrollablePanel() {
+            super();
+        }
+
+        public ScrollablePanel(LayoutManager layout) {
+            super(layout);
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 64;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
+    }
+
     public static JScrollPane createBorderlessScrollPane(Component view) {
         JScrollPane sp = new JScrollPane(view);
         sp.setBorder(null);

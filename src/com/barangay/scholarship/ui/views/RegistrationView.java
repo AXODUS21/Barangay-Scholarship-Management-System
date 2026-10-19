@@ -209,7 +209,12 @@ public class RegistrationView extends JPanel {
         lbl.setFont(Theme.FONT_SMALL_BOLD);
         lbl.setForeground(Theme.TEXT_TITLE);
         p.add(lbl, BorderLayout.NORTH);
+
+        field.setPreferredSize(new Dimension(field.getPreferredSize().width, 36));
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+
         p.add(field, BorderLayout.CENTER);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
         p.setBorder(new EmptyBorder(0, 0, 8, 0));
         return p;
     }

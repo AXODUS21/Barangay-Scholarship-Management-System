@@ -86,12 +86,12 @@ public class StudentApplicationView extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // Main Scrollable Form Container
-        JPanel mainFormContainer = new JPanel();
+        JPanel mainFormContainer = new Theme.ScrollablePanel();
         mainFormContainer.setOpaque(false);
         mainFormContainer.setLayout(new BoxLayout(mainFormContainer, BoxLayout.Y_AXIS));
 
         // CARD 1: Personal & Contact Information
-        JPanel cardPersonal = Theme.createCardPanel();
+        JPanel cardPersonal = Theme.createFullWidthCardPanel();
         cardPersonal.setLayout(new BoxLayout(cardPersonal, BoxLayout.Y_AXIS));
 
         JLabel titleSec1 = new JLabel("1. PERSONAL & RESIDENCE INFORMATION");
@@ -126,7 +126,7 @@ public class StudentApplicationView extends JPanel {
         mainFormContainer.add(Box.createVerticalStrut(16));
 
         // CARD 2: Academic Background & Financial Profile
-        JPanel cardAcademic = Theme.createCardPanel();
+        JPanel cardAcademic = Theme.createFullWidthCardPanel();
         cardAcademic.setLayout(new BoxLayout(cardAcademic, BoxLayout.Y_AXIS));
 
         JLabel titleSec2 = new JLabel("2. ACADEMIC & FINANCIAL PROFILE");
@@ -180,7 +180,7 @@ public class StudentApplicationView extends JPanel {
         mainFormContainer.add(Box.createVerticalStrut(16));
 
         // CARD 3: Physical Document Checklist & Data Consent
-        JPanel cardDocs = Theme.createCardPanel();
+        JPanel cardDocs = Theme.createFullWidthCardPanel();
         cardDocs.setLayout(new BoxLayout(cardDocs, BoxLayout.Y_AXIS));
 
         JLabel titleSec3 = new JLabel("3. DOCUMENT REQUIREMENTS & DECLARATION");
@@ -257,12 +257,14 @@ public class StudentApplicationView extends JPanel {
             JTextField tf = (JTextField) field;
             tf.setFont(Theme.FONT_BODY);
             tf.setPreferredSize(new Dimension(tf.getPreferredSize().width, 36));
+            tf.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
             tf.setBorder(new CompoundBorder(
                     new LineBorder(Theme.BORDER, 1, true),
                     new EmptyBorder(6, 10, 6, 10)
             ));
         } else if (field instanceof JComboBox) {
             field.setPreferredSize(new Dimension(field.getPreferredSize().width, 36));
+            field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         }
 
         if (tooltip != null) {
@@ -270,6 +272,7 @@ public class StudentApplicationView extends JPanel {
         }
 
         p.add(field, BorderLayout.CENTER);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
         p.setBorder(new EmptyBorder(0, 0, 10, 0));
         return p;
     }

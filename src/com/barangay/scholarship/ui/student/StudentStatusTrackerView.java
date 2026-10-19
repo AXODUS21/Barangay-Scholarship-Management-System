@@ -63,24 +63,28 @@ public class StudentStatusTrackerView extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         // Center: Search bar + Results Card
-        JPanel centerPanel = new JPanel();
+        JPanel centerPanel = new Theme.ScrollablePanel();
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Search Input Card
-        JPanel searchCard = Theme.createCardPanel();
-        searchCard.setLayout(new BorderLayout(12, 12));
+        // Search Input Card (Full width responsive card)
+        JPanel searchCard = Theme.createFullWidthCardPanel();
+        searchCard.setLayout(new BoxLayout(searchCard, BoxLayout.Y_AXIS));
 
         JLabel searchPrompt = new JLabel("Application Reference ID or Student Full Name:");
         searchPrompt.setFont(Theme.FONT_BODY_BOLD);
         searchPrompt.setForeground(Theme.TEXT_TITLE);
+        searchPrompt.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel searchBar = new JPanel(new BorderLayout(10, 0));
         searchBar.setOpaque(false);
+        searchBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        searchBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
 
         txtSearch = new JTextField();
-        txtSearch.setFont(Theme.FONT_HEADER_SM);
-        txtSearch.setPreferredSize(new Dimension(300, 42));
+        txtSearch.setFont(Theme.FONT_BODY);
+        txtSearch.setPreferredSize(new Dimension(300, 38));
+        txtSearch.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         txtSearch.setBorder(new CompoundBorder(
                 new LineBorder(Theme.BORDER, 1, true),
                 new EmptyBorder(6, 12, 6, 12)
@@ -89,7 +93,8 @@ public class StudentStatusTrackerView extends JPanel {
 
         JButton btnSearch = Theme.createStyledButton("🔍 Check Application Status", Theme.PRIMARY, Color.WHITE);
         btnSearch.setFont(Theme.FONT_BODY_BOLD);
-        btnSearch.setPreferredSize(new Dimension(220, 42));
+        btnSearch.setPreferredSize(new Dimension(220, 38));
+        btnSearch.setMaximumSize(new Dimension(220, 38));
         btnSearch.addActionListener(e -> performSearch());
 
         searchBar.add(txtSearch, BorderLayout.CENTER);
@@ -98,23 +103,28 @@ public class StudentStatusTrackerView extends JPanel {
         lblStatusSummary = new JLabel("Tip: Enter your exact ID or name, then press Enter or click 'Check Application Status'");
         lblStatusSummary.setFont(Theme.FONT_SMALL);
         lblStatusSummary.setForeground(Theme.TEXT_MUTED);
+        lblStatusSummary.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        searchCard.add(searchPrompt, BorderLayout.NORTH);
-        searchCard.add(searchBar, BorderLayout.CENTER);
-        searchCard.add(lblStatusSummary, BorderLayout.SOUTH);
+        searchCard.add(searchPrompt);
+        searchCard.add(Box.createVerticalStrut(8));
+        searchCard.add(searchBar);
+        searchCard.add(Box.createVerticalStrut(8));
+        searchCard.add(lblStatusSummary);
 
         centerPanel.add(searchCard);
-        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(Box.createVerticalStrut(16));
 
         // Results Container
         resultContainer = new JPanel();
         resultContainer.setOpaque(false);
         resultContainer.setLayout(new BoxLayout(resultContainer, BoxLayout.Y_AXIS));
+        resultContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Default empty state placeholder
         showEmptyPlaceholder();
 
         centerPanel.add(resultContainer);
+        centerPanel.add(Box.createVerticalGlue());
 
         JScrollPane scrollPane = Theme.createBorderlessScrollPane(centerPanel);
         add(scrollPane, BorderLayout.CENTER);
@@ -155,20 +165,23 @@ public class StudentStatusTrackerView extends JPanel {
     }
 
     private void displayApplicantCard(Applicant a) {
-        JPanel card = Theme.createCardPanel();
+        JPanel card = Theme.createFullWidthCardPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
         // Top Banner Row: Name + Status Badge
         JPanel topRow = new JPanel(new BorderLayout(12, 0));
         topRow.setOpaque(false);
+        topRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel nameBox = new JPanel();
         nameBox.setOpaque(false);
         nameBox.setLayout(new BoxLayout(nameBox, BoxLayout.Y_AXIS));
+        nameBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblName = new JLabel(a.getFullName());
         lblName.setFont(Theme.FONT_HEADER_MD);
         lblName.setForeground(Theme.TEXT_TITLE);
+        lblName.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         String idText = "Reference ID: " + a.getApplicantId();
         if (a instanceof Scholar) {
@@ -177,6 +190,7 @@ public class StudentStatusTrackerView extends JPanel {
         JLabel lblId = new JLabel(idText);
         lblId.setFont(Theme.FONT_BODY_BOLD);
         lblId.setForeground(Theme.PRIMARY);
+        lblId.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         nameBox.add(lblName);
         nameBox.add(Box.createVerticalStrut(2));
@@ -194,6 +208,7 @@ public class StudentStatusTrackerView extends JPanel {
         JPanel explainBox = new JPanel(new BorderLayout());
         explainBox.setBorder(new EmptyBorder(12, 14, 12, 14));
         explainBox.setBackground(getStatusBgColor(a.getStatus()));
+        explainBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblExplainTitle = new JLabel("STATUS OVERVIEW & NEXT STEPS:");
         lblExplainTitle.setFont(Theme.FONT_SMALL_BOLD);
@@ -213,6 +228,7 @@ public class StudentStatusTrackerView extends JPanel {
         // Details Grid (Academic & Profile info)
         JPanel detailsGrid = new JPanel(new GridLayout(3, 2, 16, 8));
         detailsGrid.setOpaque(false);
+        detailsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         addDetailItem(detailsGrid, "School / University:", a.getSchool());
         addDetailItem(detailsGrid, "Year Level:", a.getYearLevel());
@@ -235,16 +251,19 @@ public class StudentStatusTrackerView extends JPanel {
         JPanel docBox = new JPanel();
         docBox.setOpaque(false);
         docBox.setLayout(new BoxLayout(docBox, BoxLayout.Y_AXIS));
+        docBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel docTitle = new JLabel("PHYSICAL DOCUMENT VERIFICATION CHECKLIST");
         docTitle.setFont(Theme.FONT_SMALL_BOLD);
         docTitle.setForeground(Theme.TEXT_MUTED);
+        docTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         docBox.add(docTitle);
         docBox.add(Box.createVerticalStrut(8));
 
         DocumentChecklist docs = a.getDocuments();
         JPanel docGrid = new JPanel(new GridLayout(2, 2, 12, 8));
         docGrid.setOpaque(false);
+        docGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         docGrid.add(createDocPill("Certificate of Indigency", docs.isCertificateOfIndigency()));
         docGrid.add(createDocPill("Copy of Grades / TOR", docs.isCertifiedCopyOfGrades()));
@@ -258,18 +277,20 @@ public class StudentStatusTrackerView extends JPanel {
     }
 
     private void displayMultipleMatches(List<Applicant> matches) {
-        JPanel container = Theme.createCardPanel();
+        JPanel container = Theme.createFullWidthCardPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
         JLabel title = new JLabel("Multiple Matching Records Found (" + matches.size() + ")");
         title.setFont(Theme.FONT_HEADER_SM);
         title.setForeground(Theme.PRIMARY);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
         container.add(title);
         container.add(Box.createVerticalStrut(10));
 
         for (Applicant a : matches) {
             JPanel row = new JPanel(new BorderLayout(8, 0));
             row.setOpaque(false);
+            row.setAlignmentX(Component.LEFT_ALIGNMENT);
             row.setBorder(new CompoundBorder(
                     new LineBorder(Theme.BORDER, 1, true),
                     new EmptyBorder(8, 12, 8, 12)
@@ -297,7 +318,7 @@ public class StudentStatusTrackerView extends JPanel {
     }
 
     private void showEmptyPlaceholder() {
-        JPanel p = Theme.createCardPanel();
+        JPanel p = Theme.createFullWidthCardPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(40, 20, 40, 20));
 
@@ -325,7 +346,7 @@ public class StudentStatusTrackerView extends JPanel {
     }
 
     private void showNotFoundPlaceholder(String query) {
-        JPanel p = Theme.createCardPanel();
+        JPanel p = Theme.createFullWidthCardPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(32, 20, 32, 20));
 
