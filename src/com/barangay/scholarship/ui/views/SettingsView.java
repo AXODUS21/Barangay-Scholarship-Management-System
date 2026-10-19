@@ -108,7 +108,7 @@ public class SettingsView extends JPanel {
         dBody.setOpaque(false);
         dBody.setBorder(new EmptyBorder(12, 0, 0, 0));
 
-        JButton btnSeed = Theme.createStyledButton("🔄 Reset & Preload Demo Data (20 Students)", Theme.ACCENT, Color.WHITE);
+        JButton btnSeed = Theme.createStyledButton("Reset & Preload Demo Data (20 Students)", Theme.ACCENT, Color.WHITE);
         btnSeed.addActionListener(e -> {
             int c = JOptionPane.showConfirmDialog(this, "Preload 20 realistic student records and reset queues?", "Confirm Preload", JOptionPane.YES_NO_OPTION);
             if (c == JOptionPane.YES_OPTION) {

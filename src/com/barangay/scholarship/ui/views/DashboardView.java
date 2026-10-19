@@ -80,7 +80,7 @@ public class DashboardView extends JPanel {
         JButton btnNewApp = Theme.createStyledButton("+ New Applicant", Theme.PRIMARY, Color.WHITE);
         btnNewApp.addActionListener(e -> navigator.accept("REGISTRATION"));
 
-        JButton btnUndo = Theme.createStyledButton("⏪ Undo Last Action", Theme.CARD_BG, Theme.TEXT_TITLE);
+        JButton btnUndo = Theme.createStyledButton("Undo Last Action", Theme.CARD_BG, Theme.TEXT_TITLE);
         btnUndo.addActionListener(e -> {
             boolean undone = manager.undoLastAction();
             if (undone) {

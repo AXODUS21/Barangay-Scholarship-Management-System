@@ -31,7 +31,7 @@ if [ -z "$JAVA_FILES" ]; then
     exit 0
 fi
 
-"$JAVAC" -d bin -sourcepath src $JAVA_FILES
+"$JAVAC" -encoding UTF-8 -d bin -sourcepath src $JAVA_FILES
 echo "Build succeeded! Classes compiled into bin/"
 
 if [ "$1" = "test" ]; then

@@ -84,7 +84,7 @@ public class AuditLogView extends JPanel {
         lblInfo.setFont(Theme.FONT_BODY);
         lblInfo.setForeground(Theme.TEXT_MUTED);
 
-        JButton btnUndo = Theme.createStyledButton("⏪ 1-Click Undo Last Action", Theme.PRIMARY, Color.WHITE);
+        JButton btnUndo = Theme.createStyledButton("1-Click Undo Last Action", Theme.PRIMARY, Color.WHITE);
         btnUndo.setFont(Theme.FONT_HEADER_SM);
         btnUndo.addActionListener(e -> executeUndo());
 
@@ -161,7 +161,7 @@ public class AuditLogView extends JPanel {
             String next = r.getNewStatus() != null ? r.getNewStatus().name() : "N/A";
 
             logTableModel.addRow(new Object[]{
-                    (level == 1 ? "★ TOP (#1)" : "#" + level),
+                    (level == 1 ? "TOP (#1)" : "#" + level),
                     r.getFormattedTime(),
                     r.getType().getLabel(),
                     r.getTargetName(),

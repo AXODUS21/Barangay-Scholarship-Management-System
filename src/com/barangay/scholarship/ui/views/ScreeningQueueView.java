@@ -179,7 +179,7 @@ public class ScreeningQueueView extends JPanel {
         btnReject.setForeground(Theme.DANGER);
         btnReject.addActionListener(e -> rejectCurrentApplicant());
 
-        btnVerifyApprove = Theme.createStyledButton("Save & Mark Verified ✔", Theme.ACCENT, Color.WHITE);
+        btnVerifyApprove = Theme.createStyledButton("Save & Mark Verified", Theme.ACCENT, Color.WHITE);
         btnVerifyApprove.addActionListener(e -> verifyCurrentApplicant());
 
         btnPanel.add(btnReject);

@@ -48,8 +48,8 @@ if [ -z "$JAVA_FILES" ]; then
     exit 1
 fi
 
-"$JAVAC" -d bin -sourcepath src $JAVA_FILES
-echo -e "${GREEN}[✔] Compilation successful! Classes compiled into bin/${NC}"
+"$JAVAC" -encoding UTF-8 -d bin -sourcepath src $JAVA_FILES
+echo -e "${GREEN}[OK] Compilation successful! Classes compiled into bin/${NC}"
 
 # 4. Launch Application GUI
 echo -e "\n${YELLOW}[2/2] Launching Graphical User Interface (GUI)...${NC}"

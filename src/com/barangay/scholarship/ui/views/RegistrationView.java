@@ -236,11 +236,11 @@ public class RegistrationView extends JPanel {
             if (gwaOk && incomeOk) {
                 eligibilityBanner.setBackground(Theme.ACCENT_BG);
                 lblEligibilityText.setForeground(Theme.ACCENT_HOVER);
-                lblEligibilityText.setText("✔ AUTO-CHECK: ELIGIBLE (Meets grades & household income criteria)");
+                lblEligibilityText.setText("AUTO-CHECK: ELIGIBLE (Meets grades & household income criteria)");
             } else {
                 eligibilityBanner.setBackground(Theme.DANGER_BG);
                 lblEligibilityText.setForeground(Theme.DANGER);
-                StringBuilder sb = new StringBuilder("✖ AUTO-CHECK: INELIGIBLE - ");
+                StringBuilder sb = new StringBuilder("AUTO-CHECK: INELIGIBLE - ");
                 if (!incomeOk) sb.append("Income exceeds ₱25k limit; ");
                 if (!gwaOk) {
                     if (isCollege) sb.append("College GWA > 2.50; ");
@@ -251,7 +251,7 @@ public class RegistrationView extends JPanel {
         } catch (NumberFormatException ex) {
             eligibilityBanner.setBackground(Theme.WARNING_BG);
             lblEligibilityText.setForeground(Theme.WARNING);
-            lblEligibilityText.setText("⚠ Please input valid numerical values for GWA and Income.");
+            lblEligibilityText.setText("Please input valid numerical values for GWA and Income.");
         }
     }
 

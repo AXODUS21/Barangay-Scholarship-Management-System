@@ -100,7 +100,7 @@ public class RankingAllocationView extends JPanel {
         btnPreview.setFont(Theme.FONT_BODY_BOLD);
         btnPreview.addActionListener(e -> previewRanking());
 
-        JButton btnAllocate = Theme.createStyledButton("Confirm & Allocate Slots ✔", Theme.ACCENT, Color.WHITE);
+        JButton btnAllocate = Theme.createStyledButton("Confirm & Allocate Slots", Theme.ACCENT, Color.WHITE);
         btnAllocate.addActionListener(e -> executeAllocation());
 
         ctrlRow.add(lblCrit);
@@ -171,7 +171,7 @@ public class RankingAllocationView extends JPanel {
         for (int i = 0; i < candidates.size(); i++) {
             Applicant a = candidates.get(i);
             int rank = i + 1;
-            String outcome = (rank <= slotQuota) ? "★ OFFICIAL SLOT (APPROVED)" : "⏳ WAITLIST QUEUE (FIFO)";
+            String outcome = (rank <= slotQuota) ? "OFFICIAL SLOT (APPROVED)" : "WAITLIST QUEUE (FIFO)";
 
             rankTableModel.addRow(new Object[]{
                     "#" + rank,

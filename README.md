@@ -116,6 +116,7 @@ com.barangay.scholarship
 ### Prerequisites
 - **Java SE JDK**: Version 17, 21, or 26.
 - **Zero Third-Party Dependencies**: No Maven, Gradle, or external libraries required. The application runs natively using standard Java SE, Swing, and AWT.
+- Java sources are compiled explicitly as UTF-8. The interface uses text-only labels instead of emoji icons so controls remain legible on systems without emoji fonts.
 
 ---
 

@@ -106,10 +106,10 @@ public class DisbursementView extends JPanel {
         toolRow.add(Box.createHorizontalStrut(12));
 
         // Disbursement & Export Buttons
-        JButton btnClaim = Theme.createStyledButton("💰 Disburse Selected Stipend", Theme.ACCENT, Color.WHITE);
+        JButton btnClaim = Theme.createStyledButton("Disburse Selected Stipend", Theme.ACCENT, Color.WHITE);
         btnClaim.addActionListener(e -> disburseSelected());
 
-        JButton btnExport = Theme.createStyledButton("📄 Export Payout Attendance Sheet", Theme.PRIMARY, Color.WHITE);
+        JButton btnExport = Theme.createStyledButton("Export Payout Attendance Sheet", Theme.PRIMARY, Color.WHITE);
         btnExport.addActionListener(e -> exportAttendanceSheet());
 
         toolRow.add(btnClaim);

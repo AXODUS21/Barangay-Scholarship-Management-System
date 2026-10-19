@@ -61,14 +61,14 @@ public class SidebarPanel extends JPanel {
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBorder(new EmptyBorder(6, 0, 6, 0));
 
-        addNavItem(menuPanel, "📊  Dashboard", "DASHBOARD");
-        addNavItem(menuPanel, "📝  Registration", "REGISTRATION");
-        addNavItem(menuPanel, "📋  Screening Queue", "SCREENING");
-        addNavItem(menuPanel, "⚖️  Slot Allocation", "RANKING");
-        addNavItem(menuPanel, "💰  Disbursement", "DISBURSEMENT");
-        addNavItem(menuPanel, "🌳  Scholar Directory", "DIRECTORY");
-        addNavItem(menuPanel, "⏪  Audit & Undo Log", "AUDIT");
-        addNavItem(menuPanel, "⚙️  Settings & Rubric", "SETTINGS");
+        addNavItem(menuPanel, "Dashboard", "DASHBOARD");
+        addNavItem(menuPanel, "Registration", "REGISTRATION");
+        addNavItem(menuPanel, "Screening Queue", "SCREENING");
+        addNavItem(menuPanel, "Slot Allocation", "RANKING");
+        addNavItem(menuPanel, "Disbursement", "DISBURSEMENT");
+        addNavItem(menuPanel, "Scholar Directory", "DIRECTORY");
+        addNavItem(menuPanel, "Audit & Undo Log", "AUDIT");
+        addNavItem(menuPanel, "Settings & Rubric", "SETTINGS");
 
         menuPanel.add(Box.createVerticalGlue());
 

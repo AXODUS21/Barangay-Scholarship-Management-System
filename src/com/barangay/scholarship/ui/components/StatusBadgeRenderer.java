@@ -44,32 +44,32 @@ public class StatusBadgeRenderer extends DefaultTableCellRenderer {
             case APPROVED:
                 label.setBackground(Theme.ACCENT_BG);
                 label.setForeground(Theme.ACCENT_HOVER);
-                label.setText("✔ APPROVED");
+                label.setText("APPROVED");
                 break;
             case DISBURSED:
                 label.setBackground(new Color(224, 242, 254)); // Light cyan
                 label.setForeground(new Color(3, 105, 161));   // Cyan 700
-                label.setText("💰 DISBURSED");
+                label.setText("DISBURSED");
                 break;
             case VERIFIED:
                 label.setBackground(Theme.INFO_BG);
                 label.setForeground(Theme.INFO);
-                label.setText("📋 VERIFIED");
+                label.setText("VERIFIED");
                 break;
             case WAITLISTED:
                 label.setBackground(new Color(243, 232, 255)); // Light purple
                 label.setForeground(new Color(126, 34, 206));  // Purple 700
-                label.setText("⏳ WAITLISTED");
+                label.setText("WAITLISTED");
                 break;
             case PENDING_VERIFICATION:
                 label.setBackground(Theme.WARNING_BG);
                 label.setForeground(Theme.WARNING);
-                label.setText("🔍 PENDING");
+                label.setText("PENDING");
                 break;
             case REJECTED:
                 label.setBackground(Theme.DANGER_BG);
                 label.setForeground(Theme.DANGER);
-                label.setText("✖ REJECTED");
+                label.setText("REJECTED");
                 break;
         }
     }
