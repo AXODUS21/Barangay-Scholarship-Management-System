@@ -8,9 +8,11 @@ import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
 import com.barangay.scholarship.ui.components.ModernTable;
 import com.barangay.scholarship.ui.components.StatCard;
+import com.barangay.scholarship.ui.components.StatusBadgeRenderer;
 import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -35,6 +37,7 @@ public class ScreeningQueueView extends JPanel {
     // Document Inspector Panel
     private JLabel lblSelectedName;
     private JLabel lblSelectedDetails;
+    private JLabel lblStatusBadge;
     private JCheckBox chkIndigency;
     private JCheckBox chkGrades;
     private JCheckBox chkEnrollment;
@@ -57,6 +60,7 @@ public class ScreeningQueueView extends JPanel {
 
     private JButton btnVerifyApprove;
     private JButton btnReject;
+    private JButton btnNext;
 
     private Applicant currentSelectedApplicant;
 
@@ -72,6 +76,10 @@ public class ScreeningQueueView extends JPanel {
     }
 
     private void initUI() {
+        // Top Container: Header + Full-Width Stats Grid
+        JPanel topPanel = new JPanel(new BorderLayout(0, 14));
+        topPanel.setOpaque(false);
+
         // Header
         JPanel headerPanel = new JPanel();
         headerPanel.setOpaque(false);
@@ -88,15 +96,10 @@ public class ScreeningQueueView extends JPanel {
         headerPanel.add(title);
         headerPanel.add(Box.createVerticalStrut(4));
         headerPanel.add(subtitle);
-        add(headerPanel, BorderLayout.NORTH);
+        topPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // Center Content
-        JPanel centerPanel = new JPanel();
-        centerPanel.setOpaque(false);
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-
-        // Queue Stats
-        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
+        // Queue Stats: 2 cards spanning 50% each to fill 100% of the horizontal space with no remaining gap
+        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 0));
         statsGrid.setOpaque(false);
 
         cardQueueSize = new StatCard("Screening Queue Length", "0 Applicants", "First-In, First-Out (FIFO)", Theme.INFO);
@@ -104,12 +107,11 @@ public class ScreeningQueueView extends JPanel {
 
         statsGrid.add(cardQueueSize);
         statsGrid.add(cardFrontApplicant);
-        statsGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
-        statsGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, statsGrid.getPreferredSize().height));
-        centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(14));
+        topPanel.add(statsGrid, BorderLayout.CENTER);
 
-        // Left: Queue Table
+        add(topPanel, BorderLayout.NORTH);
+
+        // Queue Table Card
         JPanel tableCard = Theme.createCardPanel();
         tableCard.setMinimumSize(new Dimension(320, 260));
         JLabel tblTitle = new JLabel("Live Screening Line (Front to Rear)");
@@ -120,8 +122,14 @@ public class ScreeningQueueView extends JPanel {
         queueTableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public Class<?> getColumnClass(int c) {
+                if (c == 6) return ApplicationStatus.class;
+                return Object.class;
+            }
         };
         queueTable = new ModernTable(queueTableModel);
+        queueTable.getColumnModel().getColumn(6).setCellRenderer(new StatusBadgeRenderer());
         queueTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = queueTable.getSelectedRow();
@@ -136,19 +144,29 @@ public class ScreeningQueueView extends JPanel {
         tableCard.add(tblTitle, BorderLayout.NORTH);
         tableCard.add(scrollTable, BorderLayout.CENTER);
 
-        // Right: Document Inspector Card
+        // Document Inspector Card
         JPanel inspectorCard = Theme.createCardPanel();
-        inspectorCard.setMinimumSize(new Dimension(280, 260));
-        inspectorCard.setLayout(new BorderLayout());
+        inspectorCard.setLayout(new BorderLayout(0, 10));
 
         JPanel insHeader = new JPanel();
         insHeader.setOpaque(false);
         insHeader.setLayout(new BoxLayout(insHeader, BoxLayout.Y_AXIS));
 
+        JPanel titleBadgeRow = new JPanel(new BorderLayout(10, 0));
+        titleBadgeRow.setOpaque(false);
+        titleBadgeRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         JLabel insTitle = new JLabel("PHYSICAL DOCUMENT SCREENING DESK");
         insTitle.setFont(Theme.FONT_SMALL_BOLD);
         insTitle.setForeground(Theme.TEXT_MUTED);
-        insTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        lblStatusBadge = new JLabel("NO SELECTION");
+        lblStatusBadge.setFont(Theme.FONT_SMALL_BOLD);
+        lblStatusBadge.setOpaque(true);
+        lblStatusBadge.setVisible(false);
+
+        titleBadgeRow.add(insTitle, BorderLayout.WEST);
+        titleBadgeRow.add(lblStatusBadge, BorderLayout.EAST);
 
         lblSelectedName = new JLabel("Select an applicant from queue");
         lblSelectedName.setFont(Theme.FONT_HEADER_MD);
@@ -160,12 +178,12 @@ public class ScreeningQueueView extends JPanel {
         lblSelectedDetails.setForeground(Theme.TEXT_MUTED);
         lblSelectedDetails.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        insHeader.add(insTitle);
+        insHeader.add(titleBadgeRow);
         insHeader.add(Box.createVerticalStrut(6));
         insHeader.add(lblSelectedName);
         insHeader.add(Box.createVerticalStrut(4));
         insHeader.add(lblSelectedDetails);
-        insHeader.add(Box.createVerticalStrut(14));
+        insHeader.add(Box.createVerticalStrut(10));
 
         inspectorCard.add(insHeader, BorderLayout.NORTH);
 
@@ -177,6 +195,12 @@ public class ScreeningQueueView extends JPanel {
         chkGrades = new JCheckBox("2. Certified Copy of Grades (Form 138 / TOR)");
         chkEnrollment = new JCheckBox("3. Certificate of Registration / Enrollment Form");
         chkId = new JCheckBox("4. Valid Barangay ID or Student ID");
+
+        // React to live checkbox changes immediately
+        chkIndigency.addActionListener(e -> updateScreeningActionsState());
+        chkGrades.addActionListener(e -> updateScreeningActionsState());
+        chkEnrollment.addActionListener(e -> updateScreeningActionsState());
+        chkId.addActionListener(e -> updateScreeningActionsState());
 
         btnViewIndigency = new JButton("👁 View Document");
         btnViewGrades = new JButton("👁 View Document");
@@ -198,6 +222,7 @@ public class ScreeningQueueView extends JPanel {
                 currentSelectedApplicant.getDocuments().setIndigencyFilePath(path);
                 chkIndigency.setSelected(true);
                 updateDocAttachmentRow(true, f.getName(), path, btnViewIndigency, lblIndigencyInfo);
+                updateScreeningActionsState();
             }
         }));
 
@@ -206,6 +231,7 @@ public class ScreeningQueueView extends JPanel {
                 currentSelectedApplicant.getDocuments().setGradesFilePath(path);
                 chkGrades.setSelected(true);
                 updateDocAttachmentRow(true, f.getName(), path, btnViewGrades, lblGradesInfo);
+                updateScreeningActionsState();
             }
         }));
 
@@ -214,6 +240,7 @@ public class ScreeningQueueView extends JPanel {
                 currentSelectedApplicant.getDocuments().setEnrollmentFilePath(path);
                 chkEnrollment.setSelected(true);
                 updateDocAttachmentRow(true, f.getName(), path, btnViewEnrollment, lblEnrollmentInfo);
+                updateScreeningActionsState();
             }
         }));
 
@@ -222,6 +249,7 @@ public class ScreeningQueueView extends JPanel {
                 currentSelectedApplicant.getDocuments().setIdFilePath(path);
                 chkId.setSelected(true);
                 updateDocAttachmentRow(true, f.getName(), path, btnViewId, lblIdInfo);
+                updateScreeningActionsState();
             }
         }));
 
@@ -258,21 +286,30 @@ public class ScreeningQueueView extends JPanel {
         btnPanel.setOpaque(false);
 
         btnReject = new JButton("Mark Rejected");
+        btnReject.setFont(Theme.FONT_BODY_BOLD);
         btnReject.setForeground(Theme.DANGER);
+        btnReject.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnReject.addActionListener(e -> rejectCurrentApplicant());
+
+        btnNext = new JButton("Next in Line ➔");
+        btnNext.setFont(Theme.FONT_BODY_BOLD);
+        btnNext.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnNext.addActionListener(e -> selectNextApplicantInQueue());
 
         btnVerifyApprove = Theme.createStyledButton("Save & Mark Verified", Theme.ACCENT, Color.WHITE);
         btnVerifyApprove.addActionListener(e -> verifyCurrentApplicant());
 
         btnPanel.add(btnReject);
+        btnPanel.add(btnNext);
         btnPanel.add(btnVerifyApprove);
 
         inspectorCard.add(btnPanel, BorderLayout.SOUTH);
 
-        // Single-column vertical stacking for maximum readability and space
-        centerPanel.add(inspectorCard);
-        centerPanel.add(Box.createVerticalStrut(14));
-        centerPanel.add(tableCard);
+        // Center Panel: Stacked vertically with BorderLayout to give full width to both
+        JPanel centerPanel = new JPanel(new BorderLayout(0, 14));
+        centerPanel.setOpaque(false);
+        centerPanel.add(inspectorCard, BorderLayout.NORTH);
+        centerPanel.add(tableCard, BorderLayout.CENTER);
 
         add(centerPanel, BorderLayout.CENTER);
     }
@@ -357,12 +394,21 @@ public class ScreeningQueueView extends JPanel {
         if (applicant == null) {
             lblSelectedName.setText("Select an applicant from queue");
             lblSelectedDetails.setText("Click any row or peek at the front of line to inspect requirements.");
+            lblStatusBadge.setVisible(false);
+
             chkIndigency.setSelected(false);
             chkGrades.setSelected(false);
             chkEnrollment.setSelected(false);
             chkId.setSelected(false);
+
+            chkIndigency.setEnabled(false);
+            chkGrades.setEnabled(false);
+            chkEnrollment.setEnabled(false);
+            chkId.setEnabled(false);
+
             btnVerifyApprove.setEnabled(false);
             btnReject.setEnabled(false);
+            btnNext.setEnabled(false);
 
             btnViewIndigency.setVisible(false);
             btnViewGrades.setVisible(false);
@@ -386,6 +432,12 @@ public class ScreeningQueueView extends JPanel {
                 applicant.getSchool(), applicant.getPurok(), applicant.getFormattedGwa(), applicant.getFormattedIncome()));
 
         DocumentChecklist docs = applicant.getDocuments();
+        chkIndigency.setEnabled(true);
+        chkGrades.setEnabled(true);
+        chkEnrollment.setEnabled(true);
+        chkId.setEnabled(true);
+        btnNext.setEnabled(true);
+
         chkIndigency.setSelected(docs.isCertificateOfIndigency());
         chkGrades.setSelected(docs.isCertifiedCopyOfGrades());
         chkEnrollment.setSelected(docs.isEnrollmentForm());
@@ -405,8 +457,135 @@ public class ScreeningQueueView extends JPanel {
         updateDocAttachmentRow(docs.hasIdFile(), docs.getIdFileName(), docs.getIdFilePath(),
                 btnViewId, lblIdInfo);
 
-        btnVerifyApprove.setEnabled(true);
-        btnReject.setEnabled(true);
+        // Update status badge pill
+        ApplicationStatus status = applicant.getStatus();
+        lblStatusBadge.setVisible(true);
+        if (status == ApplicationStatus.VERIFIED) {
+            lblStatusBadge.setText("  ✓ VERIFIED — READY FOR RANKING  ");
+            lblStatusBadge.setBackground(Theme.ACCENT_BG);
+            lblStatusBadge.setForeground(Theme.ACCENT_HOVER);
+            lblStatusBadge.setBorder(new CompoundBorder(
+                    BorderFactory.createLineBorder(Theme.ACCENT, 1),
+                    new EmptyBorder(3, 8, 3, 8)
+            ));
+        } else if (status == ApplicationStatus.PENDING_VERIFICATION) {
+            lblStatusBadge.setText("  ⏳ PENDING VERIFICATION (" + docs.getStatusSummary() + ")  ");
+            lblStatusBadge.setBackground(Theme.WARNING_BG);
+            lblStatusBadge.setForeground(Theme.WARNING);
+            lblStatusBadge.setBorder(new CompoundBorder(
+                    BorderFactory.createLineBorder(Theme.WARNING, 1),
+                    new EmptyBorder(3, 8, 3, 8)
+            ));
+        } else if (status == ApplicationStatus.REJECTED) {
+            lblStatusBadge.setText("  ✕ REJECTED / DISQUALIFIED  ");
+            lblStatusBadge.setBackground(Theme.DANGER_BG);
+            lblStatusBadge.setForeground(Theme.DANGER);
+            lblStatusBadge.setBorder(new CompoundBorder(
+                    BorderFactory.createLineBorder(Theme.DANGER, 1),
+                    new EmptyBorder(3, 8, 3, 8)
+            ));
+        } else {
+            lblStatusBadge.setText("  " + status.name() + "  ");
+            lblStatusBadge.setBackground(Theme.BG_APP);
+            lblStatusBadge.setForeground(Theme.TEXT_BODY);
+            lblStatusBadge.setBorder(new CompoundBorder(
+                    BorderFactory.createLineBorder(Theme.BORDER, 1),
+                    new EmptyBorder(3, 8, 3, 8)
+            ));
+        }
+
+        updateScreeningActionsState();
+    }
+
+    private void updateScreeningActionsState() {
+        if (currentSelectedApplicant == null) {
+            btnVerifyApprove.setEnabled(false);
+            btnVerifyApprove.setText("Save & Mark Verified");
+            btnVerifyApprove.setBackground(Theme.ACCENT);
+            btnReject.setEnabled(false);
+            return;
+        }
+
+        boolean allChecked = chkIndigency.isSelected() && chkGrades.isSelected()
+                && chkEnrollment.isSelected() && chkId.isSelected();
+        int countChecked = (chkIndigency.isSelected() ? 1 : 0)
+                + (chkGrades.isSelected() ? 1 : 0)
+                + (chkEnrollment.isSelected() ? 1 : 0)
+                + (chkId.isSelected() ? 1 : 0);
+
+        ApplicationStatus currentStatus = currentSelectedApplicant.getStatus();
+
+        if (currentStatus == ApplicationStatus.VERIFIED) {
+            if (allChecked) {
+                btnVerifyApprove.setText("✓ Verified (Ready for Ranking)");
+                btnVerifyApprove.setEnabled(false);
+                btnVerifyApprove.setBackground(new Color(226, 232, 240));
+                btnVerifyApprove.setForeground(new Color(100, 116, 139));
+            } else {
+                // User unchecked a document -> allow updating to pending
+                btnVerifyApprove.setText("Update Checklist (Mark Pending)");
+                btnVerifyApprove.setEnabled(true);
+                btnVerifyApprove.setBackground(Theme.WARNING);
+                btnVerifyApprove.setForeground(Color.WHITE);
+            }
+            btnReject.setEnabled(true);
+            btnReject.setText("Mark Rejected");
+        } else if (currentStatus == ApplicationStatus.PENDING_VERIFICATION) {
+            if (allChecked) {
+                btnVerifyApprove.setText("Save & Mark Verified");
+                btnVerifyApprove.setEnabled(true);
+                btnVerifyApprove.setBackground(Theme.ACCENT);
+                btnVerifyApprove.setForeground(Color.WHITE);
+            } else {
+                btnVerifyApprove.setText("Save Checklist (" + countChecked + "/4)");
+                btnVerifyApprove.setEnabled(true);
+                btnVerifyApprove.setBackground(Theme.PRIMARY);
+                btnVerifyApprove.setForeground(Color.WHITE);
+            }
+            btnReject.setEnabled(true);
+            btnReject.setText("Mark Rejected");
+        } else if (currentStatus == ApplicationStatus.REJECTED) {
+            btnVerifyApprove.setText("Reinstate & Mark Verified");
+            btnVerifyApprove.setEnabled(allChecked);
+            btnVerifyApprove.setBackground(Theme.ACCENT);
+            btnVerifyApprove.setForeground(Color.WHITE);
+            btnReject.setEnabled(false);
+        } else {
+            btnVerifyApprove.setText("✓ " + currentStatus);
+            btnVerifyApprove.setEnabled(false);
+            btnVerifyApprove.setBackground(new Color(226, 232, 240));
+            btnVerifyApprove.setForeground(new Color(100, 116, 139));
+            btnReject.setEnabled(true);
+        }
+    }
+
+    private void selectNextApplicantInQueue() {
+        ScholarshipQueue<Applicant> queue = manager.getScreeningQueue();
+        List<Applicant> list = queue.toList();
+        if (list.isEmpty()) return;
+        if (currentSelectedApplicant == null) {
+            selectApplicant(list.get(0));
+            if (queueTable.getRowCount() > 0) {
+                queueTable.setRowSelectionInterval(0, 0);
+            }
+            return;
+        }
+
+        int currentIndex = -1;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getApplicantId().equals(currentSelectedApplicant.getApplicantId())) {
+                currentIndex = i;
+                break;
+            }
+        }
+
+        int nextIndex = (currentIndex + 1) % list.size();
+        Applicant nextApp = list.get(nextIndex);
+        selectApplicant(nextApp);
+        if (nextIndex < queueTable.getRowCount()) {
+            queueTable.setRowSelectionInterval(nextIndex, nextIndex);
+            queueTable.scrollRectToVisible(queueTable.getCellRect(nextIndex, 0, true));
+        }
     }
 
     private void verifyCurrentApplicant() {
@@ -428,7 +607,7 @@ public class ScreeningQueueView extends JPanel {
         if (success) {
             if (updatedDocs.isComplete()) {
                 JOptionPane.showMessageDialog(this,
-                        currentSelectedApplicant.getFullName() + " has passed all document checks and is now VERIFIED!\nApplicant is ready for Slot Ranking.",
+                        currentSelectedApplicant.getFullName() + " has passed all document checks and is now VERIFIED!\nApplicant is recorded and ready for Slot Ranking.",
                         "Document Verification Complete", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
@@ -448,6 +627,7 @@ public class ScreeningQueueView extends JPanel {
             currentSelectedApplicant.setStatus(ApplicationStatus.REJECTED);
             manager.getScreeningQueue().remove(currentSelectedApplicant);
             manager.notifyChange();
+            currentSelectedApplicant = null;
             refreshData();
         }
     }
@@ -467,10 +647,14 @@ public class ScreeningQueueView extends JPanel {
 
         queueTableModel.setRowCount(0);
         List<Applicant> list = queue.toList();
-        int pos = 1;
-        for (Applicant a : list) {
+        int selectedRow = -1;
+        for (int i = 0; i < list.size(); i++) {
+            Applicant a = list.get(i);
+            if (currentSelectedApplicant != null && a.getApplicantId().equals(currentSelectedApplicant.getApplicantId())) {
+                selectedRow = i;
+            }
             queueTableModel.addRow(new Object[]{
-                    "#" + pos++,
+                    "#" + (i + 1),
                     a.getApplicantId(),
                     a.getFullName(),
                     a.getSchool(),
@@ -480,10 +664,18 @@ public class ScreeningQueueView extends JPanel {
             });
         }
 
+        if (selectedRow >= 0 && selectedRow < queueTable.getRowCount()) {
+            queueTable.setRowSelectionInterval(selectedRow, selectedRow);
+        }
+
         if (currentSelectedApplicant == null && front != null) {
             selectApplicant(front);
+            if (queueTable.getRowCount() > 0) {
+                queueTable.setRowSelectionInterval(0, 0);
+            }
         } else if (currentSelectedApplicant != null) {
-            selectApplicant(manager.findApplicantById(currentSelectedApplicant.getApplicantId()));
+            Applicant reloaded = manager.findApplicantById(currentSelectedApplicant.getApplicantId());
+            selectApplicant(reloaded);
         }
     }
 }
