@@ -80,17 +80,6 @@ public class DashboardView extends JPanel {
         JButton btnNewApp = Theme.createStyledButton("+ New Applicant", Theme.PRIMARY, Color.WHITE);
         btnNewApp.addActionListener(e -> navigator.accept("REGISTRATION"));
 
-        JButton btnUndo = Theme.createStyledButton("Undo Last Action", Theme.CARD_BG, Theme.TEXT_TITLE);
-        btnUndo.addActionListener(e -> {
-            boolean undone = manager.undoLastAction();
-            if (undone) {
-                JOptionPane.showMessageDialog(this, "Last action successfully undone!", "Undo Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "No previous actions available to undo.", "Undo Stack Empty", JOptionPane.WARNING_MESSAGE);
-            }
-        });
-
-        quickActions.add(btnUndo);
         quickActions.add(btnNewApp);
         headerPanel.add(quickActions, BorderLayout.EAST);
 
@@ -157,47 +146,9 @@ public class DashboardView extends JPanel {
         centerPanel.add(budgetCard);
         centerPanel.add(Box.createVerticalStrut(14));
 
-        // 3. Lower Section: Quick Workflows + Recent Activity Stack
-        lowerPanel = new JPanel(new GridLayout(1, 2, 16, 16));
-        lowerPanel.setOpaque(false);
-
-        // Left: Workflow Launcher Card
-        JPanel workflowCard = Theme.createCardPanel();
-        JLabel wfTitle = new JLabel("Scholarship Transaction Workflows");
-        wfTitle.setFont(Theme.FONT_HEADER_SM);
-        wfTitle.setForeground(Theme.TEXT_TITLE);
-
-        JPanel btnGrid = new JPanel(new GridLayout(4, 1, 8, 8));
-        btnGrid.setOpaque(false);
-        btnGrid.setBorder(new EmptyBorder(12, 0, 0, 0));
-
-        JButton btnNavScreening = new JButton("1. Document Screening Queue (Verify Folders)");
-        btnNavScreening.setFont(Theme.FONT_BODY);
-        btnNavScreening.addActionListener(e -> navigator.accept("SCREENING"));
-
-        JButton btnNavRanking = new JButton("2. Merit & Need Ranking (Merge / Quick Sort)");
-        btnNavRanking.setFont(Theme.FONT_BODY);
-        btnNavRanking.addActionListener(e -> navigator.accept("RANKING"));
-
-        JButton btnNavDisbursement = new JButton("3. Payout Disbursement & Attendance Payroll");
-        btnNavDisbursement.setFont(Theme.FONT_BODY);
-        btnNavDisbursement.addActionListener(e -> navigator.accept("DISBURSEMENT"));
-
-        JButton btnNavBST = new JButton("4. Scholar Directory & Binary Search Tree (BST)");
-        btnNavBST.setFont(Theme.FONT_BODY);
-        btnNavBST.addActionListener(e -> navigator.accept("DIRECTORY"));
-
-        btnGrid.add(btnNavScreening);
-        btnGrid.add(btnNavRanking);
-        btnGrid.add(btnNavDisbursement);
-        btnGrid.add(btnNavBST);
-
-        workflowCard.add(wfTitle, BorderLayout.NORTH);
-        workflowCard.add(btnGrid, BorderLayout.CENTER);
-
-        // Right: Recent Activity Log (ActionStack snapshot)
+        // 3. Lower Section: Recent Activity Stack Table Card (Full Width)
         JPanel activityCard = Theme.createCardPanel();
-        activityCard.setPreferredSize(new Dimension(350, 240));
+        activityCard.setPreferredSize(new Dimension(350, 260));
         JLabel actTitle = new JLabel("Audit Log / Recent Transactions (LIFO Stack)");
         actTitle.setFont(Theme.FONT_HEADER_SM);
         actTitle.setForeground(Theme.TEXT_TITLE);
@@ -213,9 +164,7 @@ public class DashboardView extends JPanel {
         activityCard.add(actTitle, BorderLayout.NORTH);
         activityCard.add(actScroll, BorderLayout.CENTER);
 
-        lowerPanel.add(workflowCard);
-        lowerPanel.add(activityCard);
-        centerPanel.add(lowerPanel);
+        centerPanel.add(activityCard);
 
         add(centerPanel, BorderLayout.CENTER);
 
@@ -229,7 +178,6 @@ public class DashboardView extends JPanel {
     }
 
     private JPanel cardsGrid;
-    private JPanel lowerPanel;
 
     private void updateResponsiveLayout() {
         int w = getWidth();
@@ -240,18 +188,10 @@ public class DashboardView extends JPanel {
                 cardsGrid.setLayout(new GridLayout(2, 2, 12, 12));
                 cardsGrid.revalidate();
             }
-            if (lowerPanel != null && ((GridLayout) lowerPanel.getLayout()).getRows() != 2) {
-                lowerPanel.setLayout(new GridLayout(2, 1, 14, 14));
-                lowerPanel.revalidate();
-            }
         } else {
             if (cardsGrid != null && ((GridLayout) cardsGrid.getLayout()).getRows() != 1) {
                 cardsGrid.setLayout(new GridLayout(1, 4, 14, 0));
                 cardsGrid.revalidate();
-            }
-            if (lowerPanel != null && ((GridLayout) lowerPanel.getLayout()).getRows() != 1) {
-                lowerPanel.setLayout(new GridLayout(1, 2, 16, 0));
-                lowerPanel.revalidate();
             }
         }
     }
