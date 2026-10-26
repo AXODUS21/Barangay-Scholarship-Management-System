@@ -7,6 +7,7 @@ import com.barangay.scholarship.datastructures.ScholarshipQueue;
 import com.barangay.scholarship.model.*;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.util.FileUploadManager;
+import com.barangay.scholarship.util.ValidationUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -44,6 +45,7 @@ public class TestRunner {
         runTest("Document Checklist Digital File Tracking", TestRunner::testDocumentChecklistWithFiles);
         runTest("File Upload Manager & Storage Persistence", TestRunner::testFileUploadManager);
         runTest("Applicant Registration with Document Attachments", TestRunner::testRegisterApplicantWithFileUploads);
+        runTest("Applicant Form Validation & Anti-Gibberish Rules", TestRunner::testFormValidationRules);
 
         System.out.println("\n-----------------------------------------------------------------");
         System.out.printf("TEST SUMMARY: %d Passed, %d Failed (Total: %d)%n", passed, failed, (passed + failed));
@@ -423,5 +425,40 @@ public class TestRunner {
         } finally {
             if (dummyFile.exists()) dummyFile.delete();
         }
+    }
+
+    // 17. Applicant Form Validation & Anti-Gibberish Rules Test
+    private static void testFormValidationRules() {
+        // Full Name Validation
+        assertTrue(ValidationUtils.validateFullName("fewfewf") != null, "Gibberish name should be rejected");
+        assertTrue(ValidationUtils.validateFullName("aaaaaaa") != null, "Repeated character name should be rejected");
+        assertTrue(ValidationUtils.validateFullName("x") != null, "Too short name should be rejected");
+        assertTrue(ValidationUtils.validateFullName("JustOneWord") != null, "Single word name without surname should be rejected");
+        assertTrue(ValidationUtils.validateFullName("A".repeat(80)) != null, "Excessively long name should be rejected");
+        assertTrue(ValidationUtils.validateFullName("Dela Cruz, Juan M.") == null, "Valid Filipino name with comma should pass");
+        assertTrue(ValidationUtils.validateFullName("Maria Santos") == null, "Valid Filipino name with space should pass");
+
+        // Email Validation
+        assertTrue(ValidationUtils.validateEmail("fewfew") != null, "Nonsense email without domain should be rejected");
+        assertTrue(ValidationUtils.validateEmail("test@") != null, "Incomplete email should be rejected");
+        assertTrue(ValidationUtils.validateEmail("a".repeat(80) + "@school.edu") != null, "Excessively long email should be rejected");
+        assertTrue(ValidationUtils.validateEmail("student@school.edu.ph") == null, "Valid institutional email should pass");
+        assertTrue(ValidationUtils.validateEmail("maria.delacruz@gmail.com") == null, "Valid standard email should pass");
+
+        // Contact Number (Mobile) Validation
+        assertTrue(ValidationUtils.validatePhone("ewfewfew") != null, "Nonsense letters in phone should be rejected");
+        assertTrue(ValidationUtils.validatePhone("12345") != null, "Short number should be rejected");
+        assertTrue(ValidationUtils.validatePhone("08123456789") != null, "Non-09 starting number should be rejected");
+        assertTrue(ValidationUtils.validatePhone("09171234567") == null, "Valid 0917 standard 11-digit mobile should pass");
+        assertTrue(ValidationUtils.validatePhone("0918-123-4567") == null, "Formatted mobile with dashes should pass");
+        assertTrue(ValidationUtils.validatePhone("+639171234567") == null, "International format +639 should pass");
+
+        // School / University Validation
+        assertTrue(ValidationUtils.validateSchool("fewfwef") != null, "Gibberish school name should be rejected");
+        assertTrue(ValidationUtils.validateSchool("zzzzzzz") != null, "Repeated character school name should be rejected");
+        assertTrue(ValidationUtils.validateSchool("ab") != null, "Too short school name should be rejected");
+        assertTrue(ValidationUtils.validateSchool("A".repeat(100)) != null, "Excessively long school name should be rejected");
+        assertTrue(ValidationUtils.validateSchool("University of the Philippines Diliman") == null, "Valid university name should pass");
+        assertTrue(ValidationUtils.validateSchool("Batangas State University - Alangilan (TNEU)") == null, "Valid university with symbols should pass");
     }
 }

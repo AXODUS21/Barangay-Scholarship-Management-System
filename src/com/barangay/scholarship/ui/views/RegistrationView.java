@@ -6,6 +6,7 @@ import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
 import com.barangay.scholarship.ui.components.ModernTable;
 import com.barangay.scholarship.util.FileUploadManager;
+import com.barangay.scholarship.util.ValidationUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -267,8 +268,42 @@ public class RegistrationView extends JPanel {
         String year = (String) cmbYear.getSelectedItem();
         String purok = (String) cmbPurok.getSelectedItem();
 
+        // 1. Mandatory presence check
         if (name.isEmpty() || school.isEmpty() || txtGwa.getText().trim().isEmpty() || txtIncome.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields (Name, School, GWA, Income).", "Incomplete Form", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 2. Strict Input Validation (Gibberish, Length & Type Checks)
+        String nameErr = ValidationUtils.validateFullName(name);
+        if (nameErr != null) {
+            JOptionPane.showMessageDialog(this, nameErr, "Invalid Full Name", JOptionPane.WARNING_MESSAGE);
+            txtName.requestFocusInWindow();
+            return;
+        }
+
+        if (!email.isEmpty()) {
+            String emailErr = ValidationUtils.validateEmail(email);
+            if (emailErr != null) {
+                JOptionPane.showMessageDialog(this, emailErr, "Invalid Email Address", JOptionPane.WARNING_MESSAGE);
+                txtEmail.requestFocusInWindow();
+                return;
+            }
+        }
+
+        if (!phone.isEmpty()) {
+            String phoneErr = ValidationUtils.validatePhone(phone);
+            if (phoneErr != null) {
+                JOptionPane.showMessageDialog(this, phoneErr, "Invalid Contact Number", JOptionPane.WARNING_MESSAGE);
+                txtPhone.requestFocusInWindow();
+                return;
+            }
+        }
+
+        String schoolErr = ValidationUtils.validateSchool(school);
+        if (schoolErr != null) {
+            JOptionPane.showMessageDialog(this, schoolErr, "Invalid School / University", JOptionPane.WARNING_MESSAGE);
+            txtSchool.requestFocusInWindow();
             return;
         }
 
@@ -279,6 +314,18 @@ public class RegistrationView extends JPanel {
             income = Double.parseDouble(txtIncome.getText().trim());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "GWA and Income must be valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (gwa < 1.0 || (gwa > 5.0 && gwa < 60.0) || gwa > 100.0) {
+            JOptionPane.showMessageDialog(this, "Please enter a realistic GWA scale (1.00 - 5.00 collegiate or 75 - 100 percentage).", "Invalid GWA Scale", JOptionPane.WARNING_MESSAGE);
+            txtGwa.requestFocusInWindow();
+            return;
+        }
+
+        if (income < 0 || income > 1000000.0) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid monthly household income (₱0 - ₱1,000,000).", "Invalid Income", JOptionPane.WARNING_MESSAGE);
+            txtIncome.requestFocusInWindow();
             return;
         }
 
