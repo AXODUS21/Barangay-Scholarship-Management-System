@@ -242,8 +242,8 @@ public class DisbursementView extends JPanel {
                 Theme.createCardBorder()
         ));
 
-        // Top Header
-        JPanel topHeader = new JPanel(new BorderLayout());
+        // Top Header: Title on West, Actions on East with clean spacing
+        JPanel topHeader = new JPanel(new BorderLayout(16, 0));
         topHeader.setOpaque(false);
 
         JPanel titleGrp = new JPanel();
@@ -261,9 +261,9 @@ public class DisbursementView extends JPanel {
         titleGrp.add(lblDetailTitle);
         titleGrp.add(Box.createVerticalStrut(2));
         titleGrp.add(lblDetailSubtitle);
-        topHeader.add(titleGrp, BorderLayout.WEST);
+        topHeader.add(titleGrp, BorderLayout.CENTER);
 
-        JPanel actionGroup = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        JPanel actionGroup = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         actionGroup.setOpaque(false);
 
         lblDetailBadge = new JLabel();
@@ -387,15 +387,15 @@ public class DisbursementView extends JPanel {
             valStatus.setText("CLAIMED on " + s.getFormattedDisbursedDate());
             valStatus.setForeground(Theme.ACCENT_HOVER);
 
-            lblDetailBadge.setText("  STIPEND CLAIMED & DISBURSED  ");
+            lblDetailBadge.setText("  CLAIMED  ");
             lblDetailBadge.setBackground(Theme.ACCENT_BG);
             lblDetailBadge.setForeground(new Color(6, 95, 70));
             lblDetailBadge.setBorder(new CompoundBorder(
                     BorderFactory.createLineBorder(Theme.ACCENT, 1),
-                    new EmptyBorder(4, 10, 4, 10)
+                    new EmptyBorder(4, 8, 4, 8)
             ));
 
-            btnDetailDisburse.setText("Payout Already Claimed");
+            btnDetailDisburse.setText("Claimed");
             btnDetailDisburse.setEnabled(false);
             btnDetailDisburse.setBackground(Theme.ACCENT);
             btnDetailDisburse.setForeground(Color.WHITE);
@@ -403,15 +403,15 @@ public class DisbursementView extends JPanel {
             valStatus.setText("UNCLAIMED (Ready for Payout)");
             valStatus.setForeground(Theme.WARNING);
 
-            lblDetailBadge.setText("  UNCLAIMED — READY FOR DISBURSEMENT  ");
+            lblDetailBadge.setText("  READY FOR PAYOUT  ");
             lblDetailBadge.setBackground(Theme.WARNING_BG);
             lblDetailBadge.setForeground(Theme.WARNING);
             lblDetailBadge.setBorder(new CompoundBorder(
                     BorderFactory.createLineBorder(Theme.WARNING, 1),
-                    new EmptyBorder(4, 10, 4, 10)
+                    new EmptyBorder(4, 8, 4, 8)
             ));
 
-            btnDetailDisburse.setText("Disburse Stipend (" + s.getFormattedGrant() + ")");
+            btnDetailDisburse.setText("Disburse (" + s.getFormattedGrant() + ")");
             btnDetailDisburse.setEnabled(true);
             btnDetailDisburse.setBackground(Theme.ACCENT);
             btnDetailDisburse.setForeground(Color.WHITE);
