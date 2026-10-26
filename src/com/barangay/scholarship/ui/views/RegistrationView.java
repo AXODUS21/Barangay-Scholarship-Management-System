@@ -199,6 +199,7 @@ public class RegistrationView extends JPanel {
         formScroll.setBorder(null);
         formScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         formScroll.getViewport().setBackground(Color.WHITE);
+        Theme.enableSmoothMouseWheel(formScroll);
         formCard.add(formScroll, BorderLayout.CENTER);
         formCard.setMinimumSize(new Dimension(320, 320));
 

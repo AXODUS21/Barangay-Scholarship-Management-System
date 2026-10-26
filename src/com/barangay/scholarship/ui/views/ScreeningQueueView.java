@@ -261,6 +261,7 @@ public class ScreeningQueueView extends JPanel {
         chkScroll.setBorder(null);
         chkScroll.setOpaque(false);
         chkScroll.getViewport().setOpaque(false);
+        Theme.enableSmoothMouseWheel(chkScroll);
         inspectorCard.add(chkScroll, BorderLayout.CENTER);
 
         // Action Buttons

@@ -183,7 +183,58 @@ public class Theme {
         sp.getViewport().setBackground(BG_APP);
         sp.getVerticalScrollBar().setUnitIncrement(16);
         sp.getHorizontalScrollBar().setUnitIncrement(16);
+        enableSmoothMouseWheel(sp);
         return sp;
+    }
+
+    /**
+     * Recursively enables mouse and trackpad wheel scrolling so that events occurring
+     * on child components (such as text fields, checkboxes, labels, and panels)
+     * properly scroll the enclosing JScrollPane.
+     */
+    public static void enableSmoothMouseWheel(JScrollPane scrollPane) {
+        if (scrollPane == null) return;
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+
+        java.awt.event.ContainerListener containerListener = new java.awt.event.ContainerListener() {
+            @Override
+            public void componentAdded(java.awt.event.ContainerEvent e) {
+                attachWheelRecursively(e.getChild(), scrollPane, this);
+            }
+            @Override
+            public void componentRemoved(java.awt.event.ContainerEvent e) {}
+        };
+
+        if (scrollPane.getViewport() != null) {
+            Component view = scrollPane.getViewport().getView();
+            if (view != null) {
+                attachWheelRecursively(view, scrollPane, containerListener);
+            }
+            scrollPane.getViewport().addContainerListener(containerListener);
+        }
+    }
+
+    private static void attachWheelRecursively(Component comp, JScrollPane scrollPane, java.awt.event.ContainerListener listener) {
+        if (comp == null || comp == scrollPane) return;
+
+        // If the component is another JScrollPane, do not cross boundary
+        if (comp instanceof JScrollPane && comp != scrollPane) {
+            return;
+        }
+
+        // Add mouse wheel listener forwarding event to the target scrollpane
+        comp.addMouseWheelListener(e -> {
+            scrollPane.dispatchEvent(SwingUtilities.convertMouseEvent(comp, e, scrollPane));
+        });
+
+        if (comp instanceof Container) {
+            Container c = (Container) comp;
+            c.addContainerListener(listener);
+            for (Component child : c.getComponents()) {
+                attachWheelRecursively(child, scrollPane, listener);
+            }
+        }
     }
 
     public static JSplitPane createSplitPane(int orientation, Component left, Component right, double resizeWeight) {
