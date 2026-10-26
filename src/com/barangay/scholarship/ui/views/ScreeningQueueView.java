@@ -463,7 +463,7 @@ public class ScreeningQueueView extends JPanel {
         if (status == ApplicationStatus.VERIFIED) {
             lblStatusBadge.setText("  ✓ VERIFIED — READY FOR RANKING  ");
             lblStatusBadge.setBackground(Theme.ACCENT_BG);
-            lblStatusBadge.setForeground(Theme.ACCENT_HOVER);
+            lblStatusBadge.setForeground(new Color(6, 95, 70));
             lblStatusBadge.setBorder(new CompoundBorder(
                     BorderFactory.createLineBorder(Theme.ACCENT, 1),
                     new EmptyBorder(3, 8, 3, 8)
@@ -519,8 +519,8 @@ public class ScreeningQueueView extends JPanel {
             if (allChecked) {
                 btnVerifyApprove.setText("✓ Verified (Ready for Ranking)");
                 btnVerifyApprove.setEnabled(false);
-                btnVerifyApprove.setBackground(new Color(226, 232, 240));
-                btnVerifyApprove.setForeground(new Color(100, 116, 139));
+                btnVerifyApprove.setBackground(Theme.ACCENT);
+                btnVerifyApprove.setForeground(Color.WHITE);
             } else {
                 // User unchecked a document -> allow updating to pending
                 btnVerifyApprove.setText("Update Checklist (Mark Pending)");

@@ -56,21 +56,48 @@ public class Theme {
         return new EmptyBorder(16, 20, 20, 20);
     }
 
+    public static boolean isDarkColor(Color c) {
+        if (c == null) return false;
+        double luminance = (0.299 * c.getRed() + 0.587 * c.getGreen() + 0.114 * c.getBlue()) / 255.0;
+        return luminance < 0.65;
+    }
+
     public static JButton createStyledButton(String text, Color bg, Color fg) {
         JButton btn = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
-                Graphics2D buttonGraphics = (Graphics2D) g.create();
+                Graphics2D g2 = (Graphics2D) g.create();
                 try {
-                    Color buttonColor = getModel().isPressed() && getModel().isArmed()
-                            ? bg.darker()
-                            : bg;
-                    buttonGraphics.setColor(buttonColor);
-                    buttonGraphics.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                    Color currentBg = getBackground() != null ? getBackground() : bg;
+                    Color fill = (getModel().isPressed() && getModel().isArmed())
+                            ? currentBg.darker()
+                            : currentBg;
+
+                    g2.setColor(fill);
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+
+                    Color currentBorder = currentBg.darker();
+                    g2.setColor(currentBorder);
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+
+                    Color textFg = getForeground() != null ? getForeground() : fg;
+                    if (!isEnabled()) {
+                        boolean isDark = isDarkColor(fill);
+                        textFg = isDark ? Color.WHITE : new Color(148, 163, 184);
+                    }
+
+                    g2.setFont(getFont());
+                    g2.setColor(textFg);
+                    FontMetrics fm = g2.getFontMetrics();
+                    int textX = (getWidth() - fm.stringWidth(getText())) / 2;
+                    int textY = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                    g2.drawString(getText(), textX, textY);
                 } finally {
-                    buttonGraphics.dispose();
+                    g2.dispose();
                 }
-                super.paintComponent(g);
             }
         };
         btn.setFont(FONT_BODY_BOLD);
@@ -78,10 +105,7 @@ public class Theme {
         btn.setForeground(fg);
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
-        btn.setBorder(new CompoundBorder(
-                new LineBorder(bg.darker(), 1, true),
-                new EmptyBorder(8, 16, 8, 16)
-        ));
+        btn.setBorder(new EmptyBorder(8, 16, 8, 16));
         btn.setOpaque(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
