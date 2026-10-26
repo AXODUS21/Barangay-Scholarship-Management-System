@@ -1,20 +1,26 @@
 package com.barangay.scholarship.ui.views;
 
 import com.barangay.scholarship.model.Applicant;
+import com.barangay.scholarship.model.DocumentChecklist;
+import com.barangay.scholarship.model.Scholar;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
 import com.barangay.scholarship.ui.components.ModernTable;
 import com.barangay.scholarship.ui.components.StatCard;
+import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
 /**
  * Dedicated Applicant Registry View displaying the master database of registered applicants.
- * Full width, stretched table with search, counts, and reactive synchronization.
+ * Full width, stretched table with search, counts, reactive synchronization,
+ * and a detailed inspection card when a row is selected.
  */
 public class ApplicantRegistryView extends JPanel {
     private final ScholarshipManager manager;
@@ -23,10 +29,19 @@ public class ApplicantRegistryView extends JPanel {
     private StatCard cardTotalApplicants;
     private StatCard cardVerifiedApplicants;
 
+    // Search & Filter
+    private JTextField txtSearch;
+
+    // Selected Applicant Detail Panel
+    private JPanel detailCard;
+    private JLabel lblDetailTitle;
+    private JLabel lblDetailSubtitle;
+    private JLabel valId, valName, valContact, valSchool, valYear, valPurok, valGwa, valIncome, valStatus;
+    private JPanel docBadgesPanel;
+
     // Table
     private DefaultTableModel regTableModel;
     private ModernTable regTable;
-    private JTextField txtSearch;
 
     public ApplicantRegistryView(ScholarshipManager manager) {
         this.manager = manager;
@@ -103,6 +118,11 @@ public class ApplicantRegistryView extends JPanel {
         centerPanel.add(toolbarCard);
         centerPanel.add(Box.createVerticalStrut(14));
 
+        // Middle: Selected Row Information Inspection Card (initially visible or showing placeholder)
+        detailCard = createDetailInspectionCard();
+        detailCard.setVisible(false); // Shown when a row is selected
+        centerPanel.add(detailCard);
+
         // Table Card: Full Width
         JPanel tableCard = Theme.createCardPanel();
         JLabel tableTitle = new JLabel("All Applicant Intake Records");
@@ -115,6 +135,22 @@ public class ApplicantRegistryView extends JPanel {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         regTable = new ModernTable(regTableModel);
+        regTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Row selection listener to update detail panel
+        regTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = regTable.getSelectedRow();
+                if (row >= 0 && row < regTableModel.getRowCount()) {
+                    String appId = (String) regTableModel.getValueAt(row, 0);
+                    Applicant selected = manager.findApplicantById(appId);
+                    if (selected != null) {
+                        displayApplicantDetails(selected);
+                    }
+                }
+            }
+        });
+
         JScrollPane tblScroll = ModernTable.createScrollPane(regTable);
 
         tableCard.add(tableTitle, BorderLayout.NORTH);
@@ -122,6 +158,182 @@ public class ApplicantRegistryView extends JPanel {
         centerPanel.add(tableCard);
 
         add(centerPanel, BorderLayout.CENTER);
+    }
+
+    private JPanel createDetailInspectionCard() {
+        JPanel card = Theme.createCardPanel();
+        card.setLayout(new BorderLayout(12, 12));
+        card.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(16, 20, 16, 20)
+        ));
+
+        // Header with close button
+        JPanel topHeader = new JPanel(new BorderLayout());
+        topHeader.setOpaque(false);
+
+        JPanel titleGrp = new JPanel();
+        titleGrp.setOpaque(false);
+        titleGrp.setLayout(new BoxLayout(titleGrp, BoxLayout.Y_AXIS));
+
+        lblDetailTitle = new JLabel("Selected Applicant Information");
+        lblDetailTitle.setFont(Theme.FONT_HEADER_MD);
+        lblDetailTitle.setForeground(Theme.TEXT_TITLE);
+
+        lblDetailSubtitle = new JLabel("Full student profile, academic metrics, and verified requirements");
+        lblDetailSubtitle.setFont(Theme.FONT_SMALL);
+        lblDetailSubtitle.setForeground(Theme.TEXT_MUTED);
+
+        titleGrp.add(lblDetailTitle);
+        titleGrp.add(Box.createVerticalStrut(2));
+        titleGrp.add(lblDetailSubtitle);
+        topHeader.add(titleGrp, BorderLayout.WEST);
+
+        JButton btnClose = new JButton("✕ Close Details");
+        btnClose.setFont(Theme.FONT_SMALL_BOLD);
+        btnClose.setForeground(Theme.TEXT_MUTED);
+        btnClose.setFocusPainted(false);
+        btnClose.addActionListener(e -> {
+            detailCard.setVisible(false);
+            regTable.clearSelection();
+            revalidate();
+            repaint();
+        });
+        topHeader.add(btnClose, BorderLayout.EAST);
+
+        card.add(topHeader, BorderLayout.NORTH);
+
+        // Body: Information Fields (3 columns for spacious text and zero clipping)
+        JPanel body = new JPanel(new GridLayout(3, 3, 20, 10));
+        body.setOpaque(false);
+
+        valId = new JLabel("-");
+        valName = new JLabel("-");
+        valContact = new JLabel("-");
+        valSchool = new JLabel("-");
+        valYear = new JLabel("-");
+        valPurok = new JLabel("-");
+        valGwa = new JLabel("-");
+        valIncome = new JLabel("-");
+        valStatus = new JLabel("-");
+
+        body.add(createDetailField("APPLICANT ID", valId));
+        body.add(createDetailField("FULL NAME", valName));
+        body.add(createDetailField("CONTACT & EMAIL", valContact));
+        body.add(createDetailField("SCHOOL / UNIVERSITY", valSchool));
+        body.add(createDetailField("YEAR LEVEL", valYear));
+        body.add(createDetailField("BARANGAY PUROK", valPurok));
+        body.add(createDetailField("ACADEMIC GWA", valGwa));
+        body.add(createDetailField("MONTHLY FAMILY INCOME", valIncome));
+        body.add(createDetailField("PIPELINE STATUS", valStatus));
+
+        JPanel centerArea = new JPanel();
+        centerArea.setOpaque(false);
+        centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
+        centerArea.add(body);
+        centerArea.add(Box.createVerticalStrut(12));
+
+        // Documents Attached Bar
+        JPanel docRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        docRow.setOpaque(false);
+
+        JLabel lblDocsTitle = new JLabel("Attached Documents:");
+        lblDocsTitle.setFont(Theme.FONT_SMALL_BOLD);
+        lblDocsTitle.setForeground(Theme.TEXT_MUTED);
+        docRow.add(lblDocsTitle);
+
+        docBadgesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        docBadgesPanel.setOpaque(false);
+        docRow.add(docBadgesPanel);
+
+        centerArea.add(docRow);
+        card.add(centerArea, BorderLayout.CENTER);
+
+        return card;
+    }
+
+    private JPanel createDetailField(String label, JLabel valLabel) {
+        JPanel p = new JPanel();
+        p.setOpaque(false);
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(Theme.FONT_SMALL_BOLD);
+        lbl.setForeground(Theme.TEXT_MUTED);
+
+        valLabel.setFont(Theme.FONT_BODY_BOLD);
+        valLabel.setForeground(Theme.TEXT_TITLE);
+
+        p.add(lbl);
+        p.add(Box.createVerticalStrut(2));
+        p.add(valLabel);
+        return p;
+    }
+
+    private void displayApplicantDetails(Applicant a) {
+        lblDetailTitle.setText(a.getFullName() + " (" + a.getApplicantId() + ")");
+        String subText = "Registered: " + a.getFormattedDate() + " • ";
+        if (a instanceof Scholar) {
+            Scholar s = (Scholar) a;
+            subText += "Approved Scholar [ID: " + s.getScholarId() + "] • Grant: ₱" + String.format("%,.2f", s.getGrantAmount());
+        } else {
+            subText += a.getEligibilityReason();
+        }
+        lblDetailSubtitle.setText(subText);
+
+        valId.setText(a.getApplicantId());
+        valName.setText(a.getFullName());
+        valContact.setText(a.getContactNumber() + " | " + a.getEmail());
+        valSchool.setText(a.getSchool());
+        valYear.setText(a.getYearLevel());
+        valPurok.setText(a.getPurok());
+        valGwa.setText(a.getFormattedGwa() + (a.isCollegeScale() ? " (Collegiate)" : " (%)"));
+        valIncome.setText(a.getFormattedIncome() + " / mo");
+        valStatus.setText(a.getStatus().getDisplayName());
+
+        // Update Document Badges & View Links
+        docBadgesPanel.removeAll();
+        DocumentChecklist docs = a.getDocuments();
+
+        addDocBadge("Certificate of Indigency", docs.isCertificateOfIndigency(), docs.getIndigencyFilePath());
+        addDocBadge("Copy of Grades / TOR", docs.isCertifiedCopyOfGrades(), docs.getGradesFilePath());
+        addDocBadge("Enrollment Form (COR)", docs.isEnrollmentForm(), docs.getEnrollmentFilePath());
+        addDocBadge("Valid ID", docs.isValidBarangayOrSchoolId(), docs.getIdFilePath());
+
+        docBadgesPanel.revalidate();
+        docBadgesPanel.repaint();
+
+        detailCard.setVisible(true);
+        revalidate();
+        repaint();
+    }
+
+    private void addDocBadge(String name, boolean verified, String filePath) {
+        boolean hasFile = (filePath != null && !filePath.trim().isEmpty());
+        JButton badge = new JButton((verified ? "✓ " : "✕ ") + name + (hasFile ? " [View File]" : ""));
+        badge.setFont(Theme.FONT_SMALL);
+        badge.setFocusPainted(false);
+        badge.setMargin(new Insets(2, 6, 2, 6));
+
+        if (verified) {
+            badge.setForeground(new Color(4, 120, 87));
+            badge.setBackground(Theme.ACCENT_BG);
+            badge.setBorder(BorderFactory.createLineBorder(new Color(167, 243, 208), 1));
+        } else {
+            badge.setForeground(Theme.TEXT_MUTED);
+            badge.setBackground(new Color(241, 245, 249));
+            badge.setBorder(BorderFactory.createLineBorder(Theme.BORDER, 1));
+        }
+
+        if (hasFile) {
+            badge.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            badge.setToolTipText("Click to view uploaded attachment: " + filePath);
+            badge.addActionListener(e -> FileUploadManager.openFile(this, filePath));
+        } else {
+            badge.setEnabled(verified);
+        }
+
+        docBadgesPanel.add(badge);
     }
 
     public void refreshTable() {
