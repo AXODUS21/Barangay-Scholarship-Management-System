@@ -38,6 +38,7 @@ public class ApplicantRegistryView extends JPanel {
     private JLabel lblDetailSubtitle;
     private JLabel valId, valName, valContact, valSchool, valYear, valPurok, valGwa, valIncome, valStatus;
     private JPanel docBadgesPanel;
+    private Applicant currentSelectedApplicant;
 
     // Table
     private DefaultTableModel regTableModel;
@@ -99,6 +100,16 @@ public class ApplicantRegistryView extends JPanel {
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
         txtSearch = new JTextField(16);
         txtSearch.setPreferredSize(new Dimension(180, 32));
+        txtSearch.setToolTipText("Type to filter live in real-time");
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+        });
+        txtSearch.addActionListener(e -> applyFilter());
 
         JButton btnFilter = new JButton("Filter");
         btnFilter.addActionListener(e -> applyFilter());
@@ -195,6 +206,7 @@ public class ApplicantRegistryView extends JPanel {
         btnClose.setFocusPainted(false);
         btnClose.addActionListener(e -> {
             detailCard.setVisible(false);
+            currentSelectedApplicant = null;
             regTable.clearSelection();
             revalidate();
             repaint();
@@ -271,6 +283,7 @@ public class ApplicantRegistryView extends JPanel {
     }
 
     private void displayApplicantDetails(Applicant a) {
+        this.currentSelectedApplicant = a;
         lblDetailTitle.setText(a.getFullName() + " (" + a.getApplicantId() + ")");
         String subText = "Registered: " + a.getFormattedDate() + " • ";
         if (a instanceof Scholar) {
@@ -344,7 +357,7 @@ public class ApplicantRegistryView extends JPanel {
     private void applyFilter() {
         String query = txtSearch.getText().trim().toLowerCase();
         if (query.isEmpty()) {
-            refreshTable();
+            populateTable(manager.getMasterList());
             return;
         }
 
@@ -354,7 +367,11 @@ public class ApplicantRegistryView extends JPanel {
                     || a.getFullName().toLowerCase().contains(query)
                     || a.getPurok().toLowerCase().contains(query)
                     || a.getSchool().toLowerCase().contains(query)
-                    || a.getStatus().getDisplayName().toLowerCase().contains(query)) {
+                    || a.getYearLevel().toLowerCase().contains(query)
+                    || a.getEmail().toLowerCase().contains(query)
+                    || a.getContactNumber().toLowerCase().contains(query)
+                    || a.getStatus().getDisplayName().toLowerCase().contains(query)
+                    || a.getStatus().name().toLowerCase().contains(query)) {
                 filtered.add(a);
             }
         }
@@ -362,8 +379,17 @@ public class ApplicantRegistryView extends JPanel {
     }
 
     private void populateTable(List<Applicant> list) {
+        String selectedId = (currentSelectedApplicant != null) ? currentSelectedApplicant.getApplicantId() : null;
         regTableModel.setRowCount(0);
-        for (Applicant a : list) {
+        int reselectRow = -1;
+        Applicant reselectApp = null;
+
+        for (int i = 0; i < list.size(); i++) {
+            Applicant a = list.get(i);
+            if (selectedId != null && selectedId.equals(a.getApplicantId())) {
+                reselectRow = i;
+                reselectApp = a;
+            }
             regTableModel.addRow(new Object[]{
                     a.getApplicantId(),
                     a.getFullName(),
@@ -374,6 +400,14 @@ public class ApplicantRegistryView extends JPanel {
                     a.getYearLevel(),
                     a.getStatus()
             });
+        }
+
+        if (reselectRow >= 0 && reselectApp != null) {
+            regTable.setRowSelectionInterval(reselectRow, reselectRow);
+            displayApplicantDetails(reselectApp);
+        } else if (list.isEmpty() || currentSelectedApplicant != null) {
+            detailCard.setVisible(false);
+            currentSelectedApplicant = null;
         }
     }
 

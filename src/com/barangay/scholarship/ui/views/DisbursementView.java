@@ -110,6 +110,17 @@ public class DisbursementView extends JPanel {
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
         txtSearch = new JTextField(14);
         txtSearch.setPreferredSize(new Dimension(160, 32));
+        txtSearch.setToolTipText("Type to filter live in real-time");
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+        });
+        txtSearch.addActionListener(e -> applyFilter());
+
         JButton btnSearch = new JButton("Filter");
         btnSearch.addActionListener(e -> applyFilter());
         JButton btnReset = new JButton("Reset");
