@@ -3,14 +3,18 @@ package com.barangay.scholarship.ui.views;
 import com.barangay.scholarship.algorithms.AlgorithmUtils;
 import com.barangay.scholarship.datastructures.ScholarBST;
 import com.barangay.scholarship.model.Applicant;
+import com.barangay.scholarship.model.DocumentChecklist;
 import com.barangay.scholarship.model.Scholar;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
 import com.barangay.scholarship.ui.components.ModernTable;
 import com.barangay.scholarship.ui.components.StatCard;
+import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,6 +31,16 @@ public class ScholarDirectoryView extends JPanel {
     // Stat Cards
     private StatCard cardTreeSize;
     private StatCard cardTreeRoot;
+
+    // Selected Scholar Preview Panel
+    private JPanel detailCard;
+    private JLabel lblDetailTitle;
+    private JLabel lblDetailSubtitle;
+    private JLabel lblDetailBadge;
+    private JButton btnDetailDrop;
+    private JLabel valScholarId, valAppId, valName, valContact, valSchool, valYear, valPurok, valGwa, valStatus;
+    private JPanel docBadgesPanel;
+    private Scholar currentSelectedScholar;
 
     // Controls
     private JTextField txtSearchId;
@@ -49,6 +63,10 @@ public class ScholarDirectoryView extends JPanel {
     }
 
     private void initUI() {
+        // Top Container: Header + Full-Width Stats Grid
+        JPanel topPanel = new JPanel(new BorderLayout(0, 14));
+        topPanel.setOpaque(false);
+
         // Header
         JPanel headerPanel = new JPanel();
         headerPanel.setOpaque(false);
@@ -65,15 +83,10 @@ public class ScholarDirectoryView extends JPanel {
         headerPanel.add(title);
         headerPanel.add(Box.createVerticalStrut(4));
         headerPanel.add(subtitle);
-        add(headerPanel, BorderLayout.NORTH);
+        topPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // Center Content
-        JPanel centerPanel = new JPanel();
-        centerPanel.setOpaque(false);
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-
-        // BST Metrics
-        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
+        // BST Metrics - 2 cards spanning 50% each with no trailing gap
+        JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 0));
         statsGrid.setOpaque(false);
 
         cardTreeSize = new StatCard("BST Active Nodes", "0 Scholars", "Indexed in Binary Search Tree", Theme.PRIMARY);
@@ -81,8 +94,14 @@ public class ScholarDirectoryView extends JPanel {
 
         statsGrid.add(cardTreeSize);
         statsGrid.add(cardTreeRoot);
-        centerPanel.add(statsGrid);
-        centerPanel.add(Box.createVerticalStrut(14));
+        topPanel.add(statsGrid, BorderLayout.CENTER);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // Center Content
+        JPanel centerPanel = new JPanel();
+        centerPanel.setOpaque(false);
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // Toolbar Card: Search + Traversal Selector + Drop Scholar Button
         JPanel toolbarCard = Theme.createCardPanel();
@@ -127,11 +146,20 @@ public class ScholarDirectoryView extends JPanel {
         toolRow.add(btnReset);
 
         toolbarCard.add(toolRow, BorderLayout.CENTER);
+        toolbarCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        toolbarCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, toolbarCard.getPreferredSize().height));
         centerPanel.add(toolbarCard);
         centerPanel.add(Box.createVerticalStrut(14));
 
+        // Selected Row Preview Dossier Card (Between Toolbar and Directory Table)
+        detailCard = createDetailInspectionCard();
+        detailCard.setVisible(false);
+        detailCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        centerPanel.add(detailCard);
+
         // Directory Table Card
         JPanel tableCard = Theme.createCardPanel();
+        tableCard.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel tblTitle = new JLabel("BST Scholar Directory & Traversal Output");
         tblTitle.setFont(Theme.FONT_HEADER_SM);
         tblTitle.setForeground(Theme.TEXT_TITLE);
@@ -142,13 +170,265 @@ public class ScholarDirectoryView extends JPanel {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         dirTable = new ModernTable(dirTableModel);
-        JScrollPane tblScroll = ModernTable.createScrollPane(dirTable);
 
+        // Status badge styling on column 8: Stipend Status
+        dirTable.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                c.setHorizontalAlignment(SwingConstants.CENTER);
+                c.setFont(Theme.FONT_SMALL_BOLD);
+                String text = (value != null) ? value.toString() : "";
+                if ("CLAIMED".equalsIgnoreCase(text)) {
+                    c.setBackground(isSelected ? Theme.ACCENT : Theme.ACCENT_BG);
+                    c.setForeground(isSelected ? Color.WHITE : new Color(6, 95, 70));
+                } else {
+                    c.setBackground(isSelected ? Theme.WARNING : Theme.WARNING_BG);
+                    c.setForeground(isSelected ? Color.WHITE : Theme.WARNING);
+                }
+                c.setOpaque(true);
+                return c;
+            }
+        });
+
+        dirTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = dirTable.getSelectedRow();
+                if (row >= 0 && row < dirTableModel.getRowCount()) {
+                    String schId = (String) dirTableModel.getValueAt(row, 1);
+                    Scholar s = manager.getScholarDirectory().searchById(schId);
+                    if (s != null) {
+                        displayScholarDetails(s);
+                    }
+                }
+            }
+        });
+
+        JScrollPane tblScroll = ModernTable.createScrollPane(dirTable);
         tableCard.add(tblTitle, BorderLayout.NORTH);
         tableCard.add(tblScroll, BorderLayout.CENTER);
         centerPanel.add(tableCard);
 
         add(centerPanel, BorderLayout.CENTER);
+    }
+
+    private JPanel createDetailInspectionCard() {
+        JPanel card = Theme.createCardPanel();
+        card.setLayout(new BorderLayout(0, 10));
+        card.setBorder(new CompoundBorder(
+                new EmptyBorder(0, 0, 14, 0),
+                Theme.createCardBorder()
+        ));
+
+        // Top Header
+        JPanel topHeader = new JPanel(new BorderLayout());
+        topHeader.setOpaque(false);
+
+        JPanel titleGrp = new JPanel();
+        titleGrp.setOpaque(false);
+        titleGrp.setLayout(new BoxLayout(titleGrp, BoxLayout.Y_AXIS));
+
+        lblDetailTitle = new JLabel("SCHOLAR DIRECTORY & BST NODE DOSSIER");
+        lblDetailTitle.setFont(Theme.FONT_HEADER_MD);
+        lblDetailTitle.setForeground(Theme.TEXT_TITLE);
+
+        lblDetailSubtitle = new JLabel("Official scholarship profile, academic standing, and verified documents");
+        lblDetailSubtitle.setFont(Theme.FONT_SMALL);
+        lblDetailSubtitle.setForeground(Theme.TEXT_MUTED);
+
+        titleGrp.add(lblDetailTitle);
+        titleGrp.add(Box.createVerticalStrut(2));
+        titleGrp.add(lblDetailSubtitle);
+        topHeader.add(titleGrp, BorderLayout.WEST);
+
+        JPanel actionGroup = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        actionGroup.setOpaque(false);
+
+        lblDetailBadge = new JLabel();
+        lblDetailBadge.setFont(Theme.FONT_SMALL_BOLD);
+        lblDetailBadge.setOpaque(true);
+        actionGroup.add(lblDetailBadge);
+
+        btnDetailDrop = Theme.createStyledButton("Drop & Promote Waitlist", Theme.DANGER, Color.WHITE);
+        btnDetailDrop.addActionListener(e -> {
+            if (currentSelectedScholar != null) {
+                dropScholar(currentSelectedScholar);
+            }
+        });
+        actionGroup.add(btnDetailDrop);
+
+        JButton btnClose = new JButton("✕ Close Preview");
+        btnClose.setFont(Theme.FONT_SMALL_BOLD);
+        btnClose.setForeground(Theme.TEXT_MUTED);
+        btnClose.setFocusPainted(false);
+        btnClose.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnClose.addActionListener(e -> {
+            detailCard.setVisible(false);
+            currentSelectedScholar = null;
+            dirTable.clearSelection();
+            revalidate();
+            repaint();
+        });
+        actionGroup.add(btnClose);
+
+        topHeader.add(actionGroup, BorderLayout.EAST);
+        card.add(topHeader, BorderLayout.NORTH);
+
+        // Body: 3x3 Grid
+        JPanel body = new JPanel(new GridLayout(3, 3, 20, 10));
+        body.setOpaque(false);
+
+        valScholarId = new JLabel("-");
+        valAppId = new JLabel("-");
+        valName = new JLabel("-");
+        valContact = new JLabel("-");
+        valSchool = new JLabel("-");
+        valYear = new JLabel("-");
+        valPurok = new JLabel("-");
+        valGwa = new JLabel("-");
+        valStatus = new JLabel("-");
+
+        body.add(createDetailField("SCHOLAR ID", valScholarId));
+        body.add(createDetailField("APPLICANT ID", valAppId));
+        body.add(createDetailField("FULL NAME", valName));
+        body.add(createDetailField("CONTACT & EMAIL", valContact));
+        body.add(createDetailField("SCHOOL / UNIVERSITY", valSchool));
+        body.add(createDetailField("YEAR LEVEL", valYear));
+        body.add(createDetailField("BARANGAY PUROK", valPurok));
+        body.add(createDetailField("ACADEMIC GWA", valGwa));
+        body.add(createDetailField("STIPEND STATUS", valStatus));
+
+        JPanel centerArea = new JPanel();
+        centerArea.setOpaque(false);
+        centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
+        centerArea.add(body);
+        centerArea.add(Box.createVerticalStrut(12));
+
+        // Documents Attached Bar
+        JPanel docRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        docRow.setOpaque(false);
+
+        JLabel lblDocsTitle = new JLabel("Verified Requirements:");
+        lblDocsTitle.setFont(Theme.FONT_SMALL_BOLD);
+        lblDocsTitle.setForeground(Theme.TEXT_MUTED);
+        docRow.add(lblDocsTitle);
+
+        docBadgesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        docBadgesPanel.setOpaque(false);
+        docRow.add(docBadgesPanel);
+
+        centerArea.add(docRow);
+        card.add(centerArea, BorderLayout.CENTER);
+
+        return card;
+    }
+
+    private JPanel createDetailField(String label, JLabel valLabel) {
+        JPanel p = new JPanel();
+        p.setOpaque(false);
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(Theme.FONT_SMALL_BOLD);
+        lbl.setForeground(Theme.TEXT_MUTED);
+
+        valLabel.setFont(Theme.FONT_BODY_BOLD);
+        valLabel.setForeground(Theme.TEXT_TITLE);
+
+        p.add(lbl);
+        p.add(Box.createVerticalStrut(2));
+        p.add(valLabel);
+        return p;
+    }
+
+    private void displayScholarDetails(Scholar s) {
+        this.currentSelectedScholar = s;
+        if (s == null) {
+            detailCard.setVisible(false);
+            return;
+        }
+
+        lblDetailTitle.setText(s.getFullName() + " (" + s.getScholarId() + ")");
+        lblDetailSubtitle.setText(String.format("Official Scholar • Term: %s • Grant: %s • %s • %s",
+                s.getSemester(), s.getFormattedGrant(), s.getSchool(), s.getPurok()));
+
+        valScholarId.setText(s.getScholarId());
+        valAppId.setText(s.getApplicantId());
+        valName.setText(s.getFullName());
+        valContact.setText(s.getEmail() + " | " + s.getContactNumber());
+        valSchool.setText(s.getSchool());
+        valYear.setText(s.getYearLevel());
+        valPurok.setText(s.getPurok());
+        valGwa.setText(s.getFormattedGwa());
+
+        if (s.isStipendDisbursed()) {
+            valStatus.setText("✓ CLAIMED on " + s.getFormattedDisbursedDate());
+            valStatus.setForeground(Theme.ACCENT_HOVER);
+
+            lblDetailBadge.setText("  ✓ STIPEND CLAIMED & DISBURSED  ");
+            lblDetailBadge.setBackground(Theme.ACCENT_BG);
+            lblDetailBadge.setForeground(new Color(6, 95, 70));
+            lblDetailBadge.setBorder(new CompoundBorder(
+                    BorderFactory.createLineBorder(Theme.ACCENT, 1),
+                    new EmptyBorder(4, 10, 4, 10)
+            ));
+        } else {
+            valStatus.setText("⏳ UNCLAIMED (Pending Payout)");
+            valStatus.setForeground(Theme.WARNING);
+
+            lblDetailBadge.setText("  ⏳ STIPEND UNCLAIMED  ");
+            lblDetailBadge.setBackground(Theme.WARNING_BG);
+            lblDetailBadge.setForeground(Theme.WARNING);
+            lblDetailBadge.setBorder(new CompoundBorder(
+                    BorderFactory.createLineBorder(Theme.WARNING, 1),
+                    new EmptyBorder(4, 10, 4, 10)
+            ));
+        }
+
+        // Populate doc badges
+        docBadgesPanel.removeAll();
+        DocumentChecklist docs = s.getDocuments();
+        if (docs != null) {
+            addDocBadge("Certificate of Indigency", docs.isCertificateOfIndigency(), docs.getIndigencyFilePath());
+            addDocBadge("Copy of Grades / TOR", docs.isCertifiedCopyOfGrades(), docs.getGradesFilePath());
+            addDocBadge("Enrollment Form (COR)", docs.isEnrollmentForm(), docs.getEnrollmentFilePath());
+            addDocBadge("Valid ID", docs.isValidBarangayOrSchoolId(), docs.getIdFilePath());
+        }
+
+        docBadgesPanel.revalidate();
+        docBadgesPanel.repaint();
+
+        detailCard.setVisible(true);
+        revalidate();
+        repaint();
+    }
+
+    private void addDocBadge(String name, boolean verified, String filePath) {
+        boolean hasFile = (filePath != null && !filePath.trim().isEmpty());
+        JButton badge = new JButton((verified ? "✓ " : "✕ ") + name + (hasFile ? " [View File]" : ""));
+        badge.setFont(Theme.FONT_SMALL);
+        badge.setFocusPainted(false);
+        badge.setMargin(new Insets(2, 6, 2, 6));
+
+        if (verified) {
+            badge.setBackground(Theme.ACCENT_BG);
+            badge.setForeground(Theme.ACCENT_HOVER);
+        } else {
+            badge.setBackground(Theme.WARNING_BG);
+            badge.setForeground(Theme.WARNING);
+        }
+
+        if (hasFile) {
+            badge.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            badge.setToolTipText("Click to view archived digital file");
+            badge.addActionListener(e -> FileUploadManager.openFile(this, filePath));
+        } else {
+            badge.setEnabled(false);
+        }
+
+        docBadgesPanel.add(badge);
     }
 
     private void executeBinarySearch() {
@@ -163,6 +443,8 @@ public class ScholarDirectoryView extends JPanel {
         if (directMatch != null) {
             dirTableModel.setRowCount(0);
             addScholarRow(1, directMatch);
+            dirTable.setRowSelectionInterval(0, 0);
+            displayScholarDetails(directMatch);
             JOptionPane.showMessageDialog(this,
                     String.format("Found Scholar via BST search in O(log n) time:\n\nID: %s\nName: %s\nPurok: %s\nSchool: %s\nStatus: %s",
                             directMatch.getScholarId(), directMatch.getFullName(), directMatch.getPurok(), directMatch.getSchool(),
@@ -181,6 +463,8 @@ public class ScholarDirectoryView extends JPanel {
             Scholar found = (Scholar) appList.get(idx);
             dirTableModel.setRowCount(0);
             addScholarRow(1, found);
+            dirTable.setRowSelectionInterval(0, 0);
+            displayScholarDetails(found);
             JOptionPane.showMessageDialog(this,
                     "Binary Search found matching scholar: " + found.getFullName() + " (" + found.getScholarId() + ")",
                     "Binary Search Result", JOptionPane.INFORMATION_MESSAGE);
@@ -202,6 +486,12 @@ public class ScholarDirectoryView extends JPanel {
         Scholar scholar = manager.getScholarDirectory().searchById(schId);
         if (scholar == null) return;
 
+        dropScholar(scholar);
+    }
+
+    private void dropScholar(Scholar scholar) {
+        if (scholar == null) return;
+
         int waitlistSize = manager.getWaitlistQueue().size();
         Applicant nextWaitlist = manager.getWaitlistQueue().peek();
 
@@ -211,7 +501,7 @@ public class ScholarDirectoryView extends JPanel {
 
         int confirm = JOptionPane.showConfirmDialog(this, prompt, "Confirm Drop & Promotion", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            Scholar promoted = manager.dropScholarAndPromoteWaitlist(schId, "Dropped / Disqualified");
+            Scholar promoted = manager.dropScholarAndPromoteWaitlist(scholar.getScholarId(), "Dropped / Disqualified");
             if (promoted != null) {
                 JOptionPane.showMessageDialog(this,
                         String.format("Scholar %s dropped from BST.\n\nAUTOMATIC PROMOTION TRIGGERED:\n%s was dequeued from Waitlist Queue and promoted to Slot %s!",
@@ -220,6 +510,8 @@ public class ScholarDirectoryView extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(this, "Scholar " + scholar.getFullName() + " dropped from directory.", "Scholar Dropped", JOptionPane.INFORMATION_MESSAGE);
             }
+            detailCard.setVisible(false);
+            currentSelectedScholar = null;
             refreshDirectory();
         }
     }
@@ -261,10 +553,25 @@ public class ScholarDirectoryView extends JPanel {
             list = bst.inOrderTraversal();
         }
 
+        String previouslySelectedScholarId = (currentSelectedScholar != null) ? currentSelectedScholar.getScholarId() : null;
+
         dirTableModel.setRowCount(0);
         int idx = 1;
-        for (Scholar s : list) {
+        int reselectRow = -1;
+        Scholar reselectScholar = null;
+
+        for (int i = 0; i < list.size(); i++) {
+            Scholar s = list.get(i);
+            if (previouslySelectedScholarId != null && previouslySelectedScholarId.equals(s.getScholarId())) {
+                reselectRow = i;
+                reselectScholar = s;
+            }
             addScholarRow(idx++, s);
+        }
+
+        if (reselectRow >= 0 && reselectScholar != null) {
+            dirTable.setRowSelectionInterval(reselectRow, reselectRow);
+            displayScholarDetails(reselectScholar);
         }
     }
 }
