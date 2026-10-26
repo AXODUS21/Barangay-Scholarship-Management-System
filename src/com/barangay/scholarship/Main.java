@@ -28,11 +28,8 @@ public class Main {
         }
 
         SwingUtilities.invokeLater(() -> {
-            // Instantiate service controller
+            // Instantiate service controller (starts fresh with 0 records)
             ScholarshipManager manager = new ScholarshipManager(150000.0, 3000.0);
-
-            // Preload presentation demo dataset (20 realistic Filipino student applicants)
-            SampleDataSeeder.seedDemoData(manager);
 
             // Launch designated portal or default landing gateway
             if (args.length > 0 && "student".equalsIgnoreCase(args[0])) {
