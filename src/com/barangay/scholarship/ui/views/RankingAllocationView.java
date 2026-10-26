@@ -98,24 +98,29 @@ public class RankingAllocationView extends JPanel {
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Controls Card
+        // Controls Card: Responsive GridBagLayout / Wrap-proof header
         JPanel controlsCard = Theme.createCardPanel();
-        JPanel ctrlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
+        JPanel ctrlRow = new JPanel(new GridBagLayout());
         ctrlRow.setOpaque(false);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 6, 4, 6);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
 
         JLabel lblCrit = new JLabel("Ranking Algorithm:");
         lblCrit.setFont(Theme.FONT_BODY_BOLD);
         cmbCriteria = new JComboBox<>(ScholarshipManager.RankingCriteria.values());
-        cmbCriteria.setPreferredSize(new Dimension(240, 32));
+        cmbCriteria.setPreferredSize(new Dimension(210, 32));
         cmbCriteria.addActionListener(e -> previewRanking());
 
         JLabel lblSlots = new JLabel("Max Slots:");
         lblSlots.setFont(Theme.FONT_BODY_BOLD);
         spnSlots = new JSpinner(new SpinnerNumberModel(10, 1, 500, 1));
-        spnSlots.setPreferredSize(new Dimension(65, 32));
+        spnSlots.setPreferredSize(new Dimension(60, 32));
         spnSlots.addChangeListener(e -> previewRanking());
 
-        JButton btnPreview = new JButton("Refresh Ranking");
+        JButton btnPreview = new JButton("Refresh");
         btnPreview.setFont(Theme.FONT_BODY_BOLD);
         btnPreview.addActionListener(e -> previewRanking());
 
@@ -123,12 +128,15 @@ public class RankingAllocationView extends JPanel {
         btnAllocate.setFont(Theme.FONT_BODY_BOLD);
         btnAllocate.addActionListener(e -> executeAllocation());
 
-        ctrlRow.add(lblCrit);
-        ctrlRow.add(cmbCriteria);
-        ctrlRow.add(lblSlots);
-        ctrlRow.add(spnSlots);
-        ctrlRow.add(btnPreview);
-        ctrlRow.add(btnAllocate);
+        gbc.gridx = 0; gbc.gridy = 0; ctrlRow.add(lblCrit, gbc);
+        gbc.gridx = 1; gbc.gridy = 0; ctrlRow.add(cmbCriteria, gbc);
+        gbc.gridx = 2; gbc.gridy = 0; ctrlRow.add(lblSlots, gbc);
+        gbc.gridx = 3; gbc.gridy = 0; ctrlRow.add(spnSlots, gbc);
+        gbc.gridx = 4; gbc.gridy = 0; ctrlRow.add(btnPreview, gbc);
+        gbc.gridx = 5; gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.LINE_END;
+        ctrlRow.add(btnAllocate, gbc);
 
         controlsCard.add(ctrlRow, BorderLayout.CENTER);
         controlsCard.setAlignmentX(Component.CENTER_ALIGNMENT);
