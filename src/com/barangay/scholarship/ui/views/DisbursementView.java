@@ -12,6 +12,7 @@ import com.barangay.scholarship.util.FileUploadManager;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -100,17 +101,31 @@ public class DisbursementView extends JPanel {
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Action Toolbar Card
-        JPanel toolbarCard = Theme.createCardPanel();
-        JPanel toolRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
-        toolRow.setOpaque(false);
+        // Search Toolbar Card: Full-Width Responsive Search Bar for Disbursement
+        JPanel searchCard = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(32767, getPreferredSize().height);
+            }
+        };
+        searchCard.setBackground(Theme.CARD_BG);
+        searchCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        searchCard.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(10, 16, 10, 16)
+        ));
 
-        // Search Bar
+        JPanel searchBar = new JPanel(new BorderLayout(14, 0));
+        searchBar.setOpaque(false);
+
         JLabel lblSearch = new JLabel("Search Scholar:");
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
-        txtSearch = new JTextField(14);
-        txtSearch.setPreferredSize(new Dimension(160, 32));
-        txtSearch.setToolTipText("Type to filter live in real-time");
+        lblSearch.setForeground(Theme.TEXT_TITLE);
+
+        txtSearch = Theme.createRoundedTextField("Search scholars by ID, name, school, purok, or payout status...");
+        txtSearch.setPreferredSize(new Dimension(300, 38));
+        txtSearch.setMaximumSize(new Dimension(32767, 38));
+        txtSearch.setToolTipText("Type to filter scholars live in real-time");
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
@@ -121,48 +136,53 @@ public class DisbursementView extends JPanel {
         });
         txtSearch.addActionListener(e -> applyFilter());
 
-        JButton btnSearch = new JButton("Filter");
+        JButton btnSearch = Theme.createStyledButton("Search", Theme.PRIMARY, Color.WHITE);
+        btnSearch.setFont(Theme.FONT_BODY_BOLD);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
         btnSearch.addActionListener(e -> applyFilter());
-        JButton btnReset = new JButton("Reset");
-        btnReset.addActionListener(e -> {
-            txtSearch.setText("");
-            refreshData();
-        });
 
-        toolRow.add(lblSearch);
-        toolRow.add(txtSearch);
-        toolRow.add(btnSearch);
-        toolRow.add(btnReset);
-        toolRow.add(Box.createHorizontalStrut(12));
+        searchBar.add(lblSearch, BorderLayout.WEST);
+        searchBar.add(txtSearch, BorderLayout.CENTER);
+        searchBar.add(btnSearch, BorderLayout.EAST);
+        searchCard.add(searchBar, BorderLayout.CENTER);
+
+        centerPanel.add(searchCard);
+        centerPanel.add(Box.createVerticalStrut(14));
+
+        // Selected Row Preview Dossier Card (Between Toolbar and Payout Table)
+        detailCard = createDetailInspectionCard();
+        detailCard.setVisible(false);
+        detailCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        centerPanel.add(detailCard);
+
+        // Table Card
+        JPanel tableCard = Theme.createCardPanel();
+        tableCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel tblHeader = new JPanel(new BorderLayout(10, 0));
+        tblHeader.setOpaque(false);
+        tblHeader.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+        JLabel tblTitle = new JLabel("Approved Scholars Payout Masterlist");
+        tblTitle.setFont(Theme.FONT_HEADER_SM);
+        tblTitle.setForeground(Theme.TEXT_TITLE);
+        tblHeader.add(tblTitle, BorderLayout.WEST);
 
         // Disbursement & Export Buttons
+        JPanel tblActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        tblActions.setOpaque(false);
+
         JButton btnClaim = Theme.createStyledButton("Disburse Selected Stipend", Theme.ACCENT, Color.WHITE);
         btnClaim.addActionListener(e -> disburseSelected());
 
         JButton btnExport = Theme.createStyledButton("Export Payout Attendance Sheet", Theme.PRIMARY, Color.WHITE);
         btnExport.addActionListener(e -> exportAttendanceSheet());
 
-        toolRow.add(btnClaim);
-        toolRow.add(btnExport);
+        tblActions.add(btnClaim);
+        tblActions.add(btnExport);
+        tblHeader.add(tblActions, BorderLayout.EAST);
 
-        toolbarCard.add(toolRow, BorderLayout.CENTER);
-        toolbarCard.setAlignmentX(Component.LEFT_ALIGNMENT);
-        toolbarCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, toolbarCard.getPreferredSize().height));
-        centerPanel.add(toolbarCard);
-        centerPanel.add(Box.createVerticalStrut(14));
-
-        // Selected Row Preview Dossier Card (Between Toolbar and Payout Table)
-        detailCard = createDetailInspectionCard();
-        detailCard.setVisible(false);
-        detailCard.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centerPanel.add(detailCard);
-
-        // Table Card
-        JPanel tableCard = Theme.createCardPanel();
-        tableCard.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel tblTitle = new JLabel("Approved Scholars Payout Masterlist");
-        tblTitle.setFont(Theme.FONT_HEADER_SM);
-        tblTitle.setForeground(Theme.TEXT_TITLE);
+        tableCard.add(tblHeader, BorderLayout.NORTH);
 
         String[] cols = {"Scholar ID", "Applicant ID", "Full Name", "Purok/Zone", "School", "Grant Amount", "Disbursement Status", "Claimed Date"};
         payoutTableModel = new DefaultTableModel(cols, 0) {
@@ -454,9 +474,14 @@ public class DisbursementView extends JPanel {
         Scholar reselectScholar = null;
 
         for (Scholar s : list) {
+            String statusStr = s.isStipendDisbursed() ? "claimed" : "unclaimed";
             if (s.getScholarId().toLowerCase().contains(q)
+                    || s.getApplicantId().toLowerCase().contains(q)
                     || s.getFullName().toLowerCase().contains(q)
-                    || s.getPurok().toLowerCase().contains(q)) {
+                    || s.getPurok().toLowerCase().contains(q)
+                    || s.getSchool().toLowerCase().contains(q)
+                    || s.getFormattedGrant().toLowerCase().contains(q)
+                    || statusStr.contains(q)) {
                 if (currentSelectedScholar != null && currentSelectedScholar.getScholarId().equals(s.getScholarId())) {
                     reselectRow = payoutTableModel.getRowCount();
                     reselectScholar = s;

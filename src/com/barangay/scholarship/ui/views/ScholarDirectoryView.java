@@ -14,6 +14,7 @@ import com.barangay.scholarship.util.FileUploadManager;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -103,17 +104,31 @@ public class ScholarDirectoryView extends JPanel {
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Toolbar Card: Search + Traversal Selector + Drop Scholar Button
-        JPanel toolbarCard = Theme.createCardPanel();
-        JPanel toolRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
-        toolRow.setOpaque(false);
+        // Search Toolbar Card: Full-Width Responsive Search Bar
+        JPanel searchCard = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(32767, getPreferredSize().height);
+            }
+        };
+        searchCard.setBackground(Theme.CARD_BG);
+        searchCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        searchCard.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(10, 16, 10, 16)
+        ));
 
-        // Binary Search Input
-        JLabel lblSearch = new JLabel("Search (ID / Name):");
+        JPanel searchBar = new JPanel(new BorderLayout(14, 0));
+        searchBar.setOpaque(false);
+
+        JLabel lblSearch = new JLabel("Search Scholar (ID / Name):");
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
-        txtSearchId = new JTextField(14);
-        txtSearchId.setPreferredSize(new Dimension(150, 32));
-        txtSearchId.setToolTipText("Type to filter live, or press Enter for BST O(log n) lookup");
+        lblSearch.setForeground(Theme.TEXT_TITLE);
+
+        txtSearchId = Theme.createRoundedTextField("Search scholars by ID, name, school, purok, or term (Enter for BST lookup)...");
+        txtSearchId.setPreferredSize(new Dimension(300, 38));
+        txtSearchId.setMaximumSize(new Dimension(32767, 38));
+        txtSearchId.setToolTipText("Type to filter live in real-time, or press Enter for BST O(log n) lookup");
         txtSearchId.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) { refreshDirectory(); }
@@ -124,55 +139,57 @@ public class ScholarDirectoryView extends JPanel {
         });
         txtSearchId.addActionListener(e -> executeBinarySearch());
 
-        JButton btnSearch = new JButton("Search");
+        JButton btnSearch = Theme.createStyledButton("Search", Theme.PRIMARY, Color.WHITE);
+        btnSearch.setFont(Theme.FONT_BODY_BOLD);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
         btnSearch.addActionListener(e -> executeBinarySearch());
 
-        JLabel lblTrav = new JLabel("Traversal:");
-        lblTrav.setFont(Theme.FONT_BODY_BOLD);
-        String[] traversals = {"In-Order (Sorted by ID)", "Pre-Order (Root First)", "Post-Order (Leaves First)"};
-        cmbTraversal = new JComboBox<>(traversals);
-        cmbTraversal.setPreferredSize(new Dimension(175, 32));
-        cmbTraversal.addActionListener(e -> refreshDirectory());
+        searchBar.add(lblSearch, BorderLayout.WEST);
+        searchBar.add(txtSearchId, BorderLayout.CENTER);
+        searchBar.add(btnSearch, BorderLayout.EAST);
+        searchCard.add(searchBar, BorderLayout.CENTER);
 
-        toolRow.add(lblSearch);
-        toolRow.add(txtSearchId);
-        toolRow.add(btnSearch);
-        toolRow.add(Box.createHorizontalStrut(8));
-        toolRow.add(lblTrav);
-        toolRow.add(cmbTraversal);
-        toolRow.add(Box.createHorizontalStrut(8));
-
-        // Drop & Auto-Promote Button
-        JButton btnDrop = Theme.createStyledButton("Drop & Promote Waitlist", Theme.DANGER, Color.WHITE);
-        btnDrop.addActionListener(e -> dropSelectedScholar());
-
-        JButton btnReset = new JButton("Reset View");
-        btnReset.addActionListener(e -> {
-            txtSearchId.setText("");
-            refreshDirectory();
-        });
-
-        toolRow.add(btnDrop);
-        toolRow.add(btnReset);
-
-        toolbarCard.add(toolRow, BorderLayout.CENTER);
-        toolbarCard.setAlignmentX(Component.LEFT_ALIGNMENT);
-        toolbarCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, toolbarCard.getPreferredSize().height));
-        centerPanel.add(toolbarCard);
+        centerPanel.add(searchCard);
         centerPanel.add(Box.createVerticalStrut(14));
 
-        // Selected Row Preview Dossier Card (Between Toolbar and Directory Table)
+        // Selected Row Preview Dossier Card (Between Search and Directory Table)
         detailCard = createDetailInspectionCard();
         detailCard.setVisible(false);
-        detailCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         centerPanel.add(detailCard);
 
         // Directory Table Card
         JPanel tableCard = Theme.createCardPanel();
-        tableCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        tableCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel tblHeader = new JPanel(new BorderLayout(10, 0));
+        tblHeader.setOpaque(false);
+        tblHeader.setBorder(new EmptyBorder(0, 0, 8, 0));
+
         JLabel tblTitle = new JLabel("BST Scholar Directory & Traversal Output");
         tblTitle.setFont(Theme.FONT_HEADER_SM);
         tblTitle.setForeground(Theme.TEXT_TITLE);
+        tblHeader.add(tblTitle, BorderLayout.WEST);
+
+        JPanel tblActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        tblActions.setOpaque(false);
+
+        JLabel lblTrav = new JLabel("BST Traversal:");
+        lblTrav.setFont(Theme.FONT_BODY_BOLD);
+        String[] traversals = {"In-Order (Sorted by ID)", "Pre-Order (Root First)", "Post-Order (Leaves First)"};
+        cmbTraversal = new JComboBox<>(traversals);
+        cmbTraversal.setPreferredSize(new Dimension(185, 32));
+        cmbTraversal.addActionListener(e -> refreshDirectory());
+
+        JButton btnDrop = Theme.createStyledButton("Drop & Promote Waitlist", Theme.DANGER, Color.WHITE);
+        btnDrop.addActionListener(e -> dropSelectedScholar());
+
+        tblActions.add(lblTrav);
+        tblActions.add(cmbTraversal);
+        tblActions.add(btnDrop);
+        tblHeader.add(tblActions, BorderLayout.EAST);
+
+        tableCard.add(tblHeader, BorderLayout.NORTH);
 
         String[] cols = {"Index", "Scholar ID", "Applicant ID", "Full Name", "Purok/Zone", "School", "GWA", "Grant", "Stipend Status"};
         dirTableModel = new DefaultTableModel(cols, 0) {
