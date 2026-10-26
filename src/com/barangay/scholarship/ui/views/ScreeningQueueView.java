@@ -39,6 +39,7 @@ public class ScreeningQueueView extends JPanel {
     private ModernTable queueTable;
 
     // Document Inspector Panel
+    private JPanel inspectorCard;
     private JLabel lblSelectedName;
     private JLabel lblSelectedDetails;
     private JLabel lblStatusBadge;
@@ -152,8 +153,9 @@ public class ScreeningQueueView extends JPanel {
         tableCard.add(scrollTable, BorderLayout.CENTER);
 
         // Document Inspector Card
-        JPanel inspectorCard = Theme.createCardPanel();
+        inspectorCard = Theme.createCardPanel();
         inspectorCard.setLayout(new BorderLayout(0, 10));
+        inspectorCard.setVisible(false);
 
         JPanel insHeader = new JPanel();
         insHeader.setOpaque(false);
@@ -466,6 +468,7 @@ public class ScreeningQueueView extends JPanel {
     private void selectApplicant(Applicant applicant) {
         this.currentSelectedApplicant = applicant;
         if (applicant == null) {
+            if (inspectorCard != null) inspectorCard.setVisible(false);
             if (btnClosePreview != null) btnClosePreview.setVisible(false);
             lblSelectedName.setText("Select an applicant from queue");
             lblSelectedDetails.setText("Click any row or peek at the front of line to inspect requirements.");
@@ -499,9 +502,12 @@ public class ScreeningQueueView extends JPanel {
             btnAttachGrades.setEnabled(false);
             btnAttachEnrollment.setEnabled(false);
             btnAttachId.setEnabled(false);
+            revalidate();
+            repaint();
             return;
         }
 
+        if (inspectorCard != null) inspectorCard.setVisible(true);
         if (btnClosePreview != null) btnClosePreview.setVisible(true);
         lblSelectedName.setText(applicant.getFullName() + " (" + applicant.getApplicantId() + ")");
         lblSelectedDetails.setText(String.format("%s | %s | GWA: %s | Income: %s",
@@ -571,6 +577,8 @@ public class ScreeningQueueView extends JPanel {
         }
 
         updateScreeningActionsState();
+        revalidate();
+        repaint();
     }
 
     private void updateScreeningActionsState() {
@@ -764,12 +772,7 @@ public class ScreeningQueueView extends JPanel {
             queueTable.setRowSelectionInterval(selectedRow, selectedRow);
         }
 
-        if (currentSelectedApplicant == null && front != null && !userExplicitlyDeselected && q.isEmpty()) {
-            selectApplicant(front);
-            if (queueTable.getRowCount() > 0) {
-                queueTable.setRowSelectionInterval(0, 0);
-            }
-        } else if (currentSelectedApplicant != null) {
+        if (currentSelectedApplicant != null) {
             Applicant reloaded = manager.findApplicantById(currentSelectedApplicant.getApplicantId());
             if (reloaded != null && (q.isEmpty() || list.contains(reloaded))) {
                 selectApplicant(reloaded);
@@ -781,7 +784,12 @@ public class ScreeningQueueView extends JPanel {
                     selectApplicant(null);
                     queueTable.clearSelection();
                 }
+            } else {
+                selectApplicant(null);
+                queueTable.clearSelection();
             }
+        } else {
+            selectApplicant(null);
         }
     }
 }
