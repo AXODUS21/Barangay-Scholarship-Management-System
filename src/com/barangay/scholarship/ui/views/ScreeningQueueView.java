@@ -169,11 +169,9 @@ public class ScreeningQueueView extends JPanel {
 
         inspectorCard.add(insHeader, BorderLayout.NORTH);
 
-        // Checkbox panel
-        JPanel chkPanel = new JPanel();
+        // Checkbox panel (2x2 grid for full-width horizontal inspection)
+        JPanel chkPanel = new JPanel(new GridLayout(2, 2, 16, 8));
         chkPanel.setOpaque(false);
-        chkPanel.setLayout(new BoxLayout(chkPanel, BoxLayout.Y_AXIS));
-        chkPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         chkIndigency = new JCheckBox("1. Certificate of Indigency (Barangay)");
         chkGrades = new JCheckBox("2. Certified Copy of Grades (Form 138 / TOR)");
@@ -249,20 +247,11 @@ public class ScreeningQueueView extends JPanel {
         });
 
         chkPanel.add(createStaffDocRow(chkIndigency, btnViewIndigency, lblIndigencyInfo, btnAttachIndigency));
-        chkPanel.add(Box.createVerticalStrut(6));
         chkPanel.add(createStaffDocRow(chkGrades, btnViewGrades, lblGradesInfo, btnAttachGrades));
-        chkPanel.add(Box.createVerticalStrut(6));
         chkPanel.add(createStaffDocRow(chkEnrollment, btnViewEnrollment, lblEnrollmentInfo, btnAttachEnrollment));
-        chkPanel.add(Box.createVerticalStrut(6));
         chkPanel.add(createStaffDocRow(chkId, btnViewId, lblIdInfo, btnAttachId));
-        chkPanel.add(Box.createVerticalGlue());
 
-        JScrollPane chkScroll = new JScrollPane(chkPanel);
-        chkScroll.setBorder(null);
-        chkScroll.setOpaque(false);
-        chkScroll.getViewport().setOpaque(false);
-        Theme.enableSmoothMouseWheel(chkScroll);
-        inspectorCard.add(chkScroll, BorderLayout.CENTER);
+        inspectorCard.add(chkPanel, BorderLayout.CENTER);
 
         // Action Buttons
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -280,10 +269,10 @@ public class ScreeningQueueView extends JPanel {
 
         inspectorCard.add(btnPanel, BorderLayout.SOUTH);
 
-        JSplitPane workSplit = Theme.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, tableCard, inspectorCard, 0.55);
-        workSplit.setAlignmentX(Component.LEFT_ALIGNMENT);
-        workSplit.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        centerPanel.add(workSplit);
+        // Single-column vertical stacking for maximum readability and space
+        centerPanel.add(inspectorCard);
+        centerPanel.add(Box.createVerticalStrut(14));
+        centerPanel.add(tableCard);
 
         add(centerPanel, BorderLayout.CENTER);
     }
