@@ -109,10 +109,20 @@ public class ScholarDirectoryView extends JPanel {
         toolRow.setOpaque(false);
 
         // Binary Search Input
-        JLabel lblSearch = new JLabel("Binary Search (ID / Name):");
+        JLabel lblSearch = new JLabel("Search (ID / Name):");
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
-        txtSearchId = new JTextField(12);
-        txtSearchId.setPreferredSize(new Dimension(130, 32));
+        txtSearchId = new JTextField(14);
+        txtSearchId.setPreferredSize(new Dimension(150, 32));
+        txtSearchId.setToolTipText("Type to filter live, or press Enter for BST O(log n) lookup");
+        txtSearchId.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { refreshDirectory(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { refreshDirectory(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { refreshDirectory(); }
+        });
+        txtSearchId.addActionListener(e -> executeBinarySearch());
 
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> executeBinarySearch());
@@ -259,7 +269,7 @@ public class ScholarDirectoryView extends JPanel {
         });
         actionGroup.add(btnDetailDrop);
 
-        JButton btnClose = new JButton("✕ Close Preview");
+        JButton btnClose = new JButton("Close Preview");
         btnClose.setFont(Theme.FONT_SMALL_BOLD);
         btnClose.setForeground(Theme.TEXT_MUTED);
         btnClose.setFocusPainted(false);
@@ -364,10 +374,10 @@ public class ScholarDirectoryView extends JPanel {
         valGwa.setText(s.getFormattedGwa());
 
         if (s.isStipendDisbursed()) {
-            valStatus.setText("✓ CLAIMED on " + s.getFormattedDisbursedDate());
+            valStatus.setText("CLAIMED on " + s.getFormattedDisbursedDate());
             valStatus.setForeground(Theme.ACCENT_HOVER);
 
-            lblDetailBadge.setText("  ✓ STIPEND CLAIMED & DISBURSED  ");
+            lblDetailBadge.setText("  STIPEND CLAIMED & DISBURSED  ");
             lblDetailBadge.setBackground(Theme.ACCENT_BG);
             lblDetailBadge.setForeground(new Color(6, 95, 70));
             lblDetailBadge.setBorder(new CompoundBorder(
@@ -375,10 +385,10 @@ public class ScholarDirectoryView extends JPanel {
                     new EmptyBorder(4, 10, 4, 10)
             ));
         } else {
-            valStatus.setText("⏳ UNCLAIMED (Pending Payout)");
+            valStatus.setText("UNCLAIMED (Pending Payout)");
             valStatus.setForeground(Theme.WARNING);
 
-            lblDetailBadge.setText("  ⏳ STIPEND UNCLAIMED  ");
+            lblDetailBadge.setText("  STIPEND UNCLAIMED  ");
             lblDetailBadge.setBackground(Theme.WARNING_BG);
             lblDetailBadge.setForeground(Theme.WARNING);
             lblDetailBadge.setBorder(new CompoundBorder(
@@ -407,7 +417,7 @@ public class ScholarDirectoryView extends JPanel {
 
     private void addDocBadge(String name, boolean verified, String filePath) {
         boolean hasFile = (filePath != null && !filePath.trim().isEmpty());
-        JButton badge = new JButton((verified ? "✓ " : "✕ ") + name + (hasFile ? " [View File]" : ""));
+        JButton badge = new JButton((verified ? "[Verified] " : "[Missing] ") + name + (hasFile ? " [View File]" : ""));
         badge.setFont(Theme.FONT_SMALL);
         badge.setFocusPainted(false);
         badge.setMargin(new Insets(2, 6, 2, 6));
@@ -551,6 +561,21 @@ public class ScholarDirectoryView extends JPanel {
             list = bst.postOrderTraversal();
         } else {
             list = bst.inOrderTraversal();
+        }
+
+        String filterText = (txtSearchId != null) ? txtSearchId.getText().trim().toLowerCase() : "";
+        if (!filterText.isEmpty()) {
+            List<Scholar> filtered = new ArrayList<>();
+            for (Scholar s : list) {
+                if (s.getScholarId().toLowerCase().contains(filterText) ||
+                    s.getApplicantId().toLowerCase().contains(filterText) ||
+                    s.getFullName().toLowerCase().contains(filterText) ||
+                    s.getPurok().toLowerCase().contains(filterText) ||
+                    s.getSchool().toLowerCase().contains(filterText)) {
+                    filtered.add(s);
+                }
+            }
+            list = filtered;
         }
 
         String previouslySelectedScholarId = (currentSelectedScholar != null) ? currentSelectedScholar.getScholarId() : null;

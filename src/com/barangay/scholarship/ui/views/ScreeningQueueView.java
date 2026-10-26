@@ -202,20 +202,20 @@ public class ScreeningQueueView extends JPanel {
         chkEnrollment.addActionListener(e -> updateScreeningActionsState());
         chkId.addActionListener(e -> updateScreeningActionsState());
 
-        btnViewIndigency = new JButton("👁 View Document");
-        btnViewGrades = new JButton("👁 View Document");
-        btnViewEnrollment = new JButton("👁 View Document");
-        btnViewId = new JButton("👁 View Document");
+        btnViewIndigency = new JButton("View Document");
+        btnViewGrades = new JButton("View Document");
+        btnViewEnrollment = new JButton("View Document");
+        btnViewId = new JButton("View Document");
 
         lblIndigencyInfo = new JLabel("No applicant selected");
         lblGradesInfo = new JLabel("No applicant selected");
         lblEnrollmentInfo = new JLabel("No applicant selected");
         lblIdInfo = new JLabel("No applicant selected");
 
-        btnAttachIndigency = new JButton("📎 Attach File");
-        btnAttachGrades = new JButton("📎 Attach File");
-        btnAttachEnrollment = new JButton("📎 Attach File");
-        btnAttachId = new JButton("📎 Attach File");
+        btnAttachIndigency = new JButton("Attach File");
+        btnAttachGrades = new JButton("Attach File");
+        btnAttachEnrollment = new JButton("Attach File");
+        btnAttachId = new JButton("Attach File");
 
         btnAttachIndigency.addActionListener(e -> staffUploadDocument("Indigency", (f, path) -> {
             if (currentSelectedApplicant != null) {
@@ -291,7 +291,7 @@ public class ScreeningQueueView extends JPanel {
         btnReject.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnReject.addActionListener(e -> rejectCurrentApplicant());
 
-        btnNext = new JButton("Next in Line ➔");
+        btnNext = new JButton("Next in Line");
         btnNext.setFont(Theme.FONT_BODY_BOLD);
         btnNext.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnNext.addActionListener(e -> selectNextApplicantInQueue());
@@ -355,9 +355,9 @@ public class ScreeningQueueView extends JPanel {
     private void updateDocAttachmentRow(boolean hasFile, String fileName, String filePath, JButton btnView, JLabel lblInfo) {
         if (hasFile) {
             btnView.setVisible(true);
-            btnView.setText("👁 View (" + fileName + ")");
+            btnView.setText("View (" + fileName + ")");
             btnView.setToolTipText("Open file: " + filePath);
-            lblInfo.setText("✓ Digital File Archived");
+            lblInfo.setText("Digital File Archived");
             lblInfo.setForeground(Theme.ACCENT_HOVER);
         } else {
             btnView.setVisible(false);
@@ -461,7 +461,7 @@ public class ScreeningQueueView extends JPanel {
         ApplicationStatus status = applicant.getStatus();
         lblStatusBadge.setVisible(true);
         if (status == ApplicationStatus.VERIFIED) {
-            lblStatusBadge.setText("  ✓ VERIFIED — READY FOR RANKING  ");
+            lblStatusBadge.setText("  VERIFIED — READY FOR RANKING  ");
             lblStatusBadge.setBackground(Theme.ACCENT_BG);
             lblStatusBadge.setForeground(new Color(6, 95, 70));
             lblStatusBadge.setBorder(new CompoundBorder(
@@ -469,7 +469,7 @@ public class ScreeningQueueView extends JPanel {
                     new EmptyBorder(3, 8, 3, 8)
             ));
         } else if (status == ApplicationStatus.PENDING_VERIFICATION) {
-            lblStatusBadge.setText("  ⏳ PENDING VERIFICATION (" + docs.getStatusSummary() + ")  ");
+            lblStatusBadge.setText("  PENDING VERIFICATION (" + docs.getStatusSummary() + ")  ");
             lblStatusBadge.setBackground(Theme.WARNING_BG);
             lblStatusBadge.setForeground(Theme.WARNING);
             lblStatusBadge.setBorder(new CompoundBorder(
@@ -477,7 +477,7 @@ public class ScreeningQueueView extends JPanel {
                     new EmptyBorder(3, 8, 3, 8)
             ));
         } else if (status == ApplicationStatus.REJECTED) {
-            lblStatusBadge.setText("  ✕ REJECTED / DISQUALIFIED  ");
+            lblStatusBadge.setText("  REJECTED / DISQUALIFIED  ");
             lblStatusBadge.setBackground(Theme.DANGER_BG);
             lblStatusBadge.setForeground(Theme.DANGER);
             lblStatusBadge.setBorder(new CompoundBorder(
@@ -517,7 +517,7 @@ public class ScreeningQueueView extends JPanel {
 
         if (currentStatus == ApplicationStatus.VERIFIED) {
             if (allChecked) {
-                btnVerifyApprove.setText("✓ Verified (Ready for Ranking)");
+                btnVerifyApprove.setText("Verified (Ready for Ranking)");
                 btnVerifyApprove.setEnabled(false);
                 btnVerifyApprove.setBackground(Theme.ACCENT);
                 btnVerifyApprove.setForeground(Color.WHITE);
@@ -551,7 +551,7 @@ public class ScreeningQueueView extends JPanel {
             btnVerifyApprove.setForeground(Color.WHITE);
             btnReject.setEnabled(false);
         } else {
-            btnVerifyApprove.setText("✓ " + currentStatus);
+            btnVerifyApprove.setText(currentStatus.toString());
             btnVerifyApprove.setEnabled(false);
             btnVerifyApprove.setBackground(new Color(226, 232, 240));
             btnVerifyApprove.setForeground(new Color(100, 116, 139));

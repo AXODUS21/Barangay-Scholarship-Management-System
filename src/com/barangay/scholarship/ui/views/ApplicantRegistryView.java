@@ -189,7 +189,7 @@ public class ApplicantRegistryView extends JPanel {
         titleGrp.add(lblDetailSubtitle);
         topHeader.add(titleGrp, BorderLayout.WEST);
 
-        JButton btnClose = new JButton("✕ Close Details");
+        JButton btnClose = new JButton("Close Details");
         btnClose.setFont(Theme.FONT_SMALL_BOLD);
         btnClose.setForeground(Theme.TEXT_MUTED);
         btnClose.setFocusPainted(false);
@@ -310,7 +310,7 @@ public class ApplicantRegistryView extends JPanel {
 
     private void addDocBadge(String name, boolean verified, String filePath) {
         boolean hasFile = (filePath != null && !filePath.trim().isEmpty());
-        JButton badge = new JButton((verified ? "✓ " : "✕ ") + name + (hasFile ? " [View File]" : ""));
+        JButton badge = new JButton((verified ? "[Verified] " : "[Missing] ") + name + (hasFile ? " [View File]" : ""));
         badge.setFont(Theme.FONT_SMALL);
         badge.setFocusPainted(false);
         badge.setMargin(new Insets(2, 6, 2, 6));

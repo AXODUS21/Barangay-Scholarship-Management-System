@@ -35,7 +35,7 @@ public class Theme {
     public static final Color BORDER = new Color(226, 232, 240);        // Slate 200
 
     // Typography
-    private static final String FONT_NAME = "Segoe UI";
+    private static final String FONT_NAME = resolveAppleSystemFont();
     public static final Font FONT_HEADER_LG = new Font(FONT_NAME, Font.BOLD, 22);
     public static final Font FONT_HEADER_MD = new Font(FONT_NAME, Font.BOLD, 17);
     public static final Font FONT_HEADER_SM = new Font(FONT_NAME, Font.BOLD, 14);
@@ -44,6 +44,26 @@ public class Theme {
     public static final Font FONT_SMALL = new Font(FONT_NAME, Font.PLAIN, 11);
     public static final Font FONT_SMALL_BOLD = new Font(FONT_NAME, Font.BOLD, 11);
     public static final Font FONT_STAT_VAL = new Font(FONT_NAME, Font.BOLD, 24);
+
+    public static String getFontName() {
+        return FONT_NAME;
+    }
+
+    private static String resolveAppleSystemFont() {
+        String[] candidates = {".AppleSystemUIFont", "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Helvetica", "Segoe UI", "SansSerif"};
+        try {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            String[] available = ge.getAvailableFontFamilyNames();
+            for (String candidate : candidates) {
+                for (String av : available) {
+                    if (av.equalsIgnoreCase(candidate)) {
+                        return av;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return "SansSerif";
+    }
 
     public static Border createCardBorder() {
         return new CompoundBorder(

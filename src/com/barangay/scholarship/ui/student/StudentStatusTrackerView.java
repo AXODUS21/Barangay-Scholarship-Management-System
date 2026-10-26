@@ -476,7 +476,7 @@ public class StudentStatusTrackerView extends JPanel {
         right.setOpaque(false);
 
         if (filePath != null && !filePath.trim().isEmpty()) {
-            JButton btnView = new JButton("👁 View");
+            JButton btnView = new JButton("View");
             btnView.setFont(Theme.FONT_SMALL);
             btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btnView.setMargin(new Insets(2, 6, 2, 6));
@@ -484,7 +484,7 @@ public class StudentStatusTrackerView extends JPanel {
             right.add(btnView);
         }
 
-        JLabel status = new JLabel(isSubmitted ? (filePath != null ? "✓ Uploaded" : "✓ Received") : "Pending");
+        JLabel status = new JLabel(isSubmitted ? (filePath != null ? "Uploaded" : "Received") : "Pending");
         status.setFont(Theme.FONT_SMALL_BOLD);
         status.setForeground(isSubmitted ? Theme.ACCENT_HOVER : new Color(180, 83, 9));
         right.add(status);

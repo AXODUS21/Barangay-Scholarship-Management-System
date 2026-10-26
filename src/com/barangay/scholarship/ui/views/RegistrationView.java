@@ -341,7 +341,7 @@ public class RegistrationView extends JPanel {
         sub.setOpaque(false);
         sub.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JButton btnUpload = new JButton("📎 Attach File");
+        JButton btnUpload = new JButton("Attach File");
         btnUpload.setFont(Theme.FONT_SMALL);
         btnUpload.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -349,12 +349,12 @@ public class RegistrationView extends JPanel {
         lbl.setFont(Theme.FONT_SMALL);
         lbl.setForeground(Theme.TEXT_MUTED);
 
-        JButton btnView = new JButton("👁 View");
+        JButton btnView = new JButton("View");
         btnView.setFont(Theme.FONT_SMALL);
         btnView.setVisible(false);
         btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JButton btnRemove = new JButton("✕");
+        JButton btnRemove = new JButton("Remove");
         btnRemove.setFont(Theme.FONT_SMALL);
         btnRemove.setForeground(Theme.DANGER);
         btnRemove.setVisible(false);
@@ -375,7 +375,7 @@ public class RegistrationView extends JPanel {
                 chosenRef[0] = file;
                 onFileSet.accept(file);
                 chk.setSelected(true);
-                lbl.setText("✓ " + file.getName());
+                lbl.setText("[Attached] " + file.getName());
                 lbl.setForeground(Theme.ACCENT_HOVER);
                 btnView.setVisible(true);
                 btnRemove.setVisible(true);

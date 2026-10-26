@@ -249,7 +249,7 @@ public class StudentApplicationView extends JPanel {
         JPanel formatNote = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         formatNote.setOpaque(false);
         formatNote.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel lblFormats = new JLabel("📁 Supported file formats: PDF, PNG, JPG, JPEG, DOCX, DOC, TXT (Max 20 MB each). Digital uploads allow fast-track online verification.");
+        JLabel lblFormats = new JLabel("Supported file formats: PDF, PNG, JPG, JPEG, DOCX, DOC, TXT (Max 20 MB each). Digital uploads allow fast-track online verification.");
         lblFormats.setFont(Theme.FONT_SMALL);
         lblFormats.setForeground(Theme.TEXT_MUTED);
         formatNote.add(lblFormats);
@@ -274,7 +274,7 @@ public class StudentApplicationView extends JPanel {
         btnClear.setFont(Theme.FONT_BODY);
         btnClear.addActionListener(e -> clearForm());
 
-        JButton btnSubmit = Theme.createStyledButton("Submit Scholarship Application  ➔", Theme.ACCENT, Color.WHITE);
+        JButton btnSubmit = Theme.createStyledButton("Submit Scholarship Application", Theme.ACCENT, Color.WHITE);
         btnSubmit.setFont(Theme.FONT_HEADER_SM);
         btnSubmit.setPreferredSize(new Dimension(280, 42));
         btnSubmit.addActionListener(e -> submitApplication());
@@ -519,7 +519,7 @@ public class StudentApplicationView extends JPanel {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         btnPanel.setOpaque(false);
 
-        JButton btnTrack = Theme.createStyledButton("Track Status Now  ➔", Theme.PRIMARY, Color.WHITE);
+        JButton btnTrack = Theme.createStyledButton("Track Status Now", Theme.PRIMARY, Color.WHITE);
         btnTrack.addActionListener(e -> {
             dialog.dispose();
             if (onNavigate != null) {
@@ -596,7 +596,7 @@ public class StudentApplicationView extends JPanel {
         ctrlRow.setOpaque(false);
         ctrlRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JButton btnUpload = new JButton("📎 Choose File...");
+        JButton btnUpload = new JButton("Choose File...");
         btnUpload.setFont(Theme.FONT_SMALL_BOLD);
         btnUpload.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnUpload.setFocusPainted(false);
@@ -607,13 +607,13 @@ public class StudentApplicationView extends JPanel {
         lblStatus.setFont(Theme.FONT_SMALL);
         lblStatus.setForeground(Theme.TEXT_MUTED);
 
-        JButton btnView = new JButton("👁 View");
+        JButton btnView = new JButton("View");
         btnView.setFont(Theme.FONT_SMALL);
         btnView.setForeground(Theme.PRIMARY);
         btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnView.setVisible(false);
 
-        JButton btnRemove = new JButton("✕ Remove");
+        JButton btnRemove = new JButton("Remove");
         btnRemove.setFont(Theme.FONT_SMALL);
         btnRemove.setForeground(Theme.DANGER);
         btnRemove.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -636,7 +636,7 @@ public class StudentApplicationView extends JPanel {
                 onFileChange.accept(chosen);
                 checkBox.setSelected(true);
 
-                lblStatus.setText("✓ " + chosen.getName() + " (" + FileUploadManager.formatFileSize(chosen.length()) + ")");
+                lblStatus.setText("[Uploaded] " + chosen.getName() + " (" + FileUploadManager.formatFileSize(chosen.length()) + ")");
                 lblStatus.setFont(Theme.FONT_SMALL_BOLD);
                 lblStatus.setForeground(Theme.ACCENT_HOVER);
                 lblStatus.setToolTipText(chosen.getAbsolutePath());

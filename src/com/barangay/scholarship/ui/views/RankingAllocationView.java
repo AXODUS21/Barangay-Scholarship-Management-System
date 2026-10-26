@@ -236,7 +236,7 @@ public class RankingAllocationView extends JPanel {
         lblDetailBadge.setOpaque(true);
         actionGroup.add(lblDetailBadge);
 
-        JButton btnClose = new JButton("✕ Close Preview");
+        JButton btnClose = new JButton("Close Preview");
         btnClose.setFont(Theme.FONT_SMALL_BOLD);
         btnClose.setForeground(Theme.TEXT_MUTED);
         btnClose.setFocusPainted(false);
@@ -335,10 +335,10 @@ public class RankingAllocationView extends JPanel {
 
         boolean isApproved = outcome.contains("APPROVED") || outcome.contains("OFFICIAL");
         if (isApproved) {
-            valOutcome.setText("✓ " + outcome);
+            valOutcome.setText(outcome);
             valOutcome.setForeground(Theme.ACCENT_HOVER);
 
-            lblDetailBadge.setText("  ✓ OFFICIAL SCHOLARSHIP RECIPIENT  ");
+            lblDetailBadge.setText("  OFFICIAL SCHOLARSHIP RECIPIENT  ");
             lblDetailBadge.setBackground(Theme.ACCENT_BG);
             lblDetailBadge.setForeground(new Color(6, 95, 70));
             lblDetailBadge.setBorder(new CompoundBorder(
@@ -346,10 +346,10 @@ public class RankingAllocationView extends JPanel {
                     new EmptyBorder(4, 10, 4, 10)
             ));
         } else {
-            valOutcome.setText("⏳ " + outcome);
+            valOutcome.setText(outcome);
             valOutcome.setForeground(new Color(126, 34, 206));
 
-            lblDetailBadge.setText("  ⏳ WAITLIST QUEUE CANDIDATE (FIFO)  ");
+            lblDetailBadge.setText("  WAITLIST QUEUE CANDIDATE (FIFO)  ");
             lblDetailBadge.setBackground(new Color(243, 232, 255));
             lblDetailBadge.setForeground(new Color(126, 34, 206));
             lblDetailBadge.setBorder(new CompoundBorder(
@@ -377,7 +377,7 @@ public class RankingAllocationView extends JPanel {
 
     private void addDocBadge(String name, boolean verified, String filePath) {
         boolean hasFile = (filePath != null && !filePath.trim().isEmpty());
-        JButton badge = new JButton((verified ? "✓ " : "✕ ") + name + (hasFile ? " [View File]" : ""));
+        JButton badge = new JButton((verified ? "[Verified] " : "[Missing] ") + name + (hasFile ? " [View File]" : ""));
         badge.setFont(Theme.FONT_SMALL);
         badge.setFocusPainted(false);
         badge.setMargin(new Insets(2, 6, 2, 6));

@@ -248,7 +248,7 @@ public class DisbursementView extends JPanel {
         });
         actionGroup.add(btnDetailDisburse);
 
-        JButton btnClose = new JButton("✕ Close Preview");
+        JButton btnClose = new JButton("Close Preview");
         btnClose.setFont(Theme.FONT_SMALL_BOLD);
         btnClose.setForeground(Theme.TEXT_MUTED);
         btnClose.setFocusPainted(false);
@@ -353,10 +353,10 @@ public class DisbursementView extends JPanel {
         valGrant.setText(s.getFormattedGrant());
 
         if (s.isStipendDisbursed()) {
-            valStatus.setText("✓ CLAIMED on " + s.getFormattedDisbursedDate());
+            valStatus.setText("CLAIMED on " + s.getFormattedDisbursedDate());
             valStatus.setForeground(Theme.ACCENT_HOVER);
 
-            lblDetailBadge.setText("  ✓ STIPEND CLAIMED & DISBURSED  ");
+            lblDetailBadge.setText("  STIPEND CLAIMED & DISBURSED  ");
             lblDetailBadge.setBackground(Theme.ACCENT_BG);
             lblDetailBadge.setForeground(new Color(6, 95, 70));
             lblDetailBadge.setBorder(new CompoundBorder(
@@ -364,15 +364,15 @@ public class DisbursementView extends JPanel {
                     new EmptyBorder(4, 10, 4, 10)
             ));
 
-            btnDetailDisburse.setText("✓ Payout Already Claimed");
+            btnDetailDisburse.setText("Payout Already Claimed");
             btnDetailDisburse.setEnabled(false);
             btnDetailDisburse.setBackground(Theme.ACCENT);
             btnDetailDisburse.setForeground(Color.WHITE);
         } else {
-            valStatus.setText("⏳ UNCLAIMED (Ready for Payout)");
+            valStatus.setText("UNCLAIMED (Ready for Payout)");
             valStatus.setForeground(Theme.WARNING);
 
-            lblDetailBadge.setText("  ⏳ UNCLAIMED — READY FOR DISBURSEMENT  ");
+            lblDetailBadge.setText("  UNCLAIMED — READY FOR DISBURSEMENT  ");
             lblDetailBadge.setBackground(Theme.WARNING_BG);
             lblDetailBadge.setForeground(Theme.WARNING);
             lblDetailBadge.setBorder(new CompoundBorder(
@@ -406,7 +406,7 @@ public class DisbursementView extends JPanel {
 
     private void addDocBadge(String name, boolean verified, String filePath) {
         boolean hasFile = (filePath != null && !filePath.trim().isEmpty());
-        JButton badge = new JButton((verified ? "✓ " : "✕ ") + name + (hasFile ? " [View File]" : ""));
+        JButton badge = new JButton((verified ? "[Verified] " : "[Missing] ") + name + (hasFile ? " [View File]" : ""));
         badge.setFont(Theme.FONT_SMALL);
         badge.setFocusPainted(false);
         badge.setMargin(new Insets(2, 6, 2, 6));
