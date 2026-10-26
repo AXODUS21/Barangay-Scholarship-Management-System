@@ -191,19 +191,19 @@ public class Theme {
 
     /**
      * Card panel that spans 100% of the parent container's width in a BoxLayout(Y_AXIS)
-     * while preserving its natural preferred height.
+     * while preserving its natural preferred height. Uses 32767 (Short.MAX_VALUE) to prevent
+     * 32-bit integer overflow in Swing SizeRequirements calculations.
      */
     public static JPanel createFullWidthCardPanel() {
         JPanel panel = new JPanel() {
             @Override
             public Dimension getMaximumSize() {
-                return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+                return new Dimension(32767, getPreferredSize().height);
             }
         };
         panel.setBackground(CARD_BG);
         panel.setBorder(createCardBorder());
         panel.setLayout(new BorderLayout());
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return panel;
     }
 

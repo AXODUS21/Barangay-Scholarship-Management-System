@@ -82,6 +82,7 @@ public class ApplicantRegistryView extends JPanel {
         // Stats Row
         JPanel statsGrid = new JPanel(new GridLayout(1, 2, 16, 12));
         statsGrid.setOpaque(false);
+        statsGrid.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         cardTotalApplicants = new StatCard("Total Registered Applicants", "0", "All Recorded Intakes", Theme.PRIMARY);
         cardVerifiedApplicants = new StatCard("Screened / Verified", "0", "Eligible or Advanced in Pipeline", Theme.ACCENT);
@@ -92,7 +93,14 @@ public class ApplicantRegistryView extends JPanel {
         centerPanel.add(Box.createVerticalStrut(14));
 
         // Toolbar Card: Full-Width Responsive Search Bar
-        JPanel toolbarCard = Theme.createFullWidthCardPanel();
+        JPanel toolbarCard = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(32767, getPreferredSize().height);
+            }
+        };
+        toolbarCard.setBackground(Theme.CARD_BG);
+        toolbarCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         toolbarCard.setBorder(new CompoundBorder(
                 new LineBorder(Theme.BORDER, 1, true),
                 new EmptyBorder(10, 16, 10, 16)
@@ -107,6 +115,7 @@ public class ApplicantRegistryView extends JPanel {
 
         txtSearch = Theme.createRoundedTextField("Search by ID, name, purok, school, or status...");
         txtSearch.setPreferredSize(new Dimension(300, 38));
+        txtSearch.setMaximumSize(new Dimension(32767, 38));
         txtSearch.setToolTipText("Type to filter live in real-time");
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
@@ -133,11 +142,13 @@ public class ApplicantRegistryView extends JPanel {
 
         // Middle: Selected Row Information Inspection Card (initially visible or showing placeholder)
         detailCard = createDetailInspectionCard();
+        detailCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         detailCard.setVisible(false); // Shown when a row is selected
         centerPanel.add(detailCard);
 
         // Table Card: Full Width
         JPanel tableCard = Theme.createCardPanel();
+        tableCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel tableTitle = new JLabel("All Applicant Intake Records");
         tableTitle.setFont(Theme.FONT_HEADER_SM);
         tableTitle.setForeground(Theme.TEXT_TITLE);
