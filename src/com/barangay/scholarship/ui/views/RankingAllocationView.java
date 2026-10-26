@@ -100,26 +100,27 @@ public class RankingAllocationView extends JPanel {
 
         // Controls Card
         JPanel controlsCard = Theme.createCardPanel();
-        JPanel ctrlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
+        JPanel ctrlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
         ctrlRow.setOpaque(false);
 
         JLabel lblCrit = new JLabel("Ranking Algorithm:");
         lblCrit.setFont(Theme.FONT_BODY_BOLD);
         cmbCriteria = new JComboBox<>(ScholarshipManager.RankingCriteria.values());
-        cmbCriteria.setPreferredSize(new Dimension(280, 32));
+        cmbCriteria.setPreferredSize(new Dimension(240, 32));
         cmbCriteria.addActionListener(e -> previewRanking());
 
         JLabel lblSlots = new JLabel("Max Slots:");
         lblSlots.setFont(Theme.FONT_BODY_BOLD);
         spnSlots = new JSpinner(new SpinnerNumberModel(10, 1, 500, 1));
-        spnSlots.setPreferredSize(new Dimension(75, 32));
+        spnSlots.setPreferredSize(new Dimension(65, 32));
         spnSlots.addChangeListener(e -> previewRanking());
 
         JButton btnPreview = new JButton("Refresh Ranking");
         btnPreview.setFont(Theme.FONT_BODY_BOLD);
         btnPreview.addActionListener(e -> previewRanking());
 
-        JButton btnAllocate = Theme.createStyledButton("Confirm & Allocate Slots", Theme.ACCENT, Color.WHITE);
+        JButton btnAllocate = Theme.createStyledButton("Confirm & Allocate Slots", Theme.PRIMARY, Color.WHITE);
+        btnAllocate.setFont(Theme.FONT_BODY_BOLD);
         btnAllocate.addActionListener(e -> executeAllocation());
 
         ctrlRow.add(lblCrit);
