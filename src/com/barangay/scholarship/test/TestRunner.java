@@ -6,7 +6,11 @@ import com.barangay.scholarship.datastructures.ScholarBST;
 import com.barangay.scholarship.datastructures.ScholarshipQueue;
 import com.barangay.scholarship.model.*;
 import com.barangay.scholarship.service.ScholarshipManager;
+import com.barangay.scholarship.util.FileUploadManager;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +41,9 @@ public class TestRunner {
         runTest("Waitlist Queue Auto-Promotion on Scholar Drop", TestRunner::testWaitlistAutoPromotion);
         runTest("ActionStack 1-Click Undo Rollback", TestRunner::testUndoRollback);
         runTest("Student Inquiry Lookup & Queue Positioning", TestRunner::testStudentInquiryLookup);
+        runTest("Document Checklist Digital File Tracking", TestRunner::testDocumentChecklistWithFiles);
+        runTest("File Upload Manager & Storage Persistence", TestRunner::testFileUploadManager);
+        runTest("Applicant Registration with Document Attachments", TestRunner::testRegisterApplicantWithFileUploads);
 
         System.out.println("\n-----------------------------------------------------------------");
         System.out.printf("TEST SUMMARY: %d Passed, %d Failed (Total: %d)%n", passed, failed, (passed + failed));
@@ -323,5 +330,98 @@ public class TestRunner {
         List<Applicant> searchId = mgr.findApplicantsByIdOrName(a2.getApplicantId());
         assertEquals(1, searchId.size(), "Search by ID should return Bob");
         assertEquals("Bob Ong", searchId.get(0).getFullName(), "Applicant name should match");
+    }
+
+    // 14. Document Checklist Digital File Tracking Test
+    private static void testDocumentChecklistWithFiles() {
+        DocumentChecklist docs = new DocumentChecklist();
+        assertTrue(!docs.hasAnyUploadedFiles(), "Empty checklist should have 0 uploaded files");
+        assertEquals(0, docs.getUploadedFilesCount(), "Count should be 0");
+
+        docs.setIndigencyFilePath("data/uploads/APP-2026-001/indigency_cert.pdf");
+        assertTrue(docs.isCertificateOfIndigency(), "Setting file path should auto-mark requirement complete");
+        assertTrue(docs.hasIndigencyFile(), "Should report hasIndigencyFile true");
+        assertEquals("indigency_cert.pdf", docs.getIndigencyFileName(), "File name extraction");
+        assertEquals(1, docs.getUploadedFilesCount(), "Uploaded files count should be 1");
+
+        docs.setGradesFilePath("data/uploads/APP-2026-001/grades_tor.jpg");
+        docs.setEnrollmentForm(true);
+        docs.setValidBarangayOrSchoolId(true);
+
+        assertTrue(docs.isComplete(), "All 4 requirements met (2 digital, 2 hardcopy)");
+        assertEquals(2, docs.getUploadedFilesCount(), "Uploaded files count should be 2");
+        assertEquals("4/4 Complete", docs.getStatusSummary(), "Status summary check");
+    }
+
+    // 15. File Upload Manager & Storage Persistence Test
+    private static void testFileUploadManager() {
+        // Size formatting
+        assertEquals("500 B", FileUploadManager.formatFileSize(500), "Bytes formatting");
+        assertEquals("1.5 KB", FileUploadManager.formatFileSize(1536), "Kilobytes formatting");
+        assertEquals("2.00 MB", FileUploadManager.formatFileSize(2 * 1024 * 1024), "Megabytes formatting");
+
+        // Temporary file creation and saving
+        File tempFile = new File("test_doc.txt");
+        try {
+            try (FileWriter fw = new FileWriter(tempFile)) {
+                fw.write("BARANGAY SCHOLARSHIP TEST ATTACHMENT CONTENT");
+            }
+            assertTrue(FileUploadManager.isValidDocumentFile(tempFile), "Test document should be valid");
+
+            String savedPath = FileUploadManager.saveUploadedFile("APP-TEST-999", "Indigency", tempFile);
+            File savedFile = new File(savedPath);
+
+            assertTrue(savedFile.exists(), "Saved file must physically exist in storage directory");
+            assertTrue(savedFile.length() > 0, "Saved file length must be > 0");
+            assertTrue(savedPath.contains("APP-TEST-999"), "Path must contain applicant folder");
+
+            // Clean up test file
+            savedFile.delete();
+            File dir = savedFile.getParentFile();
+            if (dir != null && dir.exists()) dir.delete();
+        } catch (IOException e) {
+            throw new RuntimeException("FileUploadManager test failed: " + e.getMessage(), e);
+        } finally {
+            if (tempFile.exists()) tempFile.delete();
+        }
+    }
+
+    // 16. Applicant Registration with Document Attachments Test
+    private static void testRegisterApplicantWithFileUploads() {
+        ScholarshipManager mgr = new ScholarshipManager(150000.0, 3000.0);
+
+        File dummyFile = new File("dummy_cor.pdf");
+        try {
+            try (FileWriter fw = new FileWriter(dummyFile)) {
+                fw.write("%PDF-1.4 DUMMY OFFICIAL ENROLLMENT RECEIPT");
+            }
+
+            DocumentChecklist docs = new DocumentChecklist(true, true, false, true);
+
+            Applicant app = mgr.registerApplicant(
+                    "Clarisse Santos", "clarisse@univ.ph", "09181234567",
+                    "University of the Philippines", "2nd Year College",
+                    1.40, 14000.0, "Purok 1 Maligaya",
+                    docs,
+                    null, null, dummyFile, null
+            );
+
+            assertTrue(app != null, "Registered applicant should not be null");
+            assertTrue(app.getDocuments().hasEnrollmentFile(), "Applicant should have enrollment file attached");
+            assertTrue(app.getDocuments().isEnrollmentForm(), "Enrollment requirement should be satisfied");
+            assertTrue(app.getDocuments().isComplete(), "All 4 requirements should now be complete");
+            assertEquals(ApplicationStatus.VERIFIED, app.getStatus(), "Status should be VERIFIED since docs are complete");
+
+            String savedPath = app.getDocuments().getEnrollmentFilePath();
+            assertTrue(savedPath != null && new File(savedPath).exists(), "Saved enrollment document must exist on disk");
+
+            // Clean up
+            new File(savedPath).delete();
+            new File(savedPath).getParentFile().delete();
+        } catch (IOException e) {
+            throw new RuntimeException("Registration with files failed: " + e.getMessage(), e);
+        } finally {
+            if (dummyFile.exists()) dummyFile.delete();
+        }
     }
 }

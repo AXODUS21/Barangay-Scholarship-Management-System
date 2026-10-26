@@ -19,6 +19,7 @@ public class StatCard extends JPanel {
     public StatCard(String title, String initialValue, String subtitle, Color accentColor) {
         setLayout(new BorderLayout(8, 6));
         setBackground(Theme.CARD_BG);
+        setMinimumSize(new Dimension(100, 70));
 
         // Card Border with left accent line
         setBorder(new CompoundBorder(

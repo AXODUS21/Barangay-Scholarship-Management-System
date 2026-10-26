@@ -4,6 +4,7 @@ import com.barangay.scholarship.model.Applicant;
 import com.barangay.scholarship.model.DocumentChecklist;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
+import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -12,6 +13,9 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -36,11 +40,17 @@ public class StudentApplicationView extends JPanel {
     private JTextField txtGwa;
     private JTextField txtIncome;
 
-    // Physical Document Checklist Checkboxes
+    // Physical Document Checklist Checkboxes & Files
     private JCheckBox chkIndigency;
     private JCheckBox chkGrades;
     private JCheckBox chkEnrollment;
     private JCheckBox chkId;
+
+    private File fileIndigency;
+    private File fileGrades;
+    private File fileEnrollment;
+    private File fileId;
+    private final List<Runnable> fileResetCallbacks = new ArrayList<>();
 
     // Data Privacy & Truthfulness
     private JCheckBox chkConsent;
@@ -203,36 +213,51 @@ public class StudentApplicationView extends JPanel {
         cardDocs.add(titleSec3);
         cardDocs.add(Theme.createVerticalStrut(6));
 
-        JLabel docNote = new JLabel("<html>Check the physical documents you currently have available. <i>(You can submit your application online now, then bring original hardcopies to the Barangay Hall for document screening)</i>:</html>");
+        JLabel docNote = new JLabel("<html>Check the physical documents you currently have available and/or upload digital copies (PDF, PNG, JPG). <i>(You can submit digital attachments now, or bring original hardcopies to the Barangay Hall for document screening)</i>:</html>");
         docNote.setFont(Theme.FONT_BODY);
         docNote.setForeground(Theme.TEXT_MUTED);
         docNote.setAlignmentX(Component.LEFT_ALIGNMENT);
         cardDocs.add(docNote);
-        cardDocs.add(Theme.createVerticalStrut(10));
+        cardDocs.add(Theme.createVerticalStrut(12));
 
-        chkIndigency = new JCheckBox("Certificate of Indigency (Issued by Barangay Hall)");
-        chkGrades = new JCheckBox("Certified True Copy of Grades / Transcript of Records / Form 138");
-        chkEnrollment = new JCheckBox("Certificate of Registration (COR) / Official School Enrollment Form");
-        chkId = new JCheckBox("Valid Student ID or Barangay Resident ID");
+        chkIndigency = new JCheckBox();
+        chkGrades = new JCheckBox();
+        chkEnrollment = new JCheckBox();
+        chkId = new JCheckBox();
 
-        chkIndigency.setFont(Theme.FONT_BODY);
-        chkGrades.setFont(Theme.FONT_BODY);
-        chkEnrollment.setFont(Theme.FONT_BODY);
-        chkId.setFont(Theme.FONT_BODY);
+        JPanel slotIndigency = createDocumentUploadSlot("Certificate of Indigency (Issued by Barangay Hall)",
+                chkIndigency, "Certificate of Indigency", f -> this.fileIndigency = f);
+        JPanel slotGrades = createDocumentUploadSlot("Certified True Copy of Grades / Transcript of Records / Form 138",
+                chkGrades, "Copy of Grades / TOR", f -> this.fileGrades = f);
+        JPanel slotEnrollment = createDocumentUploadSlot("Certificate of Registration (COR) / Official School Enrollment Form",
+                chkEnrollment, "Certificate of Registration (COR)", f -> this.fileEnrollment = f);
+        JPanel slotId = createDocumentUploadSlot("Valid Student ID or Barangay Resident ID",
+                chkId, "Valid ID", f -> this.fileId = f);
 
-        JPanel chkGrid = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel chkGrid = new JPanel(new GridLayout(2, 2, 12, 12));
         chkGrid.setOpaque(false);
         chkGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-        chkGrid.add(chkIndigency);
-        chkGrid.add(chkGrades);
-        chkGrid.add(chkEnrollment);
-        chkGrid.add(chkId);
+        chkGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 175));
+        chkGrid.add(slotIndigency);
+        chkGrid.add(slotGrades);
+        chkGrid.add(slotEnrollment);
+        chkGrid.add(slotId);
         cardDocs.add(chkGrid);
-        cardDocs.add(Theme.createVerticalStrut(16));
+        cardDocs.add(Theme.createVerticalStrut(10));
+
+        // Format Support Notice
+        JPanel formatNote = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        formatNote.setOpaque(false);
+        formatNote.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel lblFormats = new JLabel("📁 Supported file formats: PDF, PNG, JPG, JPEG, DOCX, DOC, TXT (Max 20 MB each). Digital uploads allow fast-track online verification.");
+        lblFormats.setFont(Theme.FONT_SMALL);
+        lblFormats.setForeground(Theme.TEXT_MUTED);
+        formatNote.add(lblFormats);
+        cardDocs.add(formatNote);
+        cardDocs.add(Theme.createVerticalStrut(14));
 
         // Consent Checkbox
-        chkConsent = new JCheckBox("<html><b>Data Privacy & Truthfulness Certification:</b> I hereby certify that the information provided is true, accurate, and complete. I consent to the processing of this data by the Barangay Council and SK under the Data Privacy Act of 2012 for the purpose of scholarship evaluation.</html>");
+        chkConsent = new JCheckBox("<html><b>Data Privacy & Truthfulness Certification:</b> I hereby certify that the information provided and all uploaded documents are true, accurate, and complete. I consent to the processing of this data by the Barangay Council and SK under the Data Privacy Act of 2012 for the purpose of scholarship evaluation.</html>");
         chkConsent.setFont(Theme.FONT_SMALL);
         chkConsent.setForeground(Theme.TEXT_TITLE);
         chkConsent.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -384,8 +409,11 @@ public class StudentApplicationView extends JPanel {
                 chkId.isSelected()
         );
 
-        // Register student applicant
-        Applicant applicant = manager.registerApplicant(name, email, phone, school, year, gwa, income, purok, docs);
+        // Register student applicant with optional digital document attachments
+        Applicant applicant = manager.registerApplicant(
+                name, email, phone, school, year, gwa, income, purok, docs,
+                fileIndigency, fileGrades, fileEnrollment, fileId
+        );
 
         // Show official confirmation modal slip
         showConfirmationReceipt(applicant);
@@ -398,7 +426,7 @@ public class StudentApplicationView extends JPanel {
         String queueDisplay = queuePos > 0 ? ("#" + queuePos + " in Line") : "Evaluated";
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Official Application Receipt", true);
-        dialog.setSize(520, 500);
+        dialog.setSize(540, 530);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
@@ -443,7 +471,7 @@ public class StudentApplicationView extends JPanel {
         card.add(Box.createVerticalStrut(16));
 
         // Details grid
-        JPanel grid = new JPanel(new GridLayout(5, 2, 8, 6));
+        JPanel grid = new JPanel(new GridLayout(6, 2, 8, 6));
         grid.setOpaque(false);
 
         addDetailRow(grid, "Applicant Name:", applicant.getFullName());
@@ -451,6 +479,10 @@ public class StudentApplicationView extends JPanel {
         addDetailRow(grid, "Year & Purok:", applicant.getYearLevel() + " • " + applicant.getPurok());
         addDetailRow(grid, "Screening Queue:", queueDisplay);
         addDetailRow(grid, "Initial Status:", applicant.getStatus().getDisplayName());
+
+        int uploadCount = applicant.getDocuments().getUploadedFilesCount();
+        String uploadDisplay = uploadCount > 0 ? (uploadCount + " Digital File" + (uploadCount > 1 ? "s" : "") + " Attached") : "Physical Hardcopy Screening";
+        addDetailRow(grid, "Attached Files:", uploadDisplay);
 
         card.add(grid);
         card.add(Box.createVerticalStrut(16));
@@ -467,7 +499,14 @@ public class StudentApplicationView extends JPanel {
         noteTitle.setFont(Theme.FONT_SMALL_BOLD);
         noteTitle.setForeground(Theme.INFO);
 
-        JLabel noteBody = new JLabel("<html>Please present your <b>Application Reference Number (" + applicant.getApplicantId() + ")</b> along with original physical copies of your documents to the Barangay Hall during office hours (Mon-Fri 8:00 AM - 5:00 PM).</html>");
+        String noteText;
+        if (applicant.getDocuments().hasAnyUploadedFiles()) {
+            noteText = "<html><b>" + uploadCount + " digital document file(s) have been securely archived</b> with your application for SK Council review.<br>Keep Reference Number (<b>" + applicant.getApplicantId() + "</b>) handy and bring original hardcopies to the Barangay Hall if requested.</html>";
+        } else {
+            noteText = "<html>Please present your <b>Application Reference Number (" + applicant.getApplicantId() + ")</b> along with original physical copies of your documents to the Barangay Hall during office hours (Mon-Fri 8:00 AM - 5:00 PM).</html>";
+        }
+
+        JLabel noteBody = new JLabel(noteText);
         noteBody.setFont(Theme.FONT_SMALL);
         noteBody.setForeground(Theme.TEXT_BODY);
 
@@ -523,7 +562,126 @@ public class StudentApplicationView extends JPanel {
         chkGrades.setSelected(false);
         chkEnrollment.setSelected(false);
         chkId.setSelected(false);
+        fileIndigency = null;
+        fileGrades = null;
+        fileEnrollment = null;
+        fileId = null;
+        for (Runnable r : fileResetCallbacks) {
+            r.run();
+        }
         chkConsent.setSelected(false);
         updateEligibilityPreview();
+    }
+
+    private JPanel createDocumentUploadSlot(String title, JCheckBox checkBox, String docCategory, Consumer<File> onFileChange) {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(new Color(248, 250, 252));
+        card.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(8, 12, 8, 12)
+        ));
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        checkBox.setText(title);
+        checkBox.setFont(Theme.FONT_BODY_BOLD);
+        checkBox.setForeground(Theme.TEXT_TITLE);
+        checkBox.setOpaque(false);
+        checkBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(checkBox);
+        card.add(Box.createVerticalStrut(4));
+
+        // Indented controls row
+        JPanel ctrlRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        ctrlRow.setOpaque(false);
+        ctrlRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JButton btnUpload = new JButton("📎 Choose File...");
+        btnUpload.setFont(Theme.FONT_SMALL_BOLD);
+        btnUpload.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnUpload.setFocusPainted(false);
+        btnUpload.setBackground(Theme.PRIMARY_LIGHT);
+        btnUpload.setForeground(Theme.PRIMARY);
+
+        JLabel lblStatus = new JLabel("No digital file chosen (Optional)");
+        lblStatus.setFont(Theme.FONT_SMALL);
+        lblStatus.setForeground(Theme.TEXT_MUTED);
+
+        JButton btnView = new JButton("👁 View");
+        btnView.setFont(Theme.FONT_SMALL);
+        btnView.setForeground(Theme.PRIMARY);
+        btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnView.setVisible(false);
+
+        JButton btnRemove = new JButton("✕ Remove");
+        btnRemove.setFont(Theme.FONT_SMALL);
+        btnRemove.setForeground(Theme.DANGER);
+        btnRemove.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnRemove.setVisible(false);
+
+        final File[] currentFileRef = new File[1];
+
+        btnUpload.addActionListener(e -> {
+            JFileChooser chooser = FileUploadManager.createFileChooser("Attach " + docCategory);
+            int res = chooser.showOpenDialog(StudentApplicationView.this);
+            if (res == JFileChooser.APPROVE_OPTION) {
+                File chosen = chooser.getSelectedFile();
+                String valErr = FileUploadManager.getValidationError(chosen);
+                if (valErr != null) {
+                    JOptionPane.showMessageDialog(StudentApplicationView.this, valErr,
+                            "Invalid File", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                currentFileRef[0] = chosen;
+                onFileChange.accept(chosen);
+                checkBox.setSelected(true);
+
+                lblStatus.setText("✓ " + chosen.getName() + " (" + FileUploadManager.formatFileSize(chosen.length()) + ")");
+                lblStatus.setFont(Theme.FONT_SMALL_BOLD);
+                lblStatus.setForeground(Theme.ACCENT_HOVER);
+                lblStatus.setToolTipText(chosen.getAbsolutePath());
+                btnView.setVisible(true);
+                btnRemove.setVisible(true);
+                card.revalidate();
+                card.repaint();
+            }
+        });
+
+        btnView.addActionListener(e -> {
+            if (currentFileRef[0] != null) {
+                FileUploadManager.openFile(StudentApplicationView.this, currentFileRef[0].getAbsolutePath());
+            }
+        });
+
+        btnRemove.addActionListener(e -> {
+            currentFileRef[0] = null;
+            onFileChange.accept(null);
+            lblStatus.setText("No digital file chosen (Optional)");
+            lblStatus.setFont(Theme.FONT_SMALL);
+            lblStatus.setForeground(Theme.TEXT_MUTED);
+            lblStatus.setToolTipText(null);
+            btnView.setVisible(false);
+            btnRemove.setVisible(false);
+            card.revalidate();
+            card.repaint();
+        });
+
+        fileResetCallbacks.add(() -> {
+            currentFileRef[0] = null;
+            lblStatus.setText("No digital file chosen (Optional)");
+            lblStatus.setFont(Theme.FONT_SMALL);
+            lblStatus.setForeground(Theme.TEXT_MUTED);
+            lblStatus.setToolTipText(null);
+            btnView.setVisible(false);
+            btnRemove.setVisible(false);
+        });
+
+        ctrlRow.add(btnUpload);
+        ctrlRow.add(lblStatus);
+        ctrlRow.add(btnView);
+        ctrlRow.add(btnRemove);
+
+        card.add(ctrlRow);
+        return card;
     }
 }

@@ -6,6 +6,7 @@ import com.barangay.scholarship.model.DocumentChecklist;
 import com.barangay.scholarship.model.Scholar;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
+import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -265,10 +266,10 @@ public class StudentStatusTrackerView extends JPanel {
         docGrid.setOpaque(false);
         docGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        docGrid.add(createDocPill("Certificate of Indigency", docs.isCertificateOfIndigency()));
-        docGrid.add(createDocPill("Copy of Grades / TOR", docs.isCertifiedCopyOfGrades()));
-        docGrid.add(createDocPill("Certificate of Registration (COR)", docs.isEnrollmentForm()));
-        docGrid.add(createDocPill("Valid Student / Resident ID", docs.isValidBarangayOrSchoolId()));
+        docGrid.add(createDocPill("Certificate of Indigency", docs.isCertificateOfIndigency(), docs.getIndigencyFilePath()));
+        docGrid.add(createDocPill("Copy of Grades / TOR", docs.isCertifiedCopyOfGrades(), docs.getGradesFilePath()));
+        docGrid.add(createDocPill("Certificate of Registration (COR)", docs.isEnrollmentForm(), docs.getEnrollmentFilePath()));
+        docGrid.add(createDocPill("Valid Student / Resident ID", docs.isValidBarangayOrSchoolId(), docs.getIdFilePath()));
 
         docBox.add(docGrid);
         card.add(docBox);
@@ -458,7 +459,7 @@ public class StudentStatusTrackerView extends JPanel {
         }
     }
 
-    private JPanel createDocPill(String docTitle, boolean isSubmitted) {
+    private JPanel createDocPill(String docTitle, boolean isSubmitted, String filePath) {
         JPanel p = new JPanel(new BorderLayout(8, 0));
         p.setBackground(isSubmitted ? Theme.ACCENT_BG : Theme.WARNING_BG);
         p.setBorder(new CompoundBorder(
@@ -469,13 +470,26 @@ public class StudentStatusTrackerView extends JPanel {
         JLabel title = new JLabel(docTitle);
         title.setFont(Theme.FONT_SMALL_BOLD);
         title.setForeground(Theme.TEXT_TITLE);
+        p.add(title, BorderLayout.CENTER);
 
-        JLabel status = new JLabel(isSubmitted ? "Received" : "Pending");
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        right.setOpaque(false);
+
+        if (filePath != null && !filePath.trim().isEmpty()) {
+            JButton btnView = new JButton("👁 View");
+            btnView.setFont(Theme.FONT_SMALL);
+            btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            btnView.setMargin(new Insets(2, 6, 2, 6));
+            btnView.addActionListener(e -> FileUploadManager.openFile(this, filePath));
+            right.add(btnView);
+        }
+
+        JLabel status = new JLabel(isSubmitted ? (filePath != null ? "✓ Uploaded" : "✓ Received") : "Pending");
         status.setFont(Theme.FONT_SMALL_BOLD);
         status.setForeground(isSubmitted ? Theme.ACCENT_HOVER : new Color(180, 83, 9));
+        right.add(status);
 
-        p.add(title, BorderLayout.CENTER);
-        p.add(status, BorderLayout.EAST);
+        p.add(right, BorderLayout.EAST);
         return p;
     }
 

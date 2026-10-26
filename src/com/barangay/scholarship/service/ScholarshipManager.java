@@ -5,7 +5,9 @@ import com.barangay.scholarship.datastructures.ActionStack;
 import com.barangay.scholarship.datastructures.ScholarBST;
 import com.barangay.scholarship.datastructures.ScholarshipQueue;
 import com.barangay.scholarship.model.*;
+import com.barangay.scholarship.util.FileUploadManager;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,11 +161,59 @@ public class ScholarshipManager implements Serializable {
                                                     String school, String year, double gwa,
                                                     double income, String purok,
                                                     DocumentChecklist docs) {
+        return registerApplicant(name, email, phone, school, year, gwa, income, purok, docs, null, null, null, null);
+    }
+
+    /**
+     * Registers a new applicant with optional digital document attachments.
+     */
+    public synchronized Applicant registerApplicant(String name, String email, String phone,
+                                                    String school, String year, double gwa,
+                                                    double income, String purok,
+                                                    DocumentChecklist docs,
+                                                    File indigencyFile, File gradesFile,
+                                                    File enrollmentFile, File idFile) {
         String appId = generateNextApplicantId();
         Applicant applicant = new Applicant(appId, name, email, phone, school, year, gwa, income, purok);
-        if (docs != null) {
-            applicant.setDocuments(docs);
+        if (docs == null) {
+            docs = new DocumentChecklist();
         }
+
+        // Persist any uploaded files into data/uploads/<appId>/
+        if (indigencyFile != null && indigencyFile.exists() && indigencyFile.isFile()) {
+            try {
+                String saved = FileUploadManager.saveUploadedFile(appId, "Indigency", indigencyFile);
+                docs.setIndigencyFilePath(saved);
+            } catch (Exception e) {
+                System.err.println("Failed to save indigency file: " + e.getMessage());
+            }
+        }
+        if (gradesFile != null && gradesFile.exists() && gradesFile.isFile()) {
+            try {
+                String saved = FileUploadManager.saveUploadedFile(appId, "Grades", gradesFile);
+                docs.setGradesFilePath(saved);
+            } catch (Exception e) {
+                System.err.println("Failed to save grades file: " + e.getMessage());
+            }
+        }
+        if (enrollmentFile != null && enrollmentFile.exists() && enrollmentFile.isFile()) {
+            try {
+                String saved = FileUploadManager.saveUploadedFile(appId, "Enrollment", enrollmentFile);
+                docs.setEnrollmentFilePath(saved);
+            } catch (Exception e) {
+                System.err.println("Failed to save enrollment file: " + e.getMessage());
+            }
+        }
+        if (idFile != null && idFile.exists() && idFile.isFile()) {
+            try {
+                String saved = FileUploadManager.saveUploadedFile(appId, "ID", idFile);
+                docs.setIdFilePath(saved);
+            } catch (Exception e) {
+                System.err.println("Failed to save ID file: " + e.getMessage());
+            }
+        }
+
+        applicant.setDocuments(docs);
 
         // Auto-Eligibility Check
         if (!applicant.isEligible()) {
@@ -190,7 +240,8 @@ public class ScholarshipManager implements Serializable {
                 null,
                 applicant.getStatus(),
                 0.0,
-                "Registered student applicant " + applicant.getFullName(),
+                "Registered student applicant " + applicant.getFullName() +
+                        (docs.hasAnyUploadedFiles() ? " with " + docs.getUploadedFilesCount() + " attached document(s)" : ""),
                 applicant
         ));
 

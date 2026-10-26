@@ -169,8 +169,17 @@ public class Theme {
     }
 
     public static JScrollPane createBorderlessScrollPane(Component view) {
-        JScrollPane sp = new JScrollPane(view);
+        Component wrappedView = view;
+        if (view instanceof JComponent && !(view instanceof Scrollable)) {
+            ScrollablePanel wrapper = new ScrollablePanel(new BorderLayout());
+            wrapper.setOpaque(false);
+            wrapper.add(view, BorderLayout.CENTER);
+            wrappedView = wrapper;
+        }
+
+        JScrollPane sp = new JScrollPane(wrappedView);
         sp.setBorder(null);
+        sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         sp.getViewport().setBackground(BG_APP);
         sp.getVerticalScrollBar().setUnitIncrement(16);
         sp.getHorizontalScrollBar().setUnitIncrement(16);

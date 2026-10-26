@@ -8,11 +8,13 @@ import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
 import com.barangay.scholarship.ui.components.ModernTable;
 import com.barangay.scholarship.ui.components.StatCard;
+import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -37,6 +39,22 @@ public class ScreeningQueueView extends JPanel {
     private JCheckBox chkGrades;
     private JCheckBox chkEnrollment;
     private JCheckBox chkId;
+
+    private JButton btnViewIndigency;
+    private JButton btnViewGrades;
+    private JButton btnViewEnrollment;
+    private JButton btnViewId;
+
+    private JLabel lblIndigencyInfo;
+    private JLabel lblGradesInfo;
+    private JLabel lblEnrollmentInfo;
+    private JLabel lblIdInfo;
+
+    private JButton btnAttachIndigency;
+    private JButton btnAttachGrades;
+    private JButton btnAttachEnrollment;
+    private JButton btnAttachId;
+
     private JButton btnVerifyApprove;
     private JButton btnReject;
 
@@ -161,18 +179,82 @@ public class ScreeningQueueView extends JPanel {
         chkGrades = new JCheckBox("2. Certified Copy of Grades (Form 138 / TOR)");
         chkEnrollment = new JCheckBox("3. Certificate of Registration / Enrollment Form");
         chkId = new JCheckBox("4. Valid Barangay ID or Student ID");
-        chkIndigency.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkGrades.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkEnrollment.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkId.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        chkPanel.add(chkIndigency);
-        chkPanel.add(Box.createVerticalStrut(8));
-        chkPanel.add(chkGrades);
-        chkPanel.add(Box.createVerticalStrut(8));
-        chkPanel.add(chkEnrollment);
-        chkPanel.add(Box.createVerticalStrut(8));
-        chkPanel.add(chkId);
+        btnViewIndigency = new JButton("👁 View Document");
+        btnViewGrades = new JButton("👁 View Document");
+        btnViewEnrollment = new JButton("👁 View Document");
+        btnViewId = new JButton("👁 View Document");
+
+        lblIndigencyInfo = new JLabel("No applicant selected");
+        lblGradesInfo = new JLabel("No applicant selected");
+        lblEnrollmentInfo = new JLabel("No applicant selected");
+        lblIdInfo = new JLabel("No applicant selected");
+
+        btnAttachIndigency = new JButton("📎 Attach File");
+        btnAttachGrades = new JButton("📎 Attach File");
+        btnAttachEnrollment = new JButton("📎 Attach File");
+        btnAttachId = new JButton("📎 Attach File");
+
+        btnAttachIndigency.addActionListener(e -> staffUploadDocument("Indigency", (f, path) -> {
+            if (currentSelectedApplicant != null) {
+                currentSelectedApplicant.getDocuments().setIndigencyFilePath(path);
+                chkIndigency.setSelected(true);
+                updateDocAttachmentRow(true, f.getName(), path, btnViewIndigency, lblIndigencyInfo);
+            }
+        }));
+
+        btnAttachGrades.addActionListener(e -> staffUploadDocument("Grades", (f, path) -> {
+            if (currentSelectedApplicant != null) {
+                currentSelectedApplicant.getDocuments().setGradesFilePath(path);
+                chkGrades.setSelected(true);
+                updateDocAttachmentRow(true, f.getName(), path, btnViewGrades, lblGradesInfo);
+            }
+        }));
+
+        btnAttachEnrollment.addActionListener(e -> staffUploadDocument("Enrollment", (f, path) -> {
+            if (currentSelectedApplicant != null) {
+                currentSelectedApplicant.getDocuments().setEnrollmentFilePath(path);
+                chkEnrollment.setSelected(true);
+                updateDocAttachmentRow(true, f.getName(), path, btnViewEnrollment, lblEnrollmentInfo);
+            }
+        }));
+
+        btnAttachId.addActionListener(e -> staffUploadDocument("ID", (f, path) -> {
+            if (currentSelectedApplicant != null) {
+                currentSelectedApplicant.getDocuments().setIdFilePath(path);
+                chkId.setSelected(true);
+                updateDocAttachmentRow(true, f.getName(), path, btnViewId, lblIdInfo);
+            }
+        }));
+
+        btnViewIndigency.addActionListener(e -> {
+            if (currentSelectedApplicant != null) {
+                FileUploadManager.openFile(this, currentSelectedApplicant.getDocuments().getIndigencyFilePath());
+            }
+        });
+        btnViewGrades.addActionListener(e -> {
+            if (currentSelectedApplicant != null) {
+                FileUploadManager.openFile(this, currentSelectedApplicant.getDocuments().getGradesFilePath());
+            }
+        });
+        btnViewEnrollment.addActionListener(e -> {
+            if (currentSelectedApplicant != null) {
+                FileUploadManager.openFile(this, currentSelectedApplicant.getDocuments().getEnrollmentFilePath());
+            }
+        });
+        btnViewId.addActionListener(e -> {
+            if (currentSelectedApplicant != null) {
+                FileUploadManager.openFile(this, currentSelectedApplicant.getDocuments().getIdFilePath());
+            }
+        });
+
+        chkPanel.add(createStaffDocRow(chkIndigency, btnViewIndigency, lblIndigencyInfo, btnAttachIndigency));
+        chkPanel.add(Box.createVerticalStrut(6));
+        chkPanel.add(createStaffDocRow(chkGrades, btnViewGrades, lblGradesInfo, btnAttachGrades));
+        chkPanel.add(Box.createVerticalStrut(6));
+        chkPanel.add(createStaffDocRow(chkEnrollment, btnViewEnrollment, lblEnrollmentInfo, btnAttachEnrollment));
+        chkPanel.add(Box.createVerticalStrut(6));
+        chkPanel.add(createStaffDocRow(chkId, btnViewId, lblIdInfo, btnAttachId));
         chkPanel.add(Box.createVerticalGlue());
 
         JScrollPane chkScroll = new JScrollPane(chkPanel);
@@ -205,6 +287,81 @@ public class ScreeningQueueView extends JPanel {
         add(centerPanel, BorderLayout.CENTER);
     }
 
+    private JPanel createStaffDocRow(JCheckBox chk, JButton btnView, JLabel lblInfo, JButton btnAttach) {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        chk.setFont(Theme.FONT_BODY_BOLD);
+        chk.setForeground(Theme.TEXT_TITLE);
+        chk.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.add(chk);
+        p.add(Box.createVerticalStrut(2));
+
+        JPanel subRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        subRow.setOpaque(false);
+        subRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        btnView.setFont(Theme.FONT_SMALL_BOLD);
+        btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnView.setBackground(Theme.PRIMARY_LIGHT);
+        btnView.setForeground(Theme.PRIMARY);
+        btnView.setVisible(false);
+
+        lblInfo.setFont(Theme.FONT_SMALL);
+        lblInfo.setForeground(Theme.TEXT_MUTED);
+
+        btnAttach.setFont(Theme.FONT_SMALL);
+        btnAttach.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnAttach.setEnabled(false);
+
+        subRow.add(btnView);
+        subRow.add(lblInfo);
+        subRow.add(btnAttach);
+        p.add(subRow);
+
+        p.setBorder(new EmptyBorder(4, 6, 6, 6));
+        return p;
+    }
+
+    private void updateDocAttachmentRow(boolean hasFile, String fileName, String filePath, JButton btnView, JLabel lblInfo) {
+        if (hasFile) {
+            btnView.setVisible(true);
+            btnView.setText("👁 View (" + fileName + ")");
+            btnView.setToolTipText("Open file: " + filePath);
+            lblInfo.setText("✓ Digital File Archived");
+            lblInfo.setForeground(Theme.ACCENT_HOVER);
+        } else {
+            btnView.setVisible(false);
+            lblInfo.setText("No digital file (Physical inspection)");
+            lblInfo.setForeground(Theme.TEXT_MUTED);
+        }
+    }
+
+    private void staffUploadDocument(String docType, java.util.function.BiConsumer<File, String> onSaved) {
+        if (currentSelectedApplicant == null) return;
+        JFileChooser chooser = FileUploadManager.createFileChooser("Attach " + docType + " for " + currentSelectedApplicant.getFullName());
+        int res = chooser.showOpenDialog(this);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            String err = FileUploadManager.getValidationError(file);
+            if (err != null) {
+                JOptionPane.showMessageDialog(this, err, "Invalid File", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try {
+                String savedPath = FileUploadManager.saveUploadedFile(currentSelectedApplicant.getApplicantId(), docType, file);
+                onSaved.accept(file, savedPath);
+                JOptionPane.showMessageDialog(this, "Document successfully attached and archived!",
+                        "Upload Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage(),
+                        "Storage Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     private void selectApplicant(Applicant applicant) {
         this.currentSelectedApplicant = applicant;
         if (applicant == null) {
@@ -216,6 +373,21 @@ public class ScreeningQueueView extends JPanel {
             chkId.setSelected(false);
             btnVerifyApprove.setEnabled(false);
             btnReject.setEnabled(false);
+
+            btnViewIndigency.setVisible(false);
+            btnViewGrades.setVisible(false);
+            btnViewEnrollment.setVisible(false);
+            btnViewId.setVisible(false);
+
+            lblIndigencyInfo.setText("No applicant selected");
+            lblGradesInfo.setText("No applicant selected");
+            lblEnrollmentInfo.setText("No applicant selected");
+            lblIdInfo.setText("No applicant selected");
+
+            btnAttachIndigency.setEnabled(false);
+            btnAttachGrades.setEnabled(false);
+            btnAttachEnrollment.setEnabled(false);
+            btnAttachId.setEnabled(false);
             return;
         }
 
@@ -229,6 +401,20 @@ public class ScreeningQueueView extends JPanel {
         chkEnrollment.setSelected(docs.isEnrollmentForm());
         chkId.setSelected(docs.isValidBarangayOrSchoolId());
 
+        btnAttachIndigency.setEnabled(true);
+        btnAttachGrades.setEnabled(true);
+        btnAttachEnrollment.setEnabled(true);
+        btnAttachId.setEnabled(true);
+
+        updateDocAttachmentRow(docs.hasIndigencyFile(), docs.getIndigencyFileName(), docs.getIndigencyFilePath(),
+                btnViewIndigency, lblIndigencyInfo);
+        updateDocAttachmentRow(docs.hasGradesFile(), docs.getGradesFileName(), docs.getGradesFilePath(),
+                btnViewGrades, lblGradesInfo);
+        updateDocAttachmentRow(docs.hasEnrollmentFile(), docs.getEnrollmentFileName(), docs.getEnrollmentFilePath(),
+                btnViewEnrollment, lblEnrollmentInfo);
+        updateDocAttachmentRow(docs.hasIdFile(), docs.getIdFileName(), docs.getIdFilePath(),
+                btnViewId, lblIdInfo);
+
         btnVerifyApprove.setEnabled(true);
         btnReject.setEnabled(true);
     }
@@ -236,11 +422,16 @@ public class ScreeningQueueView extends JPanel {
     private void verifyCurrentApplicant() {
         if (currentSelectedApplicant == null) return;
 
+        DocumentChecklist existing = currentSelectedApplicant.getDocuments();
         DocumentChecklist updatedDocs = new DocumentChecklist(
                 chkIndigency.isSelected(),
                 chkGrades.isSelected(),
                 chkEnrollment.isSelected(),
-                chkId.isSelected()
+                chkId.isSelected(),
+                existing != null ? existing.getIndigencyFilePath() : null,
+                existing != null ? existing.getGradesFilePath() : null,
+                existing != null ? existing.getEnrollmentFilePath() : null,
+                existing != null ? existing.getIdFilePath() : null
         );
 
         boolean success = manager.verifyApplicantDocuments(currentSelectedApplicant.getApplicantId(), updatedDocs);

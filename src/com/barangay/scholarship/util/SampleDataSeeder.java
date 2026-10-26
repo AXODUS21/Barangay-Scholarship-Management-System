@@ -6,6 +6,8 @@ import com.barangay.scholarship.model.DocumentChecklist;
 import com.barangay.scholarship.model.Scholar;
 import com.barangay.scholarship.service.ScholarshipManager;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +76,44 @@ public class SampleDataSeeder {
                     docsComplete,
                     docsComplete || (appNum % 2 == 0)
             );
+
+            // Pre-seed mock uploaded digital files for demo scholars
+            if (docsComplete && appNum <= 4) {
+                try {
+                    String sampleDir = "data/uploads/" + appId;
+                    new File(sampleDir).mkdirs();
+                    File indFile = new File(sampleDir, "Indigency_Certificate_Barangay.txt");
+                    if (!indFile.exists()) {
+                        try (FileWriter fw = new FileWriter(indFile)) {
+                            fw.write("=====================================================\n"
+                                    + "       BARANGAY COUNCIL - CERTIFICATE OF INDIGENCY   \n"
+                                    + "=====================================================\n"
+                                    + "This certifies that " + name + ", residing at " + purok + ",\n"
+                                    + "belongs to an indigent family qualified for the Barangay\n"
+                                    + "Scholarship & Educational Aid Program.\n"
+                                    + "Monthly Household Income: ₱" + String.format("%,.2f", income) + "\n"
+                                    + "Issued by: Barangay Hall Administration\n");
+                        }
+                    }
+                    docs.setIndigencyFilePath(indFile.getPath());
+
+                    File corFile = new File(sampleDir, "Enrollment_COR_Official.txt");
+                    if (!corFile.exists()) {
+                        try (FileWriter fw = new FileWriter(corFile)) {
+                            fw.write("=====================================================\n"
+                                    + "      OFFICIAL CERTIFICATE OF REGISTRATION (COR)    \n"
+                                    + "=====================================================\n"
+                                    + "Student Name : " + name + "\n"
+                                    + "Institution  : " + school + "\n"
+                                    + "Year Level   : " + year + "\n"
+                                    + "Academic Term: 1st Semester AY 2026-2027\n"
+                                    + "Status       : Officially Enrolled (Regular)\n");
+                        }
+                    }
+                    docs.setEnrollmentFilePath(corFile.getPath());
+                } catch (Exception ignored) {
+                }
+            }
 
             Applicant applicant = new Applicant(
                     appId, name, email, phone, school, year, gwa, income, purok,

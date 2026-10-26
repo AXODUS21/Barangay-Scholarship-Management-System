@@ -22,8 +22,8 @@ public class PortalSelectorFrame extends JFrame {
         this.manager = manager;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(880, 580);
-        setMinimumSize(new Dimension(800, 520));
+        setSize(840, 420);
+        setMinimumSize(new Dimension(750, 380));
         setLocationRelativeTo(null);
         setResizable(false);
 
@@ -40,7 +40,7 @@ public class PortalSelectorFrame extends JFrame {
         topBanner.setBorder(new EmptyBorder(24, 32, 24, 32));
         topBanner.setLayout(new BoxLayout(topBanner, BoxLayout.Y_AXIS));
 
-        JLabel country = new JLabel("REPUBLIC OF THE PHILIPPINES • SANGGUNIANG KABATAAN");
+        JLabel country = new JLabel("BARANGAY CALINGATAN, MATAASNAKAHOY, BATANGAS");
         country.setFont(Theme.FONT_SMALL_BOLD);
         country.setForeground(new Color(147, 197, 253)); // Soft blue
 
@@ -63,19 +63,12 @@ public class PortalSelectorFrame extends JFrame {
         // Center: Two Role Selection Cards Side-by-Side
         JPanel centerGrid = new JPanel(new GridLayout(1, 2, 24, 0));
         centerGrid.setOpaque(false);
-        centerGrid.setBorder(new EmptyBorder(32, 36, 32, 36));
+        centerGrid.setBorder(new EmptyBorder(24, 36, 24, 36));
 
         // LEFT CARD: Student Portal
         JPanel studentCard = createRoleCard(
                 "Student Applicant Portal",
                 "For resident students submitting applications & tracking evaluation status",
-                new String[]{
-                        "-  Online Scholarship Registration Form",
-                        "-  Instant Dual-Scale Eligibility Auto-Check",
-                        "-  Document Requirements Checklist",
-                        "-  Personal Application & Queue Tracker",
-                        "-  Zero Administrative Controls Exposed"
-                },
                 "Enter Student Portal",
                 Theme.ACCENT,
                 e -> launchStudentPortal()
@@ -85,13 +78,6 @@ public class PortalSelectorFrame extends JFrame {
         JPanel adminCard = createRoleCard(
                 "Barangay Staff & Admin",
                 "For SK officials, evaluators, and treasurers managing scholarship records",
-                new String[]{
-                        "-  FIFO Document Screening Queue",
-                        "-  Merge & Quick Sort Slot Allocator",
-                        "-  Stipend Payout Desk & Payroll Export",
-                        "-  Scholar Directory (Binary Search Tree)",
-                        "-  1-Click Transaction Undo ActionStack"
-                },
                 "Access Staff Portal",
                 Theme.PRIMARY,
                 e -> launchAdminPortal()
@@ -107,7 +93,7 @@ public class PortalSelectorFrame extends JFrame {
         footer.setOpaque(false);
         footer.setBorder(new EmptyBorder(0, 36, 18, 36));
 
-        JLabel info = new JLabel("Barangay Council & SK Educational Assistance Program • Java Swing SE");
+        JLabel info = new JLabel("Group 2 Data Structures & Algorithms C2B");
         info.setFont(Theme.FONT_SMALL);
         info.setForeground(Theme.TEXT_MUTED);
 
@@ -118,13 +104,13 @@ public class PortalSelectorFrame extends JFrame {
     }
 
     private JPanel createRoleCard(String title, String subtitle,
-                                  String[] highlights, String btnText, Color accentColor,
+                                  String btnText, Color accentColor,
                                   java.awt.event.ActionListener onAction) {
         JPanel card = new JPanel();
         card.setBackground(Color.WHITE);
         card.setBorder(new CompoundBorder(
                 new LineBorder(Theme.BORDER, 1, true),
-                new EmptyBorder(24, 24, 24, 24)
+                new EmptyBorder(20, 24, 20, 24)
         ));
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
@@ -135,29 +121,11 @@ public class PortalSelectorFrame extends JFrame {
         JLabel descLbl = new JLabel("<html>" + subtitle + "</html>");
         descLbl.setFont(Theme.FONT_SMALL);
         descLbl.setForeground(Theme.TEXT_MUTED);
-        descLbl.setPreferredSize(new Dimension(300, 36));
 
         card.add(titleLbl);
-        card.add(Box.createVerticalStrut(4));
+        card.add(Box.createVerticalStrut(6));
         card.add(descLbl);
-        card.add(Box.createVerticalStrut(14));
-
-        // Separator
-        JSeparator sep = new JSeparator();
-        sep.setForeground(Theme.BORDER);
-        card.add(sep);
-        card.add(Box.createVerticalStrut(14));
-
-        // Feature Bullets
-        for (String h : highlights) {
-            JLabel bullet = new JLabel(h);
-            bullet.setFont(Theme.FONT_BODY);
-            bullet.setForeground(Theme.TEXT_BODY);
-            card.add(bullet);
-            card.add(Box.createVerticalStrut(6));
-        }
-
-        card.add(Box.createVerticalGlue());
+        card.add(Box.createVerticalStrut(18));
 
         // Launch Button
         JButton btn = Theme.createStyledButton(btnText, accentColor, Color.WHITE);

@@ -5,13 +5,18 @@ import com.barangay.scholarship.model.DocumentChecklist;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.Theme;
 import com.barangay.scholarship.ui.components.ModernTable;
+import com.barangay.scholarship.util.FileUploadManager;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,11 +35,17 @@ public class RegistrationView extends JPanel {
     private JTextField txtIncome;
     private JComboBox<String> cmbPurok;
 
-    // Document Checkboxes
+    // Document Checkboxes & Attachments
     private JCheckBox chkIndigency;
     private JCheckBox chkGrades;
     private JCheckBox chkEnrollment;
     private JCheckBox chkId;
+
+    private File fileIndigency;
+    private File fileGrades;
+    private File fileEnrollment;
+    private File fileId;
+    private final List<Runnable> fileResetCallbacks = new ArrayList<>();
 
     // Eligibility Live Feedback Panel
     private JPanel eligibilityBanner;
@@ -146,27 +157,26 @@ public class RegistrationView extends JPanel {
         formScrollContainer.add(eligibilityBanner);
         formScrollContainer.add(Box.createVerticalStrut(16));
 
-        // 3. Document Checklist
-        JLabel sec2 = new JLabel("PHYSICAL DOCUMENT REQUIREMENTS CHECKLIST");
+        // 3. Document Checklist & File Attachments
+        JLabel sec2 = new JLabel("DOCUMENT REQUIREMENTS & DIGITAL ATTACHMENTS");
         sec2.setFont(Theme.FONT_SMALL_BOLD);
         sec2.setForeground(Theme.TEXT_MUTED);
         sec2.setAlignmentX(Component.LEFT_ALIGNMENT);
         formScrollContainer.add(sec2);
         formScrollContainer.add(Box.createVerticalStrut(8));
 
-        chkIndigency = new JCheckBox("Certificate of Indigency (Issued by Barangay)");
-        chkGrades = new JCheckBox("Certified True Copy of Grades / Transcript of Records");
-        chkEnrollment = new JCheckBox("Certificate of Registration / Official Enrollment Form");
-        chkId = new JCheckBox("Valid Barangay ID or Valid Student ID");
+        chkIndigency = new JCheckBox();
+        chkGrades = new JCheckBox();
+        chkEnrollment = new JCheckBox();
+        chkId = new JCheckBox();
 
-        chkIndigency.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkGrades.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkEnrollment.setAlignmentX(Component.LEFT_ALIGNMENT);
-        chkId.setAlignmentX(Component.LEFT_ALIGNMENT);
-        formScrollContainer.add(chkIndigency);
-        formScrollContainer.add(chkGrades);
-        formScrollContainer.add(chkEnrollment);
-        formScrollContainer.add(chkId);
+        formScrollContainer.add(createDocUploadRow("Certificate of Indigency (Barangay)", chkIndigency, "Indigency", f -> this.fileIndigency = f));
+        formScrollContainer.add(Box.createVerticalStrut(6));
+        formScrollContainer.add(createDocUploadRow("Certified Copy of Grades / TOR", chkGrades, "Grades", f -> this.fileGrades = f));
+        formScrollContainer.add(Box.createVerticalStrut(6));
+        formScrollContainer.add(createDocUploadRow("Certificate of Registration (COR)", chkEnrollment, "Enrollment", f -> this.fileEnrollment = f));
+        formScrollContainer.add(Box.createVerticalStrut(6));
+        formScrollContainer.add(createDocUploadRow("Valid Barangay ID or Student ID", chkId, "Valid ID", f -> this.fileId = f));
         formScrollContainer.add(Box.createVerticalStrut(16));
 
         // Submit & Clear Buttons
@@ -304,13 +314,17 @@ public class RegistrationView extends JPanel {
                 chkId.isSelected()
         );
 
-        Applicant applicant = manager.registerApplicant(name, email, phone, school, year, gwa, income, purok, docs);
+        Applicant applicant = manager.registerApplicant(
+                name, email, phone, school, year, gwa, income, purok, docs,
+                fileIndigency, fileGrades, fileEnrollment, fileId
+        );
 
-        String msg = String.format("Applicant %s registered successfully!\nID: %s\nStatus: %s\nScreening Line: Queued at position #%d",
+        String msg = String.format("Applicant %s registered successfully!\nID: %s\nStatus: %s\nScreening Line: Queued at position #%d\nAttached Files: %d digital document(s)",
                 applicant.getFullName(),
                 applicant.getApplicantId(),
                 applicant.getStatus().getDisplayName(),
-                manager.getScreeningQueue().size());
+                manager.getScreeningQueue().size(),
+                applicant.getDocuments().getUploadedFilesCount());
 
         JOptionPane.showMessageDialog(this, msg, "Registration Successful", JOptionPane.INFORMATION_MESSAGE);
         clearForm();
@@ -328,7 +342,102 @@ public class RegistrationView extends JPanel {
         chkGrades.setSelected(false);
         chkEnrollment.setSelected(false);
         chkId.setSelected(false);
+        fileIndigency = null;
+        fileGrades = null;
+        fileEnrollment = null;
+        fileId = null;
+        for (Runnable r : fileResetCallbacks) {
+            r.run();
+        }
         updateEligibilityPreview();
+    }
+
+    private JPanel createDocUploadRow(String title, JCheckBox chk, String docType, java.util.function.Consumer<File> onFileSet) {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setOpaque(false);
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        chk.setText(title);
+        chk.setFont(Theme.FONT_BODY);
+        chk.setAlignmentX(Component.LEFT_ALIGNMENT);
+        p.add(chk);
+
+        JPanel sub = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        sub.setOpaque(false);
+        sub.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JButton btnUpload = new JButton("📎 Attach File");
+        btnUpload.setFont(Theme.FONT_SMALL);
+        btnUpload.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JLabel lbl = new JLabel("Optional digital copy");
+        lbl.setFont(Theme.FONT_SMALL);
+        lbl.setForeground(Theme.TEXT_MUTED);
+
+        JButton btnView = new JButton("👁 View");
+        btnView.setFont(Theme.FONT_SMALL);
+        btnView.setVisible(false);
+        btnView.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JButton btnRemove = new JButton("✕");
+        btnRemove.setFont(Theme.FONT_SMALL);
+        btnRemove.setForeground(Theme.DANGER);
+        btnRemove.setVisible(false);
+        btnRemove.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        final File[] chosenRef = new File[1];
+
+        btnUpload.addActionListener(e -> {
+            JFileChooser chooser = FileUploadManager.createFileChooser("Attach " + docType);
+            int res = chooser.showOpenDialog(RegistrationView.this);
+            if (res == JFileChooser.APPROVE_OPTION) {
+                File file = chooser.getSelectedFile();
+                String err = FileUploadManager.getValidationError(file);
+                if (err != null) {
+                    JOptionPane.showMessageDialog(RegistrationView.this, err, "Invalid File", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                chosenRef[0] = file;
+                onFileSet.accept(file);
+                chk.setSelected(true);
+                lbl.setText("✓ " + file.getName());
+                lbl.setForeground(Theme.ACCENT_HOVER);
+                btnView.setVisible(true);
+                btnRemove.setVisible(true);
+            }
+        });
+
+        btnView.addActionListener(e -> {
+            if (chosenRef[0] != null) {
+                FileUploadManager.openFile(RegistrationView.this, chosenRef[0].getAbsolutePath());
+            }
+        });
+
+        btnRemove.addActionListener(e -> {
+            chosenRef[0] = null;
+            onFileSet.accept(null);
+            lbl.setText("Optional digital copy");
+            lbl.setForeground(Theme.TEXT_MUTED);
+            btnView.setVisible(false);
+            btnRemove.setVisible(false);
+        });
+
+        fileResetCallbacks.add(() -> {
+            chosenRef[0] = null;
+            lbl.setText("Optional digital copy");
+            lbl.setForeground(Theme.TEXT_MUTED);
+            btnView.setVisible(false);
+            btnRemove.setVisible(false);
+        });
+
+        sub.add(btnUpload);
+        sub.add(lbl);
+        sub.add(btnView);
+        sub.add(btnRemove);
+        p.add(sub);
+
+        return p;
     }
 
     public void refreshTable() {

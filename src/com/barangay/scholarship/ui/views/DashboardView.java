@@ -235,13 +235,13 @@ public class DashboardView extends JPanel {
         int w = getWidth();
         if (w <= 0) return;
 
-        if (w < 880) {
+        if (w < 840) {
             if (cardsGrid != null && ((GridLayout) cardsGrid.getLayout()).getRows() != 2) {
-                cardsGrid.setLayout(new GridLayout(2, 2, 10, 10));
+                cardsGrid.setLayout(new GridLayout(2, 2, 12, 12));
                 cardsGrid.revalidate();
             }
             if (lowerPanel != null && ((GridLayout) lowerPanel.getLayout()).getRows() != 2) {
-                lowerPanel.setLayout(new GridLayout(2, 1, 12, 14));
+                lowerPanel.setLayout(new GridLayout(2, 1, 14, 14));
                 lowerPanel.revalidate();
             }
         } else {

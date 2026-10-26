@@ -12,14 +12,21 @@ A desktop Java application with a graphical user interface (GUI) designed for Ph
   - Automatically detects collegiate grading scale (1.00 – 5.00, where $\le 2.50$ qualifies) or percentage scale (75% – 100%, where $\ge 85.0\%$ qualifies).
   - Evaluates monthly income poverty threshold ($\le \text{₱}25,000$).
   - Provides instant visual feedback badge as data is typed.
+- **Digital Document Uploads & Declaration**:
+  - Students attach digital copies (PDF, PNG, JPG, JPEG, DOCX) for each of the 4 required documents: Certificate of Indigency, Transcript/Form 138, COR, and Valid ID.
+  - Automatically verifies, stores, and archives attachments in `data/uploads/<applicantId>/`.
+  - In-app preview and removal of selected files prior to submission.
+  - Data privacy and truthfulness certification agreement.
 
 ### 2. Document Verification & Screening Queue (Transaction Stage 2)
 - Visualizes the custom **FIFO Queue (`ScholarshipQueue<Applicant>`)**: applicants are processed on a First-Come, First-Served basis.
-- Interactive Physical Document Inspector checking off:
+- Interactive Document Inspector checking off physical copies and inspecting digital uploads:
   1. Certificate of Indigency (Barangay-issued)
   2. Certified True Copy of Grades / Transcript of Records / Form 138
   3. Certificate of Registration / Official Enrollment Form
   4. Valid Barangay ID or Student ID
+- Direct **"View Document"** button to open and review digital attachments in the OS viewer or built-in image viewer.
+- Desk file attachment button to attach walk-in student files during in-person screening.
 - Moving complete applications directly to the evaluation queue (`VERIFIED`).
 
 ### 3. Slot Allocation & Ranking Engine (Transaction Stage 3)
@@ -110,9 +117,10 @@ com.barangay.scholarship
 │       └── SettingsView.java        # Budget configuration & demo data reloader
 ├── util/
 │   ├── SampleDataSeeder.java        # Preloads 20 realistic Filipino student records
-│   └── DataPersistence.java         # Official printable payroll sheet generator
+│   ├── DataPersistence.java         # Official printable payroll sheet generator
+│   └── FileUploadManager.java       # Document file uploads, validation, storage, and viewer
 └── test/
-    └── TestRunner.java              # Standalone automated unit test suite (13 tests)
+    └── TestRunner.java              # Standalone automated unit test suite (16 tests)
 ```
 
 ---
