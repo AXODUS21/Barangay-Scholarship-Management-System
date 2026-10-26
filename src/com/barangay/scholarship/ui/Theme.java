@@ -131,6 +131,56 @@ public class Theme {
         return btn;
     }
 
+    public static JTextField createRoundedTextField(String placeholder) {
+        JTextField tf = new JTextField() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                try {
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                    g2.setColor(getBackground() != null ? getBackground() : Color.WHITE);
+                    g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+
+                    super.paintComponent(g2);
+
+                    if (getText().isEmpty() && placeholder != null && !hasFocus()) {
+                        g2.setColor(TEXT_MUTED);
+                        g2.setFont(getFont());
+                        FontMetrics fm = g2.getFontMetrics();
+                        Insets insets = getInsets();
+                        int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                        g2.drawString(placeholder, insets.left, y);
+                    }
+                } finally {
+                    g2.dispose();
+                }
+            }
+
+            @Override
+            protected void paintBorder(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                try {
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    Color borderColor = hasFocus() ? PRIMARY : BORDER;
+                    g2.setColor(borderColor);
+                    g2.setStroke(new BasicStroke(hasFocus() ? 1.5f : 1.0f));
+                    g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                } finally {
+                    g2.dispose();
+                }
+            }
+        };
+        tf.setOpaque(false);
+        tf.setBackground(Color.WHITE);
+        tf.setForeground(TEXT_MAIN);
+        tf.setCaretColor(TEXT_MAIN);
+        tf.setFont(FONT_BODY);
+        tf.setBorder(new EmptyBorder(8, 16, 8, 16));
+        return tf;
+    }
+
     public static JPanel createCardPanel() {
         JPanel panel = new JPanel();
         panel.setBackground(CARD_BG);

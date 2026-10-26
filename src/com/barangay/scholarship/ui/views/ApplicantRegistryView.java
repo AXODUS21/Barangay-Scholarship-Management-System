@@ -91,15 +91,22 @@ public class ApplicantRegistryView extends JPanel {
         centerPanel.add(statsGrid);
         centerPanel.add(Box.createVerticalStrut(14));
 
-        // Toolbar Card: Search + Filter
-        JPanel toolbarCard = Theme.createCardPanel();
-        JPanel toolRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
-        toolRow.setOpaque(false);
+        // Toolbar Card: Full-Width Responsive Search Bar
+        JPanel toolbarCard = Theme.createFullWidthCardPanel();
+        toolbarCard.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(10, 16, 10, 16)
+        ));
+
+        JPanel searchBar = new JPanel(new BorderLayout(14, 0));
+        searchBar.setOpaque(false);
 
         JLabel lblSearch = new JLabel("Search Registry:");
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
-        txtSearch = new JTextField(16);
-        txtSearch.setPreferredSize(new Dimension(180, 32));
+        lblSearch.setForeground(Theme.TEXT_TITLE);
+
+        txtSearch = Theme.createRoundedTextField("Search by ID, name, purok, school, or status...");
+        txtSearch.setPreferredSize(new Dimension(300, 38));
         txtSearch.setToolTipText("Type to filter live in real-time");
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
@@ -111,21 +118,16 @@ public class ApplicantRegistryView extends JPanel {
         });
         txtSearch.addActionListener(e -> applyFilter());
 
-        JButton btnFilter = new JButton("Filter");
-        btnFilter.addActionListener(e -> applyFilter());
+        JButton btnSearch = Theme.createStyledButton("Search", Theme.PRIMARY, Color.WHITE);
+        btnSearch.setFont(Theme.FONT_BODY_BOLD);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
+        btnSearch.addActionListener(e -> applyFilter());
 
-        JButton btnReset = new JButton("Reset");
-        btnReset.addActionListener(e -> {
-            txtSearch.setText("");
-            refreshTable();
-        });
+        searchBar.add(lblSearch, BorderLayout.WEST);
+        searchBar.add(txtSearch, BorderLayout.CENTER);
+        searchBar.add(btnSearch, BorderLayout.EAST);
 
-        toolRow.add(lblSearch);
-        toolRow.add(txtSearch);
-        toolRow.add(btnFilter);
-        toolRow.add(btnReset);
-
-        toolbarCard.add(toolRow, BorderLayout.CENTER);
+        toolbarCard.add(searchBar, BorderLayout.CENTER);
         centerPanel.add(toolbarCard);
         centerPanel.add(Box.createVerticalStrut(14));
 
