@@ -14,6 +14,7 @@ import com.barangay.scholarship.util.FileUploadManager;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
@@ -30,6 +31,9 @@ public class ScreeningQueueView extends JPanel {
     private StatCard cardQueueSize;
     private StatCard cardFrontApplicant;
 
+    // Search field
+    private JTextField txtSearch;
+
     // Table of queued applicants
     private DefaultTableModel queueTableModel;
     private ModernTable queueTable;
@@ -38,6 +42,7 @@ public class ScreeningQueueView extends JPanel {
     private JLabel lblSelectedName;
     private JLabel lblSelectedDetails;
     private JLabel lblStatusBadge;
+    private JButton btnClosePreview;
     private JCheckBox chkIndigency;
     private JCheckBox chkGrades;
     private JCheckBox chkEnrollment;
@@ -63,6 +68,7 @@ public class ScreeningQueueView extends JPanel {
     private JButton btnNext;
 
     private Applicant currentSelectedApplicant;
+    private boolean userExplicitlyDeselected = false;
 
     public ScreeningQueueView(ScholarshipManager manager) {
         this.manager = manager;
@@ -134,6 +140,7 @@ public class ScreeningQueueView extends JPanel {
             if (!e.getValueIsAdjusting()) {
                 int row = queueTable.getSelectedRow();
                 if (row >= 0 && row < queueTableModel.getRowCount()) {
+                    userExplicitlyDeselected = false;
                     String id = (String) queueTableModel.getValueAt(row, 1);
                     selectApplicant(manager.findApplicantById(id));
                 }
@@ -160,13 +167,30 @@ public class ScreeningQueueView extends JPanel {
         insTitle.setFont(Theme.FONT_SMALL_BOLD);
         insTitle.setForeground(Theme.TEXT_MUTED);
 
+        JPanel topActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        topActions.setOpaque(false);
+
         lblStatusBadge = new JLabel("NO SELECTION");
         lblStatusBadge.setFont(Theme.FONT_SMALL_BOLD);
         lblStatusBadge.setOpaque(true);
         lblStatusBadge.setVisible(false);
+        topActions.add(lblStatusBadge);
+
+        btnClosePreview = new JButton("Close Selection");
+        btnClosePreview.setFont(Theme.FONT_SMALL_BOLD);
+        btnClosePreview.setForeground(Theme.TEXT_MUTED);
+        btnClosePreview.setFocusPainted(false);
+        btnClosePreview.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnClosePreview.setVisible(false);
+        btnClosePreview.addActionListener(e -> {
+            userExplicitlyDeselected = true;
+            selectApplicant(null);
+            queueTable.clearSelection();
+        });
+        topActions.add(btnClosePreview);
 
         titleBadgeRow.add(insTitle, BorderLayout.WEST);
-        titleBadgeRow.add(lblStatusBadge, BorderLayout.EAST);
+        titleBadgeRow.add(topActions, BorderLayout.EAST);
 
         lblSelectedName = new JLabel("Select an applicant from queue");
         lblSelectedName.setFont(Theme.FONT_HEADER_MD);
@@ -305,11 +329,61 @@ public class ScreeningQueueView extends JPanel {
 
         inspectorCard.add(btnPanel, BorderLayout.SOUTH);
 
+        // Toolbar Card: Full-Width Responsive Search Bar for Queue
+        JPanel toolbarCard = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(32767, getPreferredSize().height);
+            }
+        };
+        toolbarCard.setBackground(Theme.CARD_BG);
+        toolbarCard.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(10, 16, 10, 16)
+        ));
+
+        JPanel searchBar = new JPanel(new BorderLayout(14, 0));
+        searchBar.setOpaque(false);
+
+        JLabel lblSearch = new JLabel("Search Queue:");
+        lblSearch.setFont(Theme.FONT_BODY_BOLD);
+        lblSearch.setForeground(Theme.TEXT_TITLE);
+
+        txtSearch = Theme.createRoundedTextField("Search queue by ID, name, school, purok, or verification status...");
+        txtSearch.setPreferredSize(new Dimension(300, 38));
+        txtSearch.setMaximumSize(new Dimension(32767, 38));
+        txtSearch.setToolTipText("Type to filter queue live in real-time");
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { refreshData(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { refreshData(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { refreshData(); }
+        });
+        txtSearch.addActionListener(e -> refreshData());
+
+        JButton btnSearch = Theme.createStyledButton("Search", Theme.PRIMARY, Color.WHITE);
+        btnSearch.setFont(Theme.FONT_BODY_BOLD);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
+        btnSearch.addActionListener(e -> refreshData());
+
+        searchBar.add(lblSearch, BorderLayout.WEST);
+        searchBar.add(txtSearch, BorderLayout.CENTER);
+        searchBar.add(btnSearch, BorderLayout.EAST);
+        toolbarCard.add(searchBar, BorderLayout.CENTER);
+
+        // Lower area: Search bar on top of Table Card
+        JPanel tableContainer = new JPanel(new BorderLayout(0, 14));
+        tableContainer.setOpaque(false);
+        tableContainer.add(toolbarCard, BorderLayout.NORTH);
+        tableContainer.add(tableCard, BorderLayout.CENTER);
+
         // Center Panel: Stacked vertically with BorderLayout to give full width to both
         JPanel centerPanel = new JPanel(new BorderLayout(0, 14));
         centerPanel.setOpaque(false);
         centerPanel.add(inspectorCard, BorderLayout.NORTH);
-        centerPanel.add(tableCard, BorderLayout.CENTER);
+        centerPanel.add(tableContainer, BorderLayout.CENTER);
 
         add(centerPanel, BorderLayout.CENTER);
     }
@@ -392,6 +466,7 @@ public class ScreeningQueueView extends JPanel {
     private void selectApplicant(Applicant applicant) {
         this.currentSelectedApplicant = applicant;
         if (applicant == null) {
+            if (btnClosePreview != null) btnClosePreview.setVisible(false);
             lblSelectedName.setText("Select an applicant from queue");
             lblSelectedDetails.setText("Click any row or peek at the front of line to inspect requirements.");
             lblStatusBadge.setVisible(false);
@@ -427,6 +502,7 @@ public class ScreeningQueueView extends JPanel {
             return;
         }
 
+        if (btnClosePreview != null) btnClosePreview.setVisible(true);
         lblSelectedName.setText(applicant.getFullName() + " (" + applicant.getApplicantId() + ")");
         lblSelectedDetails.setText(String.format("%s | %s | GWA: %s | Income: %s",
                 applicant.getSchool(), applicant.getPurok(), applicant.getFormattedGwa(), applicant.getFormattedIncome()));
@@ -646,15 +722,35 @@ public class ScreeningQueueView extends JPanel {
         }
 
         queueTableModel.setRowCount(0);
-        List<Applicant> list = queue.toList();
+        List<Applicant> fullList = queue.toList();
+        String q = (txtSearch != null) ? txtSearch.getText().trim().toLowerCase() : "";
+        List<Applicant> list;
+        if (!q.isEmpty()) {
+            list = new java.util.ArrayList<>();
+            for (Applicant a : fullList) {
+                if (a.getApplicantId().toLowerCase().contains(q)
+                        || a.getFullName().toLowerCase().contains(q)
+                        || a.getSchool().toLowerCase().contains(q)
+                        || a.getPurok().toLowerCase().contains(q)
+                        || a.getStatus().getDisplayName().toLowerCase().contains(q)
+                        || a.getStatus().name().toLowerCase().contains(q)
+                        || a.getDocuments().getStatusSummary().toLowerCase().contains(q)) {
+                    list.add(a);
+                }
+            }
+        } else {
+            list = fullList;
+        }
+
         int selectedRow = -1;
         for (int i = 0; i < list.size(); i++) {
             Applicant a = list.get(i);
             if (currentSelectedApplicant != null && a.getApplicantId().equals(currentSelectedApplicant.getApplicantId())) {
                 selectedRow = i;
             }
+            int queuePos = fullList.indexOf(a) + 1;
             queueTableModel.addRow(new Object[]{
-                    "#" + (i + 1),
+                    "#" + queuePos,
                     a.getApplicantId(),
                     a.getFullName(),
                     a.getSchool(),
@@ -668,14 +764,24 @@ public class ScreeningQueueView extends JPanel {
             queueTable.setRowSelectionInterval(selectedRow, selectedRow);
         }
 
-        if (currentSelectedApplicant == null && front != null) {
+        if (currentSelectedApplicant == null && front != null && !userExplicitlyDeselected && q.isEmpty()) {
             selectApplicant(front);
             if (queueTable.getRowCount() > 0) {
                 queueTable.setRowSelectionInterval(0, 0);
             }
         } else if (currentSelectedApplicant != null) {
             Applicant reloaded = manager.findApplicantById(currentSelectedApplicant.getApplicantId());
-            selectApplicant(reloaded);
+            if (reloaded != null && (q.isEmpty() || list.contains(reloaded))) {
+                selectApplicant(reloaded);
+            } else if (!q.isEmpty()) {
+                if (!list.isEmpty()) {
+                    selectApplicant(list.get(0));
+                    queueTable.setRowSelectionInterval(0, 0);
+                } else {
+                    selectApplicant(null);
+                    queueTable.clearSelection();
+                }
+            }
         }
     }
 }
