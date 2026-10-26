@@ -13,6 +13,7 @@ import com.barangay.scholarship.util.FileUploadManager;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -29,6 +30,7 @@ public class RankingAllocationView extends JPanel {
     // Control UI
     private JComboBox<ScholarshipManager.RankingCriteria> cmbCriteria;
     private JSpinner spnSlots;
+    private JTextField txtSearch;
     private StatCard cardBudgetSlots;
     private StatCard cardEligibleCandidates;
 
@@ -128,20 +130,68 @@ public class RankingAllocationView extends JPanel {
         ctrlRow.add(btnAllocate);
 
         controlsCard.add(ctrlRow, BorderLayout.CENTER);
-        controlsCard.setAlignmentX(Component.LEFT_ALIGNMENT);
-        controlsCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, controlsCard.getPreferredSize().height));
+        controlsCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        controlsCard.setMaximumSize(new Dimension(32767, controlsCard.getPreferredSize().height));
         centerPanel.add(controlsCard);
+        centerPanel.add(Box.createVerticalStrut(14));
+
+        // Toolbar Card: Full-Width Responsive Search Bar for Candidates
+        JPanel searchCard = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(32767, getPreferredSize().height);
+            }
+        };
+        searchCard.setBackground(Theme.CARD_BG);
+        searchCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        searchCard.setBorder(new CompoundBorder(
+                new LineBorder(Theme.BORDER, 1, true),
+                new EmptyBorder(10, 16, 10, 16)
+        ));
+
+        JPanel searchBar = new JPanel(new BorderLayout(14, 0));
+        searchBar.setOpaque(false);
+
+        JLabel lblSearch = new JLabel("Search Candidates:");
+        lblSearch.setFont(Theme.FONT_BODY_BOLD);
+        lblSearch.setForeground(Theme.TEXT_TITLE);
+
+        txtSearch = Theme.createRoundedTextField("Search candidates by ID, name, purok, school, or rank outcome...");
+        txtSearch.setPreferredSize(new Dimension(300, 38));
+        txtSearch.setMaximumSize(new Dimension(32767, 38));
+        txtSearch.setToolTipText("Type to filter candidates live in real-time");
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { previewRanking(); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { previewRanking(); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { previewRanking(); }
+        });
+        txtSearch.addActionListener(e -> previewRanking());
+
+        JButton btnSearch = Theme.createStyledButton("Search", Theme.PRIMARY, Color.WHITE);
+        btnSearch.setFont(Theme.FONT_BODY_BOLD);
+        btnSearch.setPreferredSize(new Dimension(100, 38));
+        btnSearch.addActionListener(e -> previewRanking());
+
+        searchBar.add(lblSearch, BorderLayout.WEST);
+        searchBar.add(txtSearch, BorderLayout.CENTER);
+        searchBar.add(btnSearch, BorderLayout.EAST);
+        searchCard.add(searchBar, BorderLayout.CENTER);
+
+        centerPanel.add(searchCard);
         centerPanel.add(Box.createVerticalStrut(14));
 
         // Selected Row Preview Dossier Card (Between Algorithm Controls and Ranking Table)
         detailCard = createDetailInspectionCard();
         detailCard.setVisible(false);
-        detailCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         centerPanel.add(detailCard);
 
         // Ranking Table Card
         JPanel tableCard = Theme.createCardPanel();
-        tableCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        tableCard.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel tblTitle = new JLabel("Algorithm Ranking & Allocation Cutoff Preview");
         tblTitle.setFont(Theme.FONT_HEADER_SM);
         tblTitle.setForeground(Theme.TEXT_TITLE);
@@ -182,7 +232,11 @@ public class RankingAllocationView extends JPanel {
                     String appId = (String) rankTableModel.getValueAt(row, 2);
                     Applicant a = manager.findApplicantById(appId);
                     if (a != null) {
+                        String rankStr = (String) rankTableModel.getValueAt(row, 0);
                         int rank = row + 1;
+                        try {
+                            rank = Integer.parseInt(rankStr.replace("#", "").trim());
+                        } catch (Exception ignored) {}
                         String outcome = (String) rankTableModel.getValueAt(row, 1);
                         displayApplicantDetails(a, rank, outcome);
                     }
@@ -442,13 +496,28 @@ public class RankingAllocationView extends JPanel {
         Applicant reselectApp = null;
         String reselectOutcome = null;
 
+        String q = (txtSearch != null) ? txtSearch.getText().trim().toLowerCase() : "";
+
         for (int i = 0; i < candidates.size(); i++) {
             Applicant a = candidates.get(i);
             int rank = i + 1;
             String outcome = (rank <= slotQuota) ? "OFFICIAL SLOT (APPROVED)" : "WAITLIST QUEUE (FIFO)";
 
+            if (!q.isEmpty()) {
+                boolean matches = a.getApplicantId().toLowerCase().contains(q)
+                        || a.getFullName().toLowerCase().contains(q)
+                        || a.getPurok().toLowerCase().contains(q)
+                        || a.getSchool().toLowerCase().contains(q)
+                        || a.getFormattedGwa().toLowerCase().contains(q)
+                        || a.getFormattedIncome().toLowerCase().contains(q)
+                        || outcome.toLowerCase().contains(q);
+                if (!matches) {
+                    continue;
+                }
+            }
+
             if (previouslySelectedAppId != null && previouslySelectedAppId.equals(a.getApplicantId())) {
-                reselectRow = i;
+                reselectRow = rankTableModel.getRowCount();
                 reselectApp = a;
                 reselectOutcome = outcome;
             }
@@ -468,6 +537,8 @@ public class RankingAllocationView extends JPanel {
         if (reselectRow >= 0 && reselectApp != null) {
             rankTable.setRowSelectionInterval(reselectRow, reselectRow);
             displayApplicantDetails(reselectApp, reselectRow + 1, reselectOutcome);
+        } else if (!q.isEmpty() && rankTableModel.getRowCount() == 0) {
+            detailCard.setVisible(false);
         }
     }
 
