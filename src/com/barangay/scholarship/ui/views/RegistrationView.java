@@ -51,10 +51,6 @@ public class RegistrationView extends JPanel {
     private JPanel eligibilityBanner;
     private JLabel lblEligibilityText;
 
-    // Recent Registrations Table
-    private DefaultTableModel regTableModel;
-    private ModernTable regTable;
-
     public RegistrationView(ScholarshipManager manager) {
         this.manager = manager;
 
@@ -63,7 +59,6 @@ public class RegistrationView extends JPanel {
         setBorder(new EmptyBorder(20, 24, 24, 24));
 
         initUI();
-        refreshTable();
     }
 
     private void initUI() {
@@ -72,11 +67,11 @@ public class RegistrationView extends JPanel {
         headerPanel.setOpaque(false);
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
-        JLabel title = new JLabel("Staff Applicant Intake & Master Registry");
+        JLabel title = new JLabel("Staff Applicant Registration");
         title.setFont(Theme.FONT_HEADER_LG);
         title.setForeground(Theme.TEXT_TITLE);
 
-        JLabel subtitle = new JLabel("Administrative walk-in student encoding and master records. (Students self-register via the dedicated Student Portal)");
+        JLabel subtitle = new JLabel("Administrative walk-in student registration & profiling with real-time eligibility evaluation");
         subtitle.setFont(Theme.FONT_BODY);
         subtitle.setForeground(Theme.TEXT_MUTED);
 
@@ -85,8 +80,7 @@ public class RegistrationView extends JPanel {
         headerPanel.add(subtitle);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Center: Form on Left, Live Table on Right
-        // LEFT: Registration Form Card
+        // Registration Form Card - Stretched to full available space
         JPanel formCard = Theme.createCardPanel();
         formCard.setLayout(new BorderLayout());
 
@@ -201,28 +195,8 @@ public class RegistrationView extends JPanel {
         formScroll.getViewport().setBackground(Color.WHITE);
         Theme.enableSmoothMouseWheel(formScroll);
         formCard.add(formScroll, BorderLayout.CENTER);
-        formCard.setMinimumSize(new Dimension(320, 320));
 
-        // RIGHT: Recent Registrations Table Card
-        JPanel tableCard = Theme.createCardPanel();
-        tableCard.setMinimumSize(new Dimension(340, 320));
-        JLabel tableTitle = new JLabel("Master Applicant Registry");
-        tableTitle.setFont(Theme.FONT_HEADER_SM);
-        tableTitle.setForeground(Theme.TEXT_TITLE);
-
-        String[] cols = {"ID", "Name", "Purok", "GWA", "Income", "Status"};
-        regTableModel = new DefaultTableModel(cols, 0) {
-            @Override
-            public boolean isCellEditable(int r, int c) { return false; }
-        };
-        regTable = new ModernTable(regTableModel);
-        JScrollPane tblScroll = ModernTable.createScrollPane(regTable);
-
-        tableCard.add(tableTitle, BorderLayout.NORTH);
-        tableCard.add(tblScroll, BorderLayout.CENTER);
-
-        JSplitPane splitPane = Theme.createSplitPane(JSplitPane.HORIZONTAL_SPLIT, formCard, tableCard, 0.48);
-        add(splitPane, BorderLayout.CENTER);
+        add(formCard, BorderLayout.CENTER);
     }
 
     private JPanel createField(String labelText, JComponent field) {
@@ -329,7 +303,6 @@ public class RegistrationView extends JPanel {
 
         JOptionPane.showMessageDialog(this, msg, "Registration Successful", JOptionPane.INFORMATION_MESSAGE);
         clearForm();
-        refreshTable();
     }
 
     private void clearForm() {
@@ -439,20 +412,5 @@ public class RegistrationView extends JPanel {
         p.add(sub);
 
         return p;
-    }
-
-    public void refreshTable() {
-        regTableModel.setRowCount(0);
-        List<Applicant> list = manager.getMasterList();
-        for (Applicant a : list) {
-            regTableModel.addRow(new Object[]{
-                    a.getApplicantId(),
-                    a.getFullName(),
-                    a.getPurok(),
-                    a.getFormattedGwa(),
-                    a.getFormattedIncome(),
-                    a.getStatus()
-            });
-        }
     }
 }

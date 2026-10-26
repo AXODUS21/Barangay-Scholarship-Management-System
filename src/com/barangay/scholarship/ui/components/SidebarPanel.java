@@ -63,6 +63,7 @@ public class SidebarPanel extends JPanel {
 
         addNavItem(menuPanel, "Dashboard", "DASHBOARD");
         addNavItem(menuPanel, "Registration", "REGISTRATION");
+        addNavItem(menuPanel, "Applicant Registry", "REGISTRY");
         addNavItem(menuPanel, "Screening Queue", "SCREENING");
         addNavItem(menuPanel, "Slot Allocation", "RANKING");
         addNavItem(menuPanel, "Disbursement", "DISBURSEMENT");

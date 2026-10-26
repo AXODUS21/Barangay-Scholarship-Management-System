@@ -20,6 +20,7 @@ public class MainFrame extends JFrame {
     // View references
     private final DashboardView dashboardView;
     private final RegistrationView registrationView;
+    private final ApplicantRegistryView applicantRegistryView;
     private final ScreeningQueueView screeningQueueView;
     private final RankingAllocationView rankingAllocationView;
     private final DisbursementView disbursementView;
@@ -47,6 +48,7 @@ public class MainFrame extends JFrame {
         // Instantiate Views
         dashboardView = new DashboardView(manager, this::navigateTo);
         registrationView = new RegistrationView(manager);
+        applicantRegistryView = new ApplicantRegistryView(manager);
         screeningQueueView = new ScreeningQueueView(manager);
         rankingAllocationView = new RankingAllocationView(manager);
         disbursementView = new DisbursementView(manager);
@@ -57,6 +59,7 @@ public class MainFrame extends JFrame {
         // Add to CardLayout wrapped in responsive borderless scrollpanes
         contentArea.add(Theme.createBorderlessScrollPane(dashboardView), "DASHBOARD");
         contentArea.add(Theme.createBorderlessScrollPane(registrationView), "REGISTRATION");
+        contentArea.add(Theme.createBorderlessScrollPane(applicantRegistryView), "REGISTRY");
         contentArea.add(Theme.createBorderlessScrollPane(screeningQueueView), "SCREENING");
         contentArea.add(Theme.createBorderlessScrollPane(rankingAllocationView), "RANKING");
         contentArea.add(Theme.createBorderlessScrollPane(disbursementView), "DISBURSEMENT");
@@ -105,7 +108,10 @@ public class MainFrame extends JFrame {
                 dashboardView.refreshData();
                 break;
             case "REGISTRATION":
-                registrationView.refreshTable();
+                // Form view
+                break;
+            case "REGISTRY":
+                applicantRegistryView.refreshTable();
                 break;
             case "SCREENING":
                 screeningQueueView.refreshData();
@@ -131,7 +137,7 @@ public class MainFrame extends JFrame {
     private void refreshAllViews() {
         SwingUtilities.invokeLater(() -> {
             dashboardView.refreshData();
-            registrationView.refreshTable();
+            applicantRegistryView.refreshTable();
             screeningQueueView.refreshData();
             rankingAllocationView.previewRanking();
             disbursementView.refreshData();
