@@ -140,5 +140,8 @@ public class SampleDataSeeder {
                 manager.recordDirectRejected(applicant);
             }
         }
+
+        manager.setApplicantCounter(appNum);
+        manager.setScholarCounter(schNum);
     }
 }

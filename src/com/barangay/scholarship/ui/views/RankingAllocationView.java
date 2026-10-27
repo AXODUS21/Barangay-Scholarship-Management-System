@@ -468,8 +468,7 @@ public class RankingAllocationView extends JPanel {
         List<Applicant> list = new ArrayList<>();
         for (Applicant a : manager.getMasterList()) {
             if (a.getStatus() == ApplicationStatus.VERIFIED
-                    || a.getStatus() == ApplicationStatus.WAITLISTED
-                    || a.getStatus() == ApplicationStatus.APPROVED) {
+                    || a.getStatus() == ApplicationStatus.WAITLISTED) {
                 list.add(a);
             }
         }

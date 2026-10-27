@@ -143,11 +143,25 @@ public class ScholarshipManager implements Serializable {
     // =========================================================================
 
     public synchronized String generateNextApplicantId() {
+        while (findApplicantById(String.format("APP-2026-%03d", applicantCounter)) != null) {
+            applicantCounter++;
+        }
         return String.format("APP-2026-%03d", applicantCounter++);
     }
 
     public synchronized String generateNextScholarId() {
+        while (scholarDirectory.searchById(String.format("SCH-2026-%03d", scholarCounter)) != null) {
+            scholarCounter++;
+        }
         return String.format("SCH-2026-%03d", scholarCounter++);
+    }
+
+    public synchronized void setApplicantCounter(int counter) {
+        this.applicantCounter = counter;
+    }
+
+    public synchronized void setScholarCounter(int counter) {
+        this.scholarCounter = counter;
     }
 
     private synchronized String generateNextActionId() {

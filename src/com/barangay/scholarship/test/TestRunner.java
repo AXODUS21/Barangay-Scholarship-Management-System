@@ -46,6 +46,8 @@ public class TestRunner {
         runTest("File Upload Manager & Storage Persistence", TestRunner::testFileUploadManager);
         runTest("Applicant Registration with Document Attachments", TestRunner::testRegisterApplicantWithFileUploads);
         runTest("Applicant Form Validation & Anti-Gibberish Rules", TestRunner::testFormValidationRules);
+        runTest("TC-07, TC-08, TC-09: Kent Assigned QA Test Cases (Ranking & Payout)",
+                () -> KentAssignedCasesTest.main(new String[0]));
 
         System.out.println("\n-----------------------------------------------------------------");
         System.out.printf("TEST SUMMARY: %d Passed, %d Failed (Total: %d)%n", passed, failed, (passed + failed));
