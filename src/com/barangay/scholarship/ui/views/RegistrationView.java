@@ -221,7 +221,7 @@ public class RegistrationView extends JPanel {
 
     private void updateEligibilityPreview() {
         String gwaStr = txtGwa.getText().trim();
-        String incStr = txtIncome.getText().trim();
+        String incStr = txtIncome.getText().trim().replace(",", "").replace("₱", "").replace("P", "").trim();
 
         if (gwaStr.isEmpty() || incStr.isEmpty()) {
             eligibilityBanner.setBackground(Theme.INFO_BG);
@@ -311,7 +311,7 @@ public class RegistrationView extends JPanel {
         double income;
         try {
             gwa = Double.parseDouble(txtGwa.getText().trim());
-            income = Double.parseDouble(txtIncome.getText().trim());
+            income = Double.parseDouble(txtIncome.getText().trim().replace(",", "").replace("₱", "").replace("P", "").trim());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "GWA and Income must be valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -341,14 +341,22 @@ public class RegistrationView extends JPanel {
                 fileIndigency, fileGrades, fileEnrollment, fileId
         );
 
-        String msg = String.format("Applicant %s registered successfully!\nID: %s\nStatus: %s\nScreening Line: Queued at position #%d\nAttached Files: %d digital document(s)",
-                applicant.getFullName(),
-                applicant.getApplicantId(),
-                applicant.getStatus().getDisplayName(),
-                manager.getScreeningQueue().size(),
-                applicant.getDocuments().getUploadedFilesCount());
-
-        JOptionPane.showMessageDialog(this, msg, "Registration Successful", JOptionPane.INFORMATION_MESSAGE);
+        if (applicant.getStatus() == com.barangay.scholarship.model.ApplicationStatus.REJECTED) {
+            String msg = String.format("APPLICATION INELIGIBLE / DISQUALIFIED\n\nApplicant: %s\nID: %s\nStatus: %s\nReason: %s\n\nNotice: This applicant does not meet program criteria and has been blocked from the Screening Queue.",
+                    applicant.getFullName(),
+                    applicant.getApplicantId(),
+                    applicant.getStatus().getDisplayName(),
+                    applicant.getEligibilityReason());
+            JOptionPane.showMessageDialog(this, msg, "Application Disqualified", JOptionPane.WARNING_MESSAGE);
+        } else {
+            String msg = String.format("Applicant %s registered successfully!\nID: %s\nStatus: %s\nScreening Line: Queued at position #%d\nAttached Files: %d digital document(s)",
+                    applicant.getFullName(),
+                    applicant.getApplicantId(),
+                    applicant.getStatus().getDisplayName(),
+                    manager.getScreeningQueue().size(),
+                    applicant.getDocuments().getUploadedFilesCount());
+            JOptionPane.showMessageDialog(this, msg, "Registration Successful", JOptionPane.INFORMATION_MESSAGE);
+        }
         clearForm();
     }
 

@@ -31,6 +31,8 @@ public class ApplicantRegistryView extends JPanel {
 
     // Search & Filter
     private JTextField txtSearch;
+    private JComboBox<String> cmbStatusFilter;
+    private JComboBox<String> cmbPurokFilter;
 
     // Selected Applicant Detail Panel
     private JPanel detailCard;
@@ -113,8 +115,8 @@ public class ApplicantRegistryView extends JPanel {
         lblSearch.setFont(Theme.FONT_BODY_BOLD);
         lblSearch.setForeground(Theme.TEXT_TITLE);
 
-        txtSearch = Theme.createRoundedTextField("Search by ID, name, purok, school, or status...");
-        txtSearch.setPreferredSize(new Dimension(300, 38));
+        txtSearch = Theme.createRoundedTextField("Search by ID, name, purok, school...");
+        txtSearch.setPreferredSize(new Dimension(220, 38));
         txtSearch.setMaximumSize(new Dimension(32767, 38));
         txtSearch.setToolTipText("Type to filter live in real-time");
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -127,14 +129,50 @@ public class ApplicantRegistryView extends JPanel {
         });
         txtSearch.addActionListener(e -> applyFilter());
 
-        JButton btnSearch = Theme.createStyledButton("Search", Theme.PRIMARY, Color.WHITE);
-        btnSearch.setFont(Theme.FONT_BODY_BOLD);
-        btnSearch.setPreferredSize(new Dimension(100, 38));
-        btnSearch.addActionListener(e -> applyFilter());
+        // Multi-Filter Dropdowns: Status & Purok
+        JPanel filtersPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        filtersPanel.setOpaque(false);
+
+        JLabel lblStatus = new JLabel("Status:");
+        lblStatus.setFont(Theme.FONT_SMALL_BOLD);
+        lblStatus.setForeground(Theme.TEXT_MUTED);
+
+        String[] statuses = {"All", "Pending Verification", "Verified", "Approved", "Waitlisted", "Rejected"};
+        cmbStatusFilter = new JComboBox<>(statuses);
+        cmbStatusFilter.setFont(Theme.FONT_SMALL);
+        cmbStatusFilter.setPreferredSize(new Dimension(150, 36));
+        cmbStatusFilter.addActionListener(e -> applyFilter());
+
+        JLabel lblPurok = new JLabel("Purok:");
+        lblPurok.setFont(Theme.FONT_SMALL_BOLD);
+        lblPurok.setForeground(Theme.TEXT_MUTED);
+
+        String[] puroks = {"All", "Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5", "Purok 6"};
+        cmbPurokFilter = new JComboBox<>(puroks);
+        cmbPurokFilter.setFont(Theme.FONT_SMALL);
+        cmbPurokFilter.setPreferredSize(new Dimension(110, 36));
+        cmbPurokFilter.addActionListener(e -> applyFilter());
+
+        JButton btnReset = new JButton("Reset");
+        btnReset.setFont(Theme.FONT_SMALL);
+        btnReset.setPreferredSize(new Dimension(70, 36));
+        btnReset.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnReset.addActionListener(e -> {
+            txtSearch.setText("");
+            cmbStatusFilter.setSelectedIndex(0);
+            cmbPurokFilter.setSelectedIndex(0);
+            applyFilter();
+        });
+
+        filtersPanel.add(lblStatus);
+        filtersPanel.add(cmbStatusFilter);
+        filtersPanel.add(lblPurok);
+        filtersPanel.add(cmbPurokFilter);
+        filtersPanel.add(btnReset);
 
         searchBar.add(lblSearch, BorderLayout.WEST);
         searchBar.add(txtSearch, BorderLayout.CENTER);
-        searchBar.add(btnSearch, BorderLayout.EAST);
+        searchBar.add(filtersPanel, BorderLayout.EAST);
 
         toolbarCard.add(searchBar, BorderLayout.CENTER);
         centerPanel.add(toolbarCard);
@@ -368,15 +406,14 @@ public class ApplicantRegistryView extends JPanel {
     }
 
     private void applyFilter() {
-        String query = txtSearch.getText().trim().toLowerCase();
-        if (query.isEmpty()) {
-            populateTable(manager.getMasterList());
-            return;
-        }
+        String query = txtSearch != null ? txtSearch.getText().trim().toLowerCase() : "";
+        String selectedStatus = cmbStatusFilter != null ? (String) cmbStatusFilter.getSelectedItem() : "All";
+        String selectedPurok = cmbPurokFilter != null ? (String) cmbPurokFilter.getSelectedItem() : "All";
 
         List<Applicant> filtered = new java.util.ArrayList<>();
         for (Applicant a : manager.getMasterList()) {
-            if (a.getApplicantId().toLowerCase().contains(query)
+            boolean matchesQuery = query.isEmpty()
+                    || a.getApplicantId().toLowerCase().contains(query)
                     || a.getFullName().toLowerCase().contains(query)
                     || a.getPurok().toLowerCase().contains(query)
                     || a.getSchool().toLowerCase().contains(query)
@@ -384,7 +421,30 @@ public class ApplicantRegistryView extends JPanel {
                     || a.getEmail().toLowerCase().contains(query)
                     || a.getContactNumber().toLowerCase().contains(query)
                     || a.getStatus().getDisplayName().toLowerCase().contains(query)
-                    || a.getStatus().name().toLowerCase().contains(query)) {
+                    || a.getStatus().name().toLowerCase().contains(query);
+
+            boolean matchesStatus = true;
+            if (selectedStatus != null && !selectedStatus.equalsIgnoreCase("All")) {
+                if (selectedStatus.equalsIgnoreCase("Pending Verification")) {
+                    matchesStatus = (a.getStatus() == com.barangay.scholarship.model.ApplicationStatus.PENDING_VERIFICATION);
+                } else if (selectedStatus.equalsIgnoreCase("Verified")) {
+                    matchesStatus = (a.getStatus() == com.barangay.scholarship.model.ApplicationStatus.VERIFIED);
+                } else if (selectedStatus.equalsIgnoreCase("Approved")) {
+                    matchesStatus = (a.getStatus() == com.barangay.scholarship.model.ApplicationStatus.APPROVED
+                            || a.getStatus() == com.barangay.scholarship.model.ApplicationStatus.DISBURSED);
+                } else if (selectedStatus.equalsIgnoreCase("Waitlisted")) {
+                    matchesStatus = (a.getStatus() == com.barangay.scholarship.model.ApplicationStatus.WAITLISTED);
+                } else if (selectedStatus.equalsIgnoreCase("Rejected")) {
+                    matchesStatus = (a.getStatus() == com.barangay.scholarship.model.ApplicationStatus.REJECTED);
+                }
+            }
+
+            boolean matchesPurok = true;
+            if (selectedPurok != null && !selectedPurok.equalsIgnoreCase("All")) {
+                matchesPurok = a.getPurok().toLowerCase().contains(selectedPurok.toLowerCase());
+            }
+
+            if (matchesQuery && matchesStatus && matchesPurok) {
                 filtered.add(a);
             }
         }

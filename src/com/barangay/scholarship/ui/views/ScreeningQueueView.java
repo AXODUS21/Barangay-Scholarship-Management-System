@@ -322,7 +322,7 @@ public class ScreeningQueueView extends JPanel {
         btnNext.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnNext.addActionListener(e -> selectNextApplicantInQueue());
 
-        btnVerifyApprove = Theme.createStyledButton("Save & Mark Verified", Theme.ACCENT, Color.WHITE);
+        btnVerifyApprove = Theme.createStyledButton("Verify Applicant & Dequeue", Theme.ACCENT, Color.WHITE);
         btnVerifyApprove.addActionListener(e -> verifyCurrentApplicant());
 
         btnPanel.add(btnReject);
@@ -584,7 +584,7 @@ public class ScreeningQueueView extends JPanel {
     private void updateScreeningActionsState() {
         if (currentSelectedApplicant == null) {
             btnVerifyApprove.setEnabled(false);
-            btnVerifyApprove.setText("Save & Mark Verified");
+            btnVerifyApprove.setText("Verify Applicant & Dequeue");
             btnVerifyApprove.setBackground(Theme.ACCENT);
             btnReject.setEnabled(false);
             return;
@@ -597,50 +597,19 @@ public class ScreeningQueueView extends JPanel {
                 + (chkEnrollment.isSelected() ? 1 : 0)
                 + (chkId.isSelected() ? 1 : 0);
 
-        ApplicationStatus currentStatus = currentSelectedApplicant.getStatus();
-
-        if (currentStatus == ApplicationStatus.VERIFIED) {
-            if (allChecked) {
-                btnVerifyApprove.setText("Verified (Ready for Ranking)");
-                btnVerifyApprove.setEnabled(false);
-                btnVerifyApprove.setBackground(Theme.ACCENT);
-                btnVerifyApprove.setForeground(Color.WHITE);
-            } else {
-                // User unchecked a document -> allow updating to pending
-                btnVerifyApprove.setText("Update Checklist (Mark Pending)");
-                btnVerifyApprove.setEnabled(true);
-                btnVerifyApprove.setBackground(Theme.WARNING);
-                btnVerifyApprove.setForeground(Color.WHITE);
-            }
-            btnReject.setEnabled(true);
-            btnReject.setText("Mark Rejected");
-        } else if (currentStatus == ApplicationStatus.PENDING_VERIFICATION) {
-            if (allChecked) {
-                btnVerifyApprove.setText("Save & Mark Verified");
-                btnVerifyApprove.setEnabled(true);
-                btnVerifyApprove.setBackground(Theme.ACCENT);
-                btnVerifyApprove.setForeground(Color.WHITE);
-            } else {
-                btnVerifyApprove.setText("Save Checklist (" + countChecked + "/4)");
-                btnVerifyApprove.setEnabled(true);
-                btnVerifyApprove.setBackground(Theme.PRIMARY);
-                btnVerifyApprove.setForeground(Color.WHITE);
-            }
-            btnReject.setEnabled(true);
-            btnReject.setText("Mark Rejected");
-        } else if (currentStatus == ApplicationStatus.REJECTED) {
-            btnVerifyApprove.setText("Reinstate & Mark Verified");
-            btnVerifyApprove.setEnabled(allChecked);
+        if (allChecked) {
+            btnVerifyApprove.setText("Verify Applicant & Dequeue");
+            btnVerifyApprove.setEnabled(true);
             btnVerifyApprove.setBackground(Theme.ACCENT);
             btnVerifyApprove.setForeground(Color.WHITE);
-            btnReject.setEnabled(false);
         } else {
-            btnVerifyApprove.setText(currentStatus.toString());
-            btnVerifyApprove.setEnabled(false);
-            btnVerifyApprove.setBackground(new Color(226, 232, 240));
-            btnVerifyApprove.setForeground(new Color(100, 116, 139));
-            btnReject.setEnabled(true);
+            btnVerifyApprove.setText("Verify Applicant (" + countChecked + "/4)");
+            btnVerifyApprove.setEnabled(true);
+            btnVerifyApprove.setBackground(Theme.PRIMARY);
+            btnVerifyApprove.setForeground(Color.WHITE);
         }
+        btnReject.setEnabled(true);
+        btnReject.setText("Mark Rejected");
     }
 
     private void selectNextApplicantInQueue() {
@@ -687,18 +656,31 @@ public class ScreeningQueueView extends JPanel {
                 existing != null ? existing.getIdFilePath() : null
         );
 
+        if (!updatedDocs.isComplete()) {
+            JOptionPane.showMessageDialog(this,
+                    "All 4 documents are required for verification.\nChecklist updated, but some documents are still missing (" + updatedDocs.getStatusSummary() + ").\nStatus remains PENDING_VERIFICATION.",
+                    "Incomplete Checklist", JOptionPane.WARNING_MESSAGE);
+            manager.verifyApplicantDocuments(currentSelectedApplicant.getApplicantId(), updatedDocs);
+            refreshData();
+            return;
+        }
+
+        String verifiedName = currentSelectedApplicant.getFullName();
         boolean success = manager.verifyApplicantDocuments(currentSelectedApplicant.getApplicantId(), updatedDocs);
         if (success) {
-            if (updatedDocs.isComplete()) {
-                JOptionPane.showMessageDialog(this,
-                        currentSelectedApplicant.getFullName() + " has passed all document checks and is now VERIFIED!\nApplicant is recorded and ready for Slot Ranking.",
-                        "Document Verification Complete", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Checklist updated, but some documents are still missing (" + updatedDocs.getStatusSummary() + ").",
-                        "Checklist Updated", JOptionPane.WARNING_MESSAGE);
-            }
+            JOptionPane.showMessageDialog(this,
+                    verifiedName + " has passed all 4 document checks and is now VERIFIED!\nApplicant has been dequeued from the screening line and is ready for Slot Ranking.",
+                    "Document Verification Complete", JOptionPane.INFORMATION_MESSAGE);
+            currentSelectedApplicant = null;
             refreshData();
+            // Automatically select next student at the front of the queue
+            ScholarshipQueue<Applicant> queue = manager.getScreeningQueue();
+            if (queue.peek() != null) {
+                selectApplicant(queue.peek());
+                if (queueTable.getRowCount() > 0) {
+                    queueTable.setRowSelectionInterval(0, 0);
+                }
+            }
         }
     }
 
