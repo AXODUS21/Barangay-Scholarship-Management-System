@@ -486,15 +486,7 @@ public class ApplicantRegistryView extends JPanel {
 
     private void updateStats() {
         List<Applicant> list = manager.getMasterList();
-        int total = list.size();
-        int verified = 0;
-        for (Applicant a : list) {
-            if (a.getStatus() != com.barangay.scholarship.model.ApplicationStatus.PENDING_VERIFICATION
-                    && a.getStatus() != com.barangay.scholarship.model.ApplicationStatus.REJECTED) {
-                verified++;
-            }
-        }
-        cardTotalApplicants.setValue(String.valueOf(total));
-        cardVerifiedApplicants.setValue(String.valueOf(verified));
+        cardTotalApplicants.setValue(String.valueOf(list.size()));
+        cardVerifiedApplicants.setValue(String.valueOf(manager.getVerifiedApplicantCount()));
     }
 }

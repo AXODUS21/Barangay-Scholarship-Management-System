@@ -266,15 +266,14 @@ public class KentAssignedCasesTest {
         ScholarshipManager manager = new ScholarshipManager(150000.0, 3000.0);
         SampleDataSeeder.seedDemoData(manager);
 
-        // Pre-seeded state: 10 scholars. First 3 already claimed.
-        // Budget = ₱150,000. Disbursed = 3 * 3,000 = ₱9,000. Remaining = ₱141,000.
+        // Pre-seeded scholars begin unclaimed so the startup budget remains untouched.
         double initialTotal = manager.getTotalBudget();
         double initialDisbursed = manager.getDisbursedBudget();
         double initialRemaining = manager.getRemainingBudget();
 
         assertEquals(150000.0, initialTotal, "Total budget should be 150,000");
-        assertEquals(9000.0, initialDisbursed, "Disbursed budget should start at 9,000 (3 scholars pre-claimed)");
-        assertEquals(141000.0, initialRemaining, "Remaining budget should start at 141,000");
+        assertEquals(0.0, initialDisbursed, "Disbursed budget should start at 0");
+        assertEquals(150000.0, initialRemaining, "Remaining budget should start at 150,000");
 
         // Step 2: Find an APPROVED scholar with payout status "Unclaimed"
         Scholar unclaimedScholar = null;
@@ -298,9 +297,9 @@ public class KentAssignedCasesTest {
 
         // Step 5: Verify dashboard budget cards and scholar payout status
         assertEquals(initialDisbursed + 3000.0, manager.getDisbursedBudget(),
-                "Disbursed budget must increment by ₱3,000 to ₱12,000");
+                "Disbursed budget must increment by ₱3,000");
         assertEquals(initialRemaining - 3000.0, manager.getRemainingBudget(),
-                "Remaining budget must decrement by ₱3,000 to ₱138,000");
+                "Remaining budget must decrement by ₱3,000");
         assertTrue(unclaimedScholar.isStipendDisbursed(), "Scholar isStipendDisbursed() must now be true");
         assertEquals(ApplicationStatus.DISBURSED, unclaimedScholar.getStatus(), "Scholar status must now be DISBURSED");
         assertTrue(unclaimedScholar.getDisbursedAt() != null, "Scholar getDisbursedAt() timestamp must be recorded");
@@ -333,9 +332,9 @@ public class KentAssignedCasesTest {
         // Verify 1-Click Undo rollback capability (LIFO)
         manager.undoLastAction();
         assertEquals(initialDisbursed, manager.getDisbursedBudget(),
-                "After undo, Disbursed budget must be rolled back to ₱9,000");
+                "After undo, Disbursed budget must return to ₱0");
         assertEquals(initialRemaining, manager.getRemainingBudget(),
-                "After undo, Remaining budget must be rolled back to ₱141,000");
+                "After undo, Remaining budget must return to ₱150,000");
         assertTrue(!unclaimedScholar.isStipendDisbursed(),
                 "After undo, scholar isStipendDisbursed() must be reset to false");
         assertEquals(ApplicationStatus.APPROVED, unclaimedScholar.getStatus(),

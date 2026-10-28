@@ -28,8 +28,9 @@ public class Main {
         }
 
         SwingUtilities.invokeLater(() -> {
-            // Instantiate service controller (starts fresh with 0 records)
+            // Load the benchmark dataset before opening any portal.
             ScholarshipManager manager = new ScholarshipManager(150000.0, 3000.0);
+            SampleDataSeeder.seedDemoData(manager);
 
             // Launch designated portal or default landing gateway
             if (args.length > 0 && "student".equalsIgnoreCase(args[0])) {

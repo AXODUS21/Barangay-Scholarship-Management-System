@@ -123,13 +123,7 @@ public class SampleDataSeeder {
             if (targetStatus == ApplicationStatus.APPROVED) {
                 String schId = String.format("SCH-2026-%03d", schNum++);
                 Scholar scholar = new Scholar(applicant, schId, manager.getGrantPerScholar(), "1st Sem AY 2026-2027");
-                // Let the first 3 scholars have claimed their payouts already
-                if (schNum <= 4) {
-                    scholar.disburseGrant();
-                    manager.recordDirectDisbursement(scholar);
-                } else {
-                    manager.recordDirectApproved(scholar);
-                }
+                manager.recordDirectApproved(scholar);
             } else if (targetStatus == ApplicationStatus.WAITLISTED) {
                 manager.recordDirectWaitlisted(applicant);
             } else if (targetStatus == ApplicationStatus.VERIFIED) {

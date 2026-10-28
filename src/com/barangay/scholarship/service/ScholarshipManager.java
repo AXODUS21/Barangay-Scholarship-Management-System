@@ -590,6 +590,17 @@ public class ScholarshipManager implements Serializable {
         return Collections.unmodifiableList(masterList);
     }
 
+    public synchronized int getVerifiedApplicantCount() {
+        int verified = 0;
+        for (Applicant applicant : masterList) {
+            ApplicationStatus status = applicant.getStatus();
+            if (status != ApplicationStatus.PENDING_VERIFICATION && status != ApplicationStatus.REJECTED) {
+                verified++;
+            }
+        }
+        return verified;
+    }
+
     public synchronized List<Scholar> getAllScholarsFromBST() {
         return scholarDirectory.inOrderTraversal();
     }

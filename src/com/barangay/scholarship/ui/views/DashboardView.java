@@ -218,7 +218,7 @@ public class DashboardView extends JPanel {
 
         budgetBar.setValue((int) pct);
         lblBudgetPercent.setText(String.format("%.1f%% Disbursed", pct));
-        lblBudgetDetails.setText(String.format("Allocated Grant per Scholar: ₱%,.2f | Available Slots by Budget: %d scholars",
+        lblBudgetDetails.setText(String.format("Default Grant: ₱%,.2f | Available Slots by Budget: %d scholars",
                 manager.getGrantPerScholar(), manager.getRemainingSlotsByBudget()));
 
         // Populate Activity Stack

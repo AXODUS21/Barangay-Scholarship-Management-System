@@ -191,17 +191,18 @@ To verify all custom data structures, sorting algorithms, searching algorithms, 
 [PASS] Budget Deduction & Stipend Disbursement
 [PASS] Waitlist Queue Auto-Promotion on Scholar Drop
 [PASS] ActionStack 1-Click Undo Rollback
+[PASS] Seeded startup dashboard initial state
 
 -----------------------------------------------------------------
-TEST SUMMARY: 12 Passed, 0 Failed (Total: 12)
+TEST SUMMARY: 19 Passed, 0 Failed (Total: 19)
 =================================================================
 ```
 
 ---
 
 ## Presentation & Classroom Demonstration Guide
-1. **Launch the App**: Run `./run.sh`. The app opens with **20 realistic Filipino student applicants** pre-loaded.
-2. **Dashboard**: View the **Remaining SK Budget meter (₱105,000 / ₱150,000)**, active scholars, and recent transactions.
+1. **Launch the App**: Run `./run.sh`. The app opens with **20 realistic Filipino student applicants** pre-loaded; all seeded scholars begin with unclaimed grants.
+2. **Dashboard**: View the initial **₱150,000 total / ₱0 disbursed / ₱150,000 remaining** budget, **₱3,000 default grant**, applicant counts, and recent transactions.
 3. **Screening Queue (FIFO)**: Click the **Screening Queue** tab. Demonstrate inspecting requirements for the student at the front of the line and clicking **"Save & Mark Verified"**.
 4. **Ranking & Slot Allocation**:
    - Switch between **Merge Sort (Merit by GWA)** and **Quick Sort (Need by Income)**.

@@ -6,14 +6,21 @@ import com.barangay.scholarship.datastructures.ScholarBST;
 import com.barangay.scholarship.datastructures.ScholarshipQueue;
 import com.barangay.scholarship.model.*;
 import com.barangay.scholarship.service.ScholarshipManager;
+import com.barangay.scholarship.ui.components.StatCard;
+import com.barangay.scholarship.ui.views.DashboardView;
 import com.barangay.scholarship.util.FileUploadManager;
+import com.barangay.scholarship.util.SampleDataSeeder;
 import com.barangay.scholarship.util.ValidationUtils;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Automated test suite verifying custom Data Structures, Sorting & Searching Algorithms,
@@ -46,6 +53,7 @@ public class TestRunner {
         runTest("File Upload Manager & Storage Persistence", TestRunner::testFileUploadManager);
         runTest("Applicant Registration with Document Attachments", TestRunner::testRegisterApplicantWithFileUploads);
         runTest("Applicant Form Validation & Anti-Gibberish Rules", TestRunner::testFormValidationRules);
+        runTest("Seeded startup dashboard initial state", TestRunner::testInitialDashboardState);
         runTest("TC-07, TC-08, TC-09: Kent Assigned QA Test Cases (Ranking & Payout)",
                 () -> KentAssignedCasesTest.main(new String[0]));
 
@@ -81,6 +89,114 @@ public class TestRunner {
         if (expected == null || !expected.equals(actual)) {
             throw new AssertionError(message + " (Expected: " + expected + ", Got: " + actual + ")");
         }
+    }
+
+    private static void testInitialDashboardState() {
+        ScholarshipManager manager = new ScholarshipManager(150000.0, 3000.0);
+        SampleDataSeeder.seedDemoData(manager);
+
+        assertEquals(20, manager.getMasterList().size(), "Startup should preload 20 benchmark applicants");
+        assertEquals(150000.0, manager.getTotalBudget(), "Initial total budget");
+        assertEquals(0.0, manager.getDisbursedBudget(), "Initial disbursed budget");
+        assertEquals(150000.0, manager.getRemainingBudget(), "Initial remaining budget");
+        assertEquals(3000.0, manager.getGrantPerScholar(), "Default grant");
+        assertEquals(10, manager.getCountByStatus(ApplicationStatus.APPROVED), "Approved scholars");
+        assertEquals(17, manager.getVerifiedApplicantCount(), "Screened / verified applicants");
+        assertEquals(4, manager.getWaitlistQueue().size(), "Waitlisted applicants");
+
+        AtomicInteger changeNotifications = new AtomicInteger();
+        manager.addChangeListener(changeNotifications::incrementAndGet);
+        manager.setTotalBudget(manager.getTotalBudget());
+        assertEquals(1, changeNotifications.get(), "Manager change listeners should receive updates");
+
+        AtomicReference<DashboardView> dashboardRef = new AtomicReference<>();
+        try {
+            SwingUtilities.invokeAndWait(() -> dashboardRef.set(new DashboardView(manager, ignored -> { })));
+        } catch (Exception e) {
+            throw new AssertionError("Dashboard should initialize on the EDT", e);
+        }
+
+        DashboardView dashboard = dashboardRef.get();
+        assertDashboardCard(dashboard, "Remaining Budget", String.format("₱%,.2f", 150000.0));
+        assertDashboardCardSubtitle(dashboard, "Remaining Budget",
+                String.format("Total: ₱%,.2f | Disbursed: ₱%,.2f", 150000.0, 0.0));
+        assertDashboardCard(dashboard, "Approved Scholars", "10");
+        assertDashboardCard(dashboard, "Waitlist Queue", "4 Students");
+        assertDashboardCard(dashboard, "Screening Line", "5 In Line");
+        assertDashboardText(dashboard, String.format(
+                "Default Grant: ₱%,.2f | Available Slots by Budget: %d scholars", 3000.0, 50));
+        assertEquals(4, countDashboardCards(dashboard), "Dashboard should retain its original four-card layout");
+    }
+
+    private static void assertDashboardCard(Container container, String title, String expectedValue) {
+        StatCard card = findDashboardCard(container, title);
+        assertTrue(card != null, "Missing dashboard card: " + title);
+
+        boolean hasExpectedValue = false;
+        for (Component child : card.getComponents()) {
+            if (child instanceof JLabel && ((JLabel) child).getText().equals(expectedValue)) {
+                hasExpectedValue = true;
+                break;
+            }
+        }
+        assertTrue(hasExpectedValue,
+                title + " dashboard card should display " + expectedValue);
+    }
+
+    private static void assertDashboardCardSubtitle(Container container, String title, String expectedSubtitle) {
+        StatCard card = findDashboardCard(container, title);
+        assertTrue(card != null, "Missing dashboard card: " + title);
+        assertDashboardText(card, expectedSubtitle);
+    }
+
+    private static void assertDashboardText(Container container, String expectedText) {
+        assertTrue(findDashboardText(container, expectedText),
+                "Dashboard should display: " + expectedText);
+    }
+
+    private static boolean findDashboardText(Container container, String text) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof JLabel && ((JLabel) component).getText().equals(text)) {
+                return true;
+            }
+            if (component instanceof Container && findDashboardText((Container) component, text)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static int countDashboardCards(Container container) {
+        int count = 0;
+        for (Component component : container.getComponents()) {
+            if (component instanceof StatCard) {
+                count++;
+            }
+            if (component instanceof Container) {
+                count += countDashboardCards((Container) component);
+            }
+        }
+        return count;
+    }
+
+    private static StatCard findDashboardCard(Container container, String title) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof StatCard) {
+                for (Component child : ((StatCard) component).getComponents()) {
+                    if (child instanceof JLabel
+                            && ((JLabel) child).getText().equals(title.toUpperCase())) {
+                        return (StatCard) component;
+                    }
+                }
+            }
+            if (component instanceof Container) {
+                StatCard card = findDashboardCard((Container) component, title);
+                if (card != null) {
+                    return card;
+                }
+            }
+        }
+        return null;
     }
 
     // 1. Custom Queue Test

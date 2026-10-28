@@ -127,15 +127,15 @@ public class KentAssignedViewsUITest {
             throw new AssertionError("Expected 10 scholars in payout list, got: " + model.getRowCount());
         }
 
-        // Search for "Unclaimed"
+        // All seeded scholars should start with their grant unclaimed.
         txtSearch.setText("Unclaimed");
         Method applyFilterMethod = DisbursementView.class.getDeclaredMethod("applyFilter");
         applyFilterMethod.setAccessible(true);
         applyFilterMethod.invoke(view);
 
         System.out.println("  Unclaimed filtered rows: " + model.getRowCount());
-        if (model.getRowCount() != 7) {
-            throw new AssertionError("Expected 7 unclaimed scholars, got: " + model.getRowCount());
+        if (model.getRowCount() != 10) {
+            throw new AssertionError("Expected 10 unclaimed scholars, got: " + model.getRowCount());
         }
 
         // Clear search
