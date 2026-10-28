@@ -7,6 +7,7 @@ import com.barangay.scholarship.datastructures.ScholarshipQueue;
 import com.barangay.scholarship.model.*;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.components.StatCard;
+import com.barangay.scholarship.ui.student.StudentApplicationView;
 import com.barangay.scholarship.ui.views.DashboardView;
 import com.barangay.scholarship.util.FileUploadManager;
 import com.barangay.scholarship.util.SampleDataSeeder;
@@ -17,6 +18,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,6 +56,7 @@ public class TestRunner {
         runTest("File Upload Manager & Storage Persistence", TestRunner::testFileUploadManager);
         runTest("Applicant Registration with Document Attachments", TestRunner::testRegisterApplicantWithFileUploads);
         runTest("Applicant Form Validation & Anti-Gibberish Rules", TestRunner::testFormValidationRules);
+        runTest("Student Portal formatted inputs and registration", TestRunner::testStudentPortalRequestedRegistration);
         runTest("Seeded startup dashboard initial state", TestRunner::testInitialDashboardState);
         runTest("TC-07, TC-08, TC-09: Kent Assigned QA Test Cases (Ranking & Payout)",
                 () -> KentAssignedCasesTest.main(new String[0]));
@@ -578,5 +582,103 @@ public class TestRunner {
         assertTrue(ValidationUtils.validateSchool("A".repeat(100)) != null, "Excessively long school name should be rejected");
         assertTrue(ValidationUtils.validateSchool("University of the Philippines Diliman") == null, "Valid university name should pass");
         assertTrue(ValidationUtils.validateSchool("Batangas State University - Alangilan (TNEU)") == null, "Valid university with symbols should pass");
+    }
+
+    private static void testStudentPortalRequestedRegistration() {
+        assertEquals(18000.0, ValidationUtils.parseMonthlyIncome("₱18,000"),
+                "Peso-formatted monthly income should parse");
+        assertEquals(18000.0, ValidationUtils.parseMonthlyIncome("18,000"),
+                "Grouped monthly income should parse");
+        assertTrue(rejectsMonthlyIncome("18,00"), "Incorrectly grouped monthly income should be rejected");
+        assertTrue(rejectsMonthlyIncome("₱18,000 pesos"), "Non-numeric monthly income should be rejected");
+
+        ScholarshipManager manager = new ScholarshipManager();
+        SampleDataSeeder.seedDemoData(manager);
+        int initialApplicantCount = manager.getMasterList().size();
+        int initialQueueSize = manager.getScreeningQueue().size();
+
+        AtomicReference<StudentApplicationView> viewRef = new AtomicReference<>();
+        try {
+            SwingUtilities.invokeAndWait(() -> viewRef.set(new StudentApplicationView(manager, ignored -> { })));
+        } catch (Exception e) {
+            throw new AssertionError("Student application view should initialize on the EDT", e);
+        }
+        StudentApplicationView view = viewRef.get();
+
+        try {
+            Field yearField = StudentApplicationView.class.getDeclaredField("cmbYear");
+            Field purokField = StudentApplicationView.class.getDeclaredField("cmbPurok");
+            yearField.setAccessible(true);
+            purokField.setAccessible(true);
+            JComboBox<?> year = (JComboBox<?>) yearField.get(view);
+            JComboBox<?> purok = (JComboBox<?>) purokField.get(view);
+            assertTrue(year.isEditable(), "Year level should allow the requested free-text value");
+            assertTrue(purok.isEditable(), "Purok should allow the requested free-text value");
+            year.setSelectedItem("College 2nd Year");
+            purok.setSelectedItem("Purok 3");
+            assertEquals("College 2nd Year", year.getSelectedItem(), "Requested year level should be retained");
+            assertEquals("Purok 3", purok.getSelectedItem(), "Requested purok should be retained");
+
+            Field gwaField = StudentApplicationView.class.getDeclaredField("txtGwa");
+            Field incomeField = StudentApplicationView.class.getDeclaredField("txtIncome");
+            Method updatePreview = StudentApplicationView.class.getDeclaredMethod("updateEligibilityPreview");
+            gwaField.setAccessible(true);
+            incomeField.setAccessible(true);
+            updatePreview.setAccessible(true);
+            ((JTextField) gwaField.get(view)).setText("1.75");
+            ((JTextField) incomeField.get(view)).setText("₱18,000");
+            updatePreview.invoke(view);
+            Field eligibilityText = StudentApplicationView.class.getDeclaredField("lblEligibilityText");
+            eligibilityText.setAccessible(true);
+            assertTrue(((JLabel) eligibilityText.get(view)).getText().contains("ELIGIBLE"),
+                    "GWA 1.75 with ₱18,000 income should pass the Student Portal eligibility preview");
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("Could not verify student portal input controls", e);
+        }
+
+        assertTrue(ValidationUtils.validateFullName("Juan Dela Cruz") == null, "Requested name should pass");
+        assertTrue(ValidationUtils.validateEmail("juan@dlsl.edu.ph") == null, "Requested email should pass");
+        assertTrue(ValidationUtils.validatePhone("09123456789") == null, "Requested phone should pass");
+        assertTrue(ValidationUtils.validateSchool("Batangas State University") == null, "Requested school should pass");
+        assertEquals(1.75, ValidationUtils.parseGwa("1.75"), "Decimal collegiate GWA should parse");
+        assertEquals(94.5, ValidationUtils.parseGwa("94.5"), "Percentage grade should parse");
+        assertTrue(rejectsGwa("1.75x"), "Nonnumeric GWA should be rejected");
+        assertTrue(rejectsGwa("70"), "Out-of-range percentage grade should be rejected");
+
+        Applicant applicant = manager.registerApplicant(
+                "Juan Dela Cruz", "juan@dlsl.edu.ph", "09123456789",
+                "Batangas State University", "College 2nd Year", ValidationUtils.parseGwa("1.75"),
+                ValidationUtils.parseMonthlyIncome("₱18,000"), "Purok 3", new DocumentChecklist()
+        );
+
+        assertEquals("APP-2026-021", applicant.getApplicantId(), "Seeded application ID");
+        assertEquals(ApplicationStatus.PENDING_VERIFICATION, applicant.getStatus(),
+                "Applicant should await document verification");
+        assertEquals(initialApplicantCount + 1, manager.getMasterList().size(),
+                "Applicant count should increment immediately");
+        assertEquals(initialQueueSize + 1, manager.getScreeningQueue().size(),
+                "Applicant should be added to the screening queue");
+        assertEquals(initialQueueSize + 1, manager.getQueuePosition(applicant.getApplicantId()),
+                "New applicant should appear in screening queue");
+        assertEquals("College 2nd Year", applicant.getYearLevel(), "Requested year level should be stored");
+        assertEquals("Purok 3", applicant.getPurok(), "Requested purok should be stored");
+    }
+
+    private static boolean rejectsMonthlyIncome(String income) {
+        try {
+            ValidationUtils.parseMonthlyIncome(income);
+            return false;
+        } catch (NumberFormatException e) {
+            return true;
+        }
+    }
+
+    private static boolean rejectsGwa(String gwa) {
+        try {
+            ValidationUtils.parseGwa(gwa);
+            return false;
+        } catch (IllegalArgumentException e) {
+            return true;
+        }
     }
 }

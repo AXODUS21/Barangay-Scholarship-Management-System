@@ -121,6 +121,7 @@ public class StudentApplicationView extends JPanel {
                 "Purok 4 San Jose", "Purok 5 Kawayan", "Purok 6 Ilaya"
         };
         cmbPurok = new JComboBox<>(puroks);
+        cmbPurok.setEditable(true);
 
         JPanel row1 = new JPanel(new GridLayout(1, 2, 16, 0));
         row1.setOpaque(false);
@@ -155,6 +156,7 @@ public class StudentApplicationView extends JPanel {
         txtSchool = new JTextField();
         String[] years = {"1st Year College", "2nd Year College", "3rd Year College", "4th Year College", "Grade 11", "Grade 12"};
         cmbYear = new JComboBox<>(years);
+        cmbYear.setEditable(true);
 
         txtGwa = new JTextField();
         txtIncome = new JTextField();
@@ -335,8 +337,8 @@ public class StudentApplicationView extends JPanel {
         }
 
         try {
-            double gwa = Double.parseDouble(gwaStr);
-            double income = Double.parseDouble(incStr);
+            double gwa = ValidationUtils.parseGwa(gwaStr);
+            double income = ValidationUtils.parseMonthlyIncome(incStr);
 
             boolean isCollege = gwa <= 5.0;
             boolean gwaOk = isCollege ? (gwa <= 2.50 && gwa >= 1.0) : (gwa >= 85.0 && gwa <= 100.0);
@@ -362,6 +364,10 @@ public class StudentApplicationView extends JPanel {
             eligibilityBanner.setBackground(Theme.DANGER_BG);
             lblEligibilityText.setForeground(Theme.DANGER);
             lblEligibilityText.setText("ERROR: Please input valid numerical values for GWA and Monthly Income.");
+        } catch (IllegalArgumentException ex) {
+            eligibilityBanner.setBackground(Theme.DANGER_BG);
+            lblEligibilityText.setForeground(Theme.DANGER);
+            lblEligibilityText.setText("ERROR: GWA must be 1.00–5.00 for college or 75–100 for percentage grades.");
         }
     }
 
@@ -370,10 +376,11 @@ public class StudentApplicationView extends JPanel {
         String email = txtEmail.getText().trim();
         String phone = txtPhone.getText().trim();
         String school = txtSchool.getText().trim();
-        String year = (String) cmbYear.getSelectedItem();
-        String purok = (String) cmbPurok.getSelectedItem();
+        String year = cmbYear.getSelectedItem() == null ? "" : cmbYear.getSelectedItem().toString().trim();
+        String purok = cmbPurok.getSelectedItem() == null ? "" : cmbPurok.getSelectedItem().toString().trim();
 
         if (name.isEmpty() || email.isEmpty() || phone.isEmpty() || school.isEmpty() ||
+                year.isEmpty() || purok.isEmpty() ||
                 txtGwa.getText().trim().isEmpty() || txtIncome.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Please fill in all required fields (marked with *).",
@@ -422,21 +429,16 @@ public class StudentApplicationView extends JPanel {
         double gwa;
         double income;
         try {
-            gwa = Double.parseDouble(txtGwa.getText().trim());
-            income = Double.parseDouble(txtIncome.getText().trim());
+            gwa = ValidationUtils.parseGwa(txtGwa.getText());
+            income = ValidationUtils.parseMonthlyIncome(txtIncome.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this,
-                    "GWA and Monthly Income must be valid numbers.",
+                    "GWA must be a valid number and Monthly Income must use valid number formatting.",
                     "Invalid Numeric Input",
                     JOptionPane.ERROR_MESSAGE);
             return;
-        }
-
-        if (gwa < 1.0 || (gwa > 5.0 && gwa < 60.0) || gwa > 100.0) {
-            JOptionPane.showMessageDialog(this,
-                    "Please enter a realistic GWA scale (1.00 - 5.00 collegiate or 75 - 100 percentage).",
-                    "Invalid GWA Scale",
-                    JOptionPane.WARNING_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid GWA Scale", JOptionPane.WARNING_MESSAGE);
             txtGwa.requestFocusInWindow();
             return;
         }

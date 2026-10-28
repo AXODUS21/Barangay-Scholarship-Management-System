@@ -8,6 +8,7 @@ A desktop Java application with a graphical user interface (GUI) designed for Ph
 
 ### 1. Applicant Registration & Profiling (Transaction Stage 1)
 - Encodes resident student details: Applicant ID, Full Name, School/University, Year Level, GWA, Monthly Household Income, and Barangay Zone/Purok.
+- Year Level and Purok support either the suggested options or typed values; monthly income accepts comma-grouped numbers with an optional peso sign (for example, `₱18,000`).
 - **Dual-Scale Eligibility Auto-Checker**:
   - Automatically detects collegiate grading scale (1.00 – 5.00, where $\le 2.50$ qualifies) or percentage scale (75% – 100%, where $\ge 85.0\%$ qualifies).
   - Evaluates monthly income poverty threshold ($\le \text{₱}25,000$).

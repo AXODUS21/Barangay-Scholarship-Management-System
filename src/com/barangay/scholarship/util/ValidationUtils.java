@@ -35,6 +35,9 @@ public final class ValidationUtils {
     private static final Pattern SCHOOL_CHARS_PATTERN = Pattern.compile(
             "^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚüÜ\\s,.'\\-()&/]+$"
     );
+    private static final Pattern MONTHLY_INCOME_PATTERN = Pattern.compile(
+            "^-?(?:\\d+|\\d{1,3}(?:,\\d{3})+)(?:\\.\\d+)?$"
+    );
 
     // Gibberish detector patterns:
     // 1. 4+ identical characters in a row (e.g. "aaaaa", "xxxxxx")
@@ -46,6 +49,45 @@ public final class ValidationUtils {
 
     private ValidationUtils() {
         // Prevent instantiation
+    }
+
+    /**
+     * Parses a monthly income value with optional peso symbol and correctly grouped thousands.
+     * @throws NumberFormatException if the value is not a valid formatted number.
+     */
+    public static double parseMonthlyIncome(String income) {
+        if (income == null) {
+            throw new NumberFormatException("Monthly income is required.");
+        }
+
+        String clean = income.trim();
+        if (clean.startsWith("₱")) {
+            clean = clean.substring(1).trim();
+        }
+        if (!MONTHLY_INCOME_PATTERN.matcher(clean).matches()) {
+            throw new NumberFormatException("Invalid monthly income format.");
+        }
+        return Double.parseDouble(clean.replace(",", ""));
+    }
+
+    /**
+     * Parses and validates a collegiate GWA or percentage grade.
+     * @throws NumberFormatException if the value is not a valid number.
+     * @throws IllegalArgumentException if the value is outside the supported grade scales.
+     */
+    public static double parseGwa(String gwa) {
+        if (gwa == null || gwa.trim().isEmpty()) {
+            throw new NumberFormatException("GWA is required.");
+        }
+
+        double value = Double.parseDouble(gwa.trim());
+        boolean collegiateScale = value >= 1.0 && value <= 5.0;
+        boolean percentageScale = value >= 75.0 && value <= 100.0;
+        if (!collegiateScale && !percentageScale) {
+            throw new IllegalArgumentException(
+                    "GWA must be 1.00–5.00 for college or 75–100 for percentage grades.");
+        }
+        return value;
     }
 
     /**
