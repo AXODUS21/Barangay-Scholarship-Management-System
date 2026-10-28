@@ -8,6 +8,7 @@ import com.barangay.scholarship.model.*;
 import com.barangay.scholarship.service.ScholarshipManager;
 import com.barangay.scholarship.ui.components.StatCard;
 import com.barangay.scholarship.ui.student.StudentApplicationView;
+import com.barangay.scholarship.ui.student.StudentGuidelinesView;
 import com.barangay.scholarship.ui.views.DashboardView;
 import com.barangay.scholarship.util.FileUploadManager;
 import com.barangay.scholarship.util.SampleDataSeeder;
@@ -57,6 +58,7 @@ public class TestRunner {
         runTest("Applicant Registration with Document Attachments", TestRunner::testRegisterApplicantWithFileUploads);
         runTest("Applicant Form Validation & Anti-Gibberish Rules", TestRunner::testFormValidationRules);
         runTest("Student Portal formatted inputs and registration", TestRunner::testStudentPortalRequestedRegistration);
+        runTest("Student Portal guidelines render formatted content", TestRunner::testStudentGuidelinesFormatting);
         runTest("Seeded startup dashboard initial state", TestRunner::testInitialDashboardState);
         runTest("TC-07, TC-08, TC-09: Kent Assigned QA Test Cases (Ranking & Payout)",
                 () -> KentAssignedCasesTest.main(new String[0]));
@@ -679,6 +681,43 @@ public class TestRunner {
             return false;
         } catch (IllegalArgumentException e) {
             return true;
+        }
+    }
+
+    private static void testStudentGuidelinesFormatting() {
+        AtomicReference<StudentGuidelinesView> viewRef = new AtomicReference<>();
+        try {
+            SwingUtilities.invokeAndWait(() -> viewRef.set(new StudentGuidelinesView()));
+        } catch (Exception e) {
+            throw new AssertionError("Student guidelines view should initialize on the EDT", e);
+        }
+
+        List<JTextArea> descriptions = new ArrayList<>();
+        collectTextAreas(viewRef.get(), descriptions);
+        JTextArea incomeGuideline = descriptions.stream()
+                .filter(area -> area.getText().contains("₱25,000.00"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Income eligibility guideline should be present"));
+        assertTrue(!incomeGuideline.getText().contains("<b>"),
+                "Income guideline should not show HTML markup");
+
+        JTextArea academicGuideline = descriptions.stream()
+                .filter(area -> area.getText().contains("Collegiate Scale"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Academic standing guideline should be present"));
+        assertTrue(academicGuideline.getText().contains("\nPercentage Scale:"),
+                "Academic scales should render as separate lines");
+        assertTrue(academicGuideline.getRows() >= 2,
+                "Academic guideline should reserve space for both scales");
+    }
+
+    private static void collectTextAreas(Container container, List<JTextArea> textAreas) {
+        for (Component component : container.getComponents()) {
+            if (component instanceof JTextArea) {
+                textAreas.add((JTextArea) component);
+            } else if (component instanceof Container) {
+                collectTextAreas((Container) component, textAreas);
+            }
         }
     }
 }

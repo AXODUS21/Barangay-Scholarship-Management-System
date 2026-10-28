@@ -65,9 +65,9 @@ public class StudentGuidelinesView extends JPanel {
         cardEligibility.add(createBulletItem("Barangay Residency:", "Must be a bona fide resident of the Barangay (any recognized Purok/Zone) for at least 6 months."));
         cardEligibility.add(createBulletItem("Enrolled Student:", "Must be currently enrolled in an accredited Senior High School (Grade 11/12) or College / State University."));
         cardEligibility.add(createBulletItem("Academic Standing (Dual Scale):",
-                "<html>• <b>Collegiate Scale:</b> GWA of <b>2.50 or better</b> (1.00 - 2.50 qualifying range)<br>" +
-                "• <b>Percentage Scale:</b> General Average of <b>85.0% or higher</b> (Senior High School)</html>"));
-        cardEligibility.add(createBulletItem("Financial Need Threshold:", "Gross monthly household family income must not exceed <b>₱25,000.00</b>."));
+                "Collegiate Scale: GWA of 2.50 or better (1.00 - 2.50 qualifying range)\n" +
+                "Percentage Scale: General Average of 85.0% or higher (Senior High School)"));
+        cardEligibility.add(createBulletItem("Financial Need Threshold:", "Gross monthly household family income must not exceed ₱25,000.00."));
 
         container.add(cardEligibility);
         container.add(Theme.createVerticalStrut(16));
@@ -140,23 +140,33 @@ public class StudentGuidelinesView extends JPanel {
     }
 
     private JPanel createBulletItem(String label, String desc) {
-        JPanel p = new JPanel(new BorderLayout(8, 0));
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setOpaque(false);
         p.setAlignmentX(Component.LEFT_ALIGNMENT);
-        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
         p.setBorder(new EmptyBorder(0, 0, 10, 0));
 
         JLabel l = new JLabel("• " + label);
         l.setFont(Theme.FONT_BODY_BOLD);
         l.setForeground(Theme.TEXT_TITLE);
-        l.setPreferredSize(new Dimension(240, 24));
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel d = new JLabel(desc);
+        JTextArea d = new JTextArea(desc);
         d.setFont(Theme.FONT_BODY);
         d.setForeground(Theme.TEXT_BODY);
+        d.setLineWrap(true);
+        d.setWrapStyleWord(true);
+        d.setEditable(false);
+        d.setFocusable(false);
+        d.setOpaque(false);
+        d.setBorder(null);
+        d.setRows(Math.max(1, (int) Math.ceil(desc.length() / 100.0)));
+        d.setAlignmentX(Component.LEFT_ALIGNMENT);
+        d.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.getPreferredSize().height));
 
-        p.add(l, BorderLayout.WEST);
-        p.add(d, BorderLayout.CENTER);
+        p.add(l);
+        p.add(d);
+        p.setMaximumSize(new Dimension(Integer.MAX_VALUE, p.getPreferredSize().height));
         return p;
     }
 
