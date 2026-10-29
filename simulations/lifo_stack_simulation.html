@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ActionStack&lt;T&gt; Simulation</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Minimalist Top Control Bar */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+      color: #FFFFFF;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange) !important;
+      color: #FFFFFF !important;
+      border-color: var(--accent-orange) !important;
+    }
+
+    .btn-misclick {
+      border-color: rgba(255, 149, 0, 0.35);
+      color: var(--accent-orange);
+      background: #FFFFFF;
+    }
+
+    .btn-misclick:hover {
+      background: var(--accent-orange-bg);
+      border-color: var(--accent-orange);
+    }
+
+    .btn-undo {
+      border-color: rgba(88, 86, 214, 0.35);
+      color: var(--accent-purple);
+      background: #FFFFFF;
+    }
+
+    .btn-undo:hover {
+      background: var(--accent-purple-bg);
+      border-color: var(--accent-purple);
+    }
+
+    .btn-disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .speed-select {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Card Panels */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.2px;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-sub);
+      display: flex;
+      gap: 16px;
+    }
+
+    /* Track Buffer */
+    .queue-track-buffer {
+      background: rgba(242, 242, 247, 0.5);
+      border: 1.5px dashed rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      padding: 26px 20px 20px;
+      min-height: 145px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      width: 100%;
+    }
+
+    .queue-track {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      min-height: 94px;
+      transition: all 0.35s var(--spring);
+    }
+
+    /* Spacious Singly-Linked Node (Zero Overflow) */
+    .node {
+      background: #FFFFFF;
+      border: 1.5px solid var(--accent-purple);
+      border-radius: 14px;
+      display: flex;
+      align-items: stretch;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+      position: relative;
+      width: 245px;
+      min-width: 245px;
+      height: 88px;
+      transition: transform 0.35s var(--spring), opacity 0.3s ease, border-color 0.2s ease;
+      animation: nodeEnter 0.35s var(--spring);
+    }
+
+    .node.is-misclick {
+      border-color: var(--accent-red);
+      background: #FFFBFA;
+    }
+
+    @keyframes nodeEnter {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .node-exit {
+      opacity: 0 !important;
+      transform: translateY(-20px) scale(0.9) !important;
+      transition: all 0.3s var(--spring) !important;
+    }
+
+    .node-data {
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .node-id-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .node-id {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .node.is-misclick .node-id {
+      color: var(--accent-red);
+    }
+
+    .node-pos {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      background: var(--accent-purple-bg);
+      padding: 2px 7px;
+      border-radius: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .node.is-misclick .node-pos {
+      color: var(--accent-red);
+      background: var(--accent-red-bg);
+    }
+
+    .node-name {
+      font-size: 11.5px;
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+
+    .node-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* Next Pointer Compartment */
+    .node-next {
+      width: 32px;
+      border-left: 1.5px dashed rgba(88, 86, 214, 0.25);
+      background: rgba(240, 239, 252, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .node.is-misclick .node-next {
+      border-left-color: rgba(255, 59, 48, 0.25);
+      background: rgba(254, 236, 235, 0.35);
+    }
+
+    .next-text {
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .node.is-misclick .next-text {
+      color: var(--accent-red);
+    }
+
+    .next-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+    }
+
+    .node.is-misclick .next-dot {
+      background: var(--accent-red);
+    }
+
+    /* Pointer Connector Arrow */
+    .arrow-connector {
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 2px;
+      background: var(--accent-purple);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .node.is-misclick .arrow-connector {
+      background: var(--accent-red);
+    }
+
+    .arrow-connector::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 3.5px solid transparent;
+      border-bottom: 3.5px solid transparent;
+      border-left: 5px solid var(--accent-purple);
+      margin-right: -1px;
+    }
+
+    .node.is-misclick .arrow-connector::after {
+      border-left-color: var(--accent-red);
+    }
+
+    /* Terminal Null Marker */
+    .null-marker {
+      background: #E5E5EA;
+      border: 1px solid #D1D1D6;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      margin-left: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Pointer Badges (TOP and CHAIN) */
+    .pointer-tag {
+      position: absolute;
+      top: -12px;
+      padding: 1.5px 6px;
+      border-radius: 6px;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+      z-index: 5;
+      transition: all 0.3s var(--spring);
+      white-space: nowrap;
+    }
+
+    .pointer-tag-top {
+      left: 10px;
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    .pointer-tag-misclick {
+      left: 10px;
+      background: var(--accent-red);
+      color: #FFFFFF;
+    }
+
+    .pointer-tag-chain {
+      right: 10px;
+      background: #8E8E93;
+      color: #FFFFFF;
+    }
+
+    .pointer-tag::after {
+      content: "";
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+      border-top: 4px solid currentColor;
+    }
+
+    .empty-placeholder {
+      color: var(--text-muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 70px;
+    }
+
+    /* ============================================================= */
+    /* SPOTIFY & YOUTUBE-STYLE TIMELINE PLAYER BAR (BOTTOM COMPONENT) */
+    /* ============================================================= */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s var(--spring);
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.08);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-purple);
+      color: #FFFFFF;
+      border-color: var(--accent-purple);
+    }
+
+    .player-btn-main:hover {
+      background: #4B48C8;
+      color: #FFFFFF;
+    }
+
+    .player-btn-main.is-playing {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 4px;
+      min-width: 62px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* Draggable & Clickable Track Bar */
+    .timeline-track-container {
+      position: relative;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.08);
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 8px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--accent-purple);
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring), height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 8px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2.5px solid var(--accent-purple);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 0%;
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    /* Chapter Pips (Like YouTube Chapter Markers) */
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-pip {
+      background: #FFFFFF;
+      height: 10px;
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .timeline-chapter-name {
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timeline-time-badge {
+      color: var(--text-sub);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .player-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Custom LIFO Stack: ActionStack&lt;T&gt; Simulation</h1>
+        <div class="header-sub">Singly-linked generic memory stack with explicit top pointer for 1-click administrative rollback</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="manualPush()">Push Mutation</button>
+        <button class="btn btn-misclick" onclick="simulateMisclick()">Simulate Misclick</button>
+        <button class="btn btn-undo" id="btnUndo" onclick="manualPop()">1-Click Undo</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="simulation-stage">
+      
+      <!-- Primary LIFO Memory Track Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">Singly-Linked ActionStack Memory Track</div>
+            <span class="badge badge-purple">LIFO (Last-In, First-Out)</span>
+            <span class="badge badge-blue">O(1) Push &amp; Pop</span>
+          </div>
+          <div class="card-meta">
+            <div>Depth: <strong id="stackDepthLabel">2 Nodes</strong></div>
+            <div>Top: <strong id="topPointerLabel">ACT-092</strong></div>
+            <div>Treasury: <strong id="topBudgetLabel">₱150,000.00</strong></div>
+          </div>
+        </div>
+
+        <div class="queue-track-buffer">
+          <div id="stackTrack" class="queue-track"></div>
+        </div>
+      </div>
+
+      <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM) -->
+      <div class="player-bar-card">
+        <div class="player-controls">
+          <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+            <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+          <div class="timeline-step-label">
+            <span id="timelineCurrentStep">Step 0</span>
+            <span class="timeline-step-sep">/</span>
+            <span id="timelineTotalSteps">8</span>
+          </div>
+        </div>
+
+        <div class="timeline-progress-wrapper">
+          <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+            <div class="timeline-track-bg"></div>
+            <div class="timeline-track-fill" id="timelineTrackFill"></div>
+            <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+            <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+          </div>
+          <div class="timeline-info-row">
+            <div class="timeline-chapter-name" id="timelineChapterName">
+              <span class="badge badge-purple" id="timelineChapterBadge">Step 0</span>
+              <span id="timelineChapterTitle">Initial System State</span>
+            </div>
+            <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+          </div>
+        </div>
+
+        <div class="player-right-group">
+          <button class="btn btn-sm" id="btnReplay" onclick="restartSimulation()" title="Replay from Beginning">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Replay
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATA MODEL & STATE MANAGEMENT
+    // -------------------------------------------------------------
+    const TOTAL_BUDGET = 150000.00;
+    const STIPEND_AMOUNT = 3000.00;
+
+    let disbursedBudget = 0.00;
+    let actionCounter = 90;
+    let stack = []; // Array representing LIFO stack (index 0 = TOP)
+
+    let isAutoplaying = false;
+    let autoplayTimer = null;
+    let speed = 1.0;
+    let currentStepIndex = 0; // Current position on timeline (0..8)
+
+    // =============================================================
+    // COMPLETE PRE-RECORDED TIMELINE SNAPSHOTS (0 TO 7)
+    // Capped at max 3-4 concurrent active nodes with spacious 245px cards:
+    // Full words, long labels, and names fit with zero overflow or x-scroll!
+    // =============================================================
+    const simulationTimeline = [
+      {
+        step: 0,
+        title: "Initial System State (Baseline Action)",
+        badge: "Initial State",
+        badgeColor: "green",
+        bannerText: "Singly-linked ActionStack initialized with baseline verified slot allocation at base.",
+        stack: [
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 0.00
+      },
+      {
+        step: 1,
+        title: "Official Grant Payout (Maria Santos)",
+        badge: "Release Stipend",
+        badgeColor: "purple",
+        bannerText: "<strong>ACT-092</strong> pushed to TOP: Disbursed ₱3,000 grant to <strong>Maria Santos</strong> (-₱3,000.00).",
+        stack: [
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 3000.00
+      },
+      {
+        step: 2,
+        title: "Teller Rush Misclick (Duplicate Payout)",
+        badge: "Human Error Flagged",
+        badgeColor: "red",
+        bannerText: "Accidental duplicate payout to <strong>Maria Santos</strong> (-₱3,000.00) pushed to <strong>TOP</strong>! 1-Click Undo ready.",
+        stack: [
+          { actionId: "ACT-093", typeLabel: "Duplicate Payout", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "DISBURSED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: true },
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 6000.00
+      },
+      {
+        step: 3,
+        title: "1-Click Undo (Rollback & Refund ₱3,000)",
+        badge: "1-Click Undo",
+        badgeColor: "green",
+        bannerText: "<strong>ACT-093</strong> popped from TOP in O(1)! Duplicate payout reverted and <strong>+₱3,000.00</strong> auto-refunded to Municipal Pool.",
+        stack: [
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 3000.00
+      },
+      {
+        step: 4,
+        title: "Official Grant Payout (Bea Reyes)",
+        badge: "Release Stipend",
+        badgeColor: "purple",
+        bannerText: "<strong>ACT-094</strong> pushed to TOP: Release Stipend for <strong>Bea Reyes</strong> (-₱3,000.00).",
+        stack: [
+          { actionId: "ACT-094", typeLabel: "Release Stipend", targetId: "APP-035", targetName: "Bea Reyes", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 6000.00
+      },
+      {
+        step: 5,
+        title: "Accidental Status Drop (Mark Ramos)",
+        badge: "Human Error Flagged",
+        badgeColor: "red",
+        bannerText: "Accidental student drop pushed to <strong>TOP</strong> for <strong>Mark Ramos</strong>! 1-Click Undo ready.",
+        stack: [
+          { actionId: "ACT-095", typeLabel: "Accidental Drop", targetId: "APP-042", targetName: "Mark Ramos", prevStatus: "VERIFIED", newStatus: "PENDING", amount: 0.0, isMisclick: true },
+          { actionId: "ACT-094", typeLabel: "Release Stipend", targetId: "APP-035", targetName: "Bea Reyes", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 6000.00
+      },
+      {
+        step: 6,
+        title: "1-Click Undo (Restore Mark Ramos Status)",
+        badge: "1-Click Undo",
+        badgeColor: "green",
+        bannerText: "<strong>ACT-095</strong> popped in O(1)! Restored <strong>Mark Ramos</strong> to VERIFIED. 100% data integrity preserved.",
+        stack: [
+          { actionId: "ACT-094", typeLabel: "Release Stipend", targetId: "APP-035", targetName: "Bea Reyes", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 6000.00
+      },
+      {
+        step: 7,
+        title: "Final Audited ActionStack Ledger",
+        badge: "Simulation Complete",
+        badgeColor: "green",
+        bannerText: "ActionStack audit complete. All transactions verified, both teller errors cleanly undone, treasury perfectly balanced. Replay or scrub timeline.",
+        stack: [
+          { actionId: "ACT-094", typeLabel: "Release Stipend", targetId: "APP-035", targetName: "Bea Reyes", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-092", typeLabel: "Release Stipend", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "APPROVED", newStatus: "DISBURSED", amount: 3000.0, isMisclick: false },
+          { actionId: "ACT-091", typeLabel: "Slot Allocation", targetId: "APP-014", targetName: "Maria Santos", prevStatus: "PENDING", newStatus: "APPROVED", amount: 0.0, isMisclick: false }
+        ],
+        disbursedBudget: 6000.00
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // INITIALIZATION & TIMELINE LOGIC
+    // -------------------------------------------------------------
+    function initSimulation() {
+      currentStepIndex = 0;
+      initTimelinePips();
+      applyTimelineStep(0, false);
+      updateUndoButtonState();
+    }
+
+    function initTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      if (!pipsContainer) return;
+      pipsContainer.innerHTML = "";
+      for (let i = 0; i < simulationTimeline.length; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-pip' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function renderAll() {
+      renderStackTrack();
+      updateUndoButtonState();
+      updateTimelineUI();
+    }
+
+    // Apply specific snapshot from the timeline
+    function applyTimelineStep(stepIdx, animate = true) {
+      if (stepIdx < 0) stepIdx = 0;
+      if (stepIdx >= simulationTimeline.length) stepIdx = simulationTimeline.length - 1;
+
+      currentStepIndex = stepIdx;
+      const snapshot = simulationTimeline[stepIdx];
+
+      // Clone state
+      stack = JSON.parse(JSON.stringify(snapshot.stack));
+      disbursedBudget = snapshot.disbursedBudget;
+
+      renderAll();
+    }
+
+    // Update bottom Spotify/YouTube-like timeline bar
+    function updateTimelineUI() {
+      const maxIndex = simulationTimeline.length - 1;
+      const pct = (currentStepIndex / maxIndex) * 100;
+
+      const fill = document.getElementById("timelineTrackFill");
+      const thumb = document.getElementById("timelineThumb");
+      if (fill) fill.style.width = `${pct}%`;
+      if (thumb) thumb.style.left = `${pct}%`;
+
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${maxIndex}`;
+
+      const curr = simulationTimeline[currentStepIndex];
+      const badgeElem = document.getElementById("timelineChapterBadge");
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (badgeElem) {
+        badgeElem.textContent = `Step ${currentStepIndex}`;
+        badgeElem.className = `badge badge-${curr.badgeColor}`;
+      }
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>${curr.title}</strong> &mdash; <span style="color: var(--text-sub); font-weight: 500;">${curr.bannerText}</span>`;
+      }
+
+      const statusBadge = document.getElementById("timelineStatusBadge");
+      if (statusBadge) {
+        if (isAutoplaying) {
+          statusBadge.textContent = "Playing";
+          statusBadge.style.color = "var(--accent-orange)";
+        } else if (currentStepIndex === maxIndex) {
+          statusBadge.textContent = "Completed (Auto-Stopped)";
+          statusBadge.style.color = "var(--accent-green)";
+        } else {
+          statusBadge.textContent = "Paused";
+          statusBadge.style.color = "var(--text-sub)";
+        }
+      }
+
+      // Update chapter pips
+      for (let i = 0; i <= maxIndex; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-pip");
+          } else {
+            pip.classList.remove("active-pip");
+          }
+        }
+      }
+
+      // Play/Pause icon synchronization
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+      const btnTimelinePlay = document.getElementById("btnTimelinePlay");
+      const topPlayBtn = document.getElementById("btnPlayPause");
+
+      if (isAutoplaying) {
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+        if (btnTimelinePlay) btnTimelinePlay.classList.add("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = "Pause";
+          topPlayBtn.classList.remove("btn-primary");
+          topPlayBtn.classList.add("btn-active-pause");
+        }
+      } else {
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+        if (btnTimelinePlay) btnTimelinePlay.classList.remove("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = (currentStepIndex === maxIndex) ? "Replay" : "Play";
+          topPlayBtn.classList.remove("btn-active-pause");
+          topPlayBtn.classList.add("btn-primary");
+        }
+      }
+    }
+
+    // Step forward or backward using timeline buttons
+    function stepTimeline(delta) {
+      pausePlayback();
+      const next = Math.max(0, Math.min(simulationTimeline.length - 1, currentStepIndex + delta));
+      applyTimelineStep(next, true);
+    }
+
+    // Click anywhere on progress track to jump/seek
+    function seekTimelineByClick(event) {
+      pausePlayback();
+      const container = document.getElementById("timelineTrackContainer");
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const width = rect.width;
+      const ratio = Math.max(0, Math.min(1, clickX / width));
+      const targetStep = Math.round(ratio * (simulationTimeline.length - 1));
+      applyTimelineStep(targetStep, true);
+    }
+
+    function updateUndoButtonState() {
+      const btn = document.getElementById("btnUndo");
+      if (!btn) return;
+      if (stack.length === 0) {
+        btn.classList.add("btn-disabled");
+        btn.title = "ActionStack is empty (top -> null)";
+      } else {
+        btn.classList.remove("btn-disabled");
+        btn.title = `Undo last action: ${stack[0].actionId}`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // RENDERING COMPONENTS
+    // -------------------------------------------------------------
+    function renderStackTrack() {
+      const track = document.getElementById("stackTrack");
+      track.innerHTML = "";
+
+      const depth = stack.length;
+      document.getElementById("stackDepthLabel").textContent = `${depth} ${depth === 1 ? 'Node' : 'Nodes'}`;
+      document.getElementById("topPointerLabel").textContent = depth > 0 ? stack[0].actionId : "null";
+      const remaining = Math.max(0, TOTAL_BUDGET - disbursedBudget);
+      document.getElementById("topBudgetLabel").textContent = "₱" + remaining.toLocaleString("en-US", { minimumFractionDigits: 2 });
+
+      if (depth === 0) {
+        track.innerHTML = `<div class="empty-placeholder">ActionStack Empty (top &rarr; null)</div>`;
+        return;
+      }
+
+      stack.forEach((rec, idx) => {
+        const node = document.createElement("div");
+        node.className = `node ${rec.isMisclick ? 'is-misclick' : ''}`;
+        node.id = `node-${rec.actionId}`;
+
+        const isTop = (idx === 0);
+        const isBase = (idx === depth - 1);
+
+        let pointerTags = "";
+        if (isTop) {
+          pointerTags = rec.isMisclick
+            ? `<div class="pointer-tag pointer-tag-misclick">MISCLICK (TOP)</div>`
+            : `<div class="pointer-tag pointer-tag-top">TOP</div>`;
+        } else {
+          pointerTags = `<div class="pointer-tag pointer-tag-chain">PREV #${idx}</div>`;
+        }
+
+        const financeDisplay = rec.amount > 0 ? `-₱${rec.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "No Cost";
+        const financeColor = rec.amount > 0 ? "var(--accent-red)" : "var(--text-muted)";
+
+        node.innerHTML = `
+          ${pointerTags}
+          <div class="node-data">
+            <div class="node-id-row">
+              <span class="node-id">${rec.actionId}</span>
+              <span class="node-pos">${rec.typeLabel}</span>
+            </div>
+            <div class="node-name">${rec.targetName} (${rec.targetId})</div>
+            <div class="node-meta">
+              <span>${rec.prevStatus} &rarr; ${rec.newStatus}</span>
+              <span style="color: ${financeColor}; font-weight: 700;">${financeDisplay}</span>
+            </div>
+          </div>
+          <div class="node-next">
+            <span class="next-text">next</span>
+            <div class="next-dot"></div>
+          </div>
+          ${!isBase ? `<div class="arrow-connector"></div>` : ""}
+        `;
+        track.appendChild(node);
+      });
+
+      const nullEl = document.createElement("div");
+      nullEl.className = "null-marker";
+      nullEl.textContent = "STACK BASE (null)";
+      track.appendChild(nullEl);
+    }
+
+    // -------------------------------------------------------------
+    // MANUAL BUTTON ACTIONS (SYNCED TO TIMELINE)
+    // -------------------------------------------------------------
+    function manualPush() {
+      pausePlayback();
+      if (currentStepIndex === 0) {
+        stepTimeline(1); // To Step 1 (Payout Maria)
+      } else if (currentStepIndex === 3) {
+        stepTimeline(1); // To Step 4 (Payout Bea)
+      } else if (currentStepIndex === 6) {
+        stepTimeline(1); // To Step 7 (Final Complete)
+      } else if (currentStepIndex < simulationTimeline.length - 1) {
+        stepTimeline(1);
+      }
+    }
+
+    function simulateMisclick() {
+      pausePlayback();
+      if (currentStepIndex < 2) {
+        applyTimelineStep(2, true); // Jump to Step 2: Duplicate payout misclick (Flagged in Red)
+      } else if (currentStepIndex < 5) {
+        applyTimelineStep(5, true); // Jump to Step 5: Accidental drop misclick (Flagged in Red)
+      } else {
+        applyTimelineStep(2, true);
+      }
+    }
+
+    function manualPop() {
+      pausePlayback();
+      if (currentStepIndex === 2) {
+        applyTimelineStep(3, true); // Step 3: 1-Click Undo pops duplicate payout & refunds ₱3,000
+      } else if (currentStepIndex === 5) {
+        applyTimelineStep(6, true); // Step 6: 1-Click Undo pops accidental drop & restores student
+      } else if (currentStepIndex > 0) {
+        stepTimeline(-1);
+      } else {
+        const titleElem = document.getElementById("timelineChapterTitle");
+        if (titleElem) {
+          titleElem.innerHTML = `<strong>ActionStack Baseline</strong> &mdash; <span style="color: var(--text-sub); font-weight: 500;">Stack is at bottom boundary (top &rarr; ACT-091). Nothing to undo.</span>`;
+        }
+      }
+    }
+
+    function restartSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+      startAutoplay();
+    }
+
+    function resetSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+    }
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER: AUTO-STOP AT END (NO INFINITE LOOP)
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (isAutoplaying) {
+        pausePlayback();
+      } else {
+        // If already at end, restart from step 0
+        if (currentStepIndex >= simulationTimeline.length - 1) {
+          applyTimelineStep(0, false);
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      isAutoplaying = true;
+      updateTimelineUI();
+      executePlaybackStep();
+    }
+
+    function pausePlayback() {
+      isAutoplaying = false;
+      clearTimeout(autoplayTimer);
+      updateTimelineUI();
+    }
+
+    // Plays sequentially through the timeline and AUTO-STOPS at Step 8!
+    function executePlaybackStep() {
+      if (!isAutoplaying) return;
+
+      const maxStep = simulationTimeline.length - 1;
+      if (currentStepIndex < maxStep) {
+        currentStepIndex++;
+        applyTimelineStep(currentStepIndex, true);
+
+        // Check if we just reached the end
+        if (currentStepIndex >= maxStep) {
+          // AUTO-STOP: Stop playback and do not loop!
+          pausePlayback();
+          return;
+        }
+
+        // Schedule next step
+        autoplayTimer = setTimeout(executePlaybackStep, 2200 / speed);
+      } else {
+        // Already at end -> Auto-stop
+        pausePlayback();
+      }
+    }
+
+    function changeSpeed(val) {
+      speed = parseFloat(val);
+    }
+
+    // Keyboard navigation (Space to play/pause, Left/Right arrows to step)
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleAutoplay();
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        stepTimeline(1);
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        stepTimeline(-1);
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>

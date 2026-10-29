@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarBST: Directory & Hierarchical Traversals Simulation</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-teal: #30B0C7;
+      --accent-teal-bg: #E5F7FA;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Minimalist Top Control Bar */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange);
+      color: #FFFFFF;
+      border-color: var(--accent-orange);
+    }
+
+    .btn-active-pause:hover {
+      background: #E08500;
+    }
+
+    .btn-search {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+      border-color: rgba(88, 86, 214, 0.25);
+    }
+
+    .btn-search:hover {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* MAIN TWO-COLUMN WORKSPACE LAYOUT */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* LEFT SIDEBAR: CANONICAL TRAVERSAL TABS */
+    .sidebar-tabs-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-tabs-card {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-tabs-list {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-tab-btn {
+      appearance: none;
+      border: 1.5px solid transparent;
+      background: rgba(0, 0, 0, 0.02);
+      padding: 14px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      transition: all 0.2s var(--spring);
+      position: relative;
+    }
+
+    .sidebar-tab-btn:hover {
+      background: rgba(0, 0, 0, 0.04);
+      transform: translateY(-1px);
+    }
+
+    .sidebar-tab-btn.active {
+      background: #FFFFFF;
+      border-color: var(--accent-blue);
+      box-shadow: 0 4px 16px rgba(0, 113, 227, 0.12), 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .sidebar-tab-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .sidebar-tab-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .sidebar-tab-btn.active .sidebar-tab-name {
+      color: var(--accent-blue);
+    }
+
+    .sidebar-tab-formula {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+
+    .sidebar-tab-btn.active .sidebar-tab-formula {
+      color: var(--accent-blue);
+    }
+
+    .sidebar-tab-desc {
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-muted);
+    }
+
+    .sidebar-tab-btn.active .sidebar-tab-desc {
+      color: var(--text-sub);
+    }
+
+    .tab-badge-default {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: var(--accent-blue-bg);
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Sidebar Specs Card */
+    .sidebar-specs-card {
+      padding: 0;
+    }
+
+    .sidebar-specs-body {
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .spec-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+    }
+
+    .spec-label {
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    .spec-desc {
+      margin-top: 4px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--card-border);
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--text-sub);
+    }
+
+    /* Right Column: Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .card-meta strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-teal { background: var(--accent-teal-bg); color: var(--accent-teal); }
+
+    /* Traversal Purpose Banner */
+    .traversal-purpose-banner {
+      padding: 12px 20px;
+      background: rgba(0, 113, 227, 0.04);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+    }
+
+    .purpose-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .formula-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: var(--text-main);
+    }
+
+    .purpose-desc {
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    .complexity-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* 2D BINARY SEARCH TREE CANVAS & VISUALIZATION */
+    /* ------------------------------------------------------------- */
+    .tree-stage-card {
+      padding: 24px 20px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tree-canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 290px;
+      margin: 0 auto;
+    }
+
+    .tree-svg-connectors {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tree-connector-line {
+      stroke: rgba(0, 0, 0, 0.12);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      transition: stroke 0.3s ease, stroke-width 0.3s ease;
+    }
+
+    .tree-connector-line.active-branch {
+      stroke: var(--accent-blue);
+      stroke-width: 3.5;
+      stroke-dasharray: 6 3;
+      animation: dash 1s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -18;
+      }
+    }
+
+    /* Positioned BST Nodes */
+    .bst-node {
+      position: absolute;
+      width: 136px;
+      height: 60px;
+      transform: translate(-50%, -50%);
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      z-index: 2;
+      transition: all 0.3s var(--spring);
+      cursor: pointer;
+    }
+
+    .bst-node:hover {
+      transform: translate(-50%, -50%) scale(1.04);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      border-color: var(--accent-blue);
+    }
+
+    .bst-node-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bst-node-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bst-node-order-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+    }
+
+    .bst-node-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bst-node-sub {
+      font-size: 9.5px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Active Visited / Highlight States */
+    .bst-node.is-active-visiting {
+      border-color: var(--accent-blue) !important;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.22), 0 8px 20px rgba(0, 113, 227, 0.15) !important;
+      transform: translate(-50%, -50%) scale(1.08) !important;
+      background: #FFFFFF !important;
+      z-index: 10 !important;
+    }
+
+    .bst-node.is-active-visiting .bst-node-order-badge {
+      background: var(--accent-blue) !important;
+      color: #FFFFFF !important;
+    }
+
+    .bst-node.is-visited {
+      border-color: rgba(52, 199, 89, 0.6) !important;
+      background: #F8FDF9 !important;
+    }
+
+    .bst-node.is-visited .bst-node-order-badge {
+      background: var(--accent-green) !important;
+      color: #FFFFFF !important;
+    }
+
+    .bst-node.is-root-node {
+      border-width: 2px;
+    }
+
+    .root-tag-indicator {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* 2. EMITTED TRAVERSAL SEQUENCE STREAM (FULL WIDTH) */
+    /* ------------------------------------------------------------- */
+    .stream-card-full {
+      width: 100%;
+    }
+
+    .stream-tape-wrapper {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stream-nodes-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 2px 10px;
+    }
+
+    .stream-nodes-row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .stream-nodes-row::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+    }
+
+    .stream-chip {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      animation: chipPop 0.3s var(--spring);
+      transition: all 0.2s var(--spring);
+    }
+
+    @keyframes chipPop {
+      0% { opacity: 0; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .stream-chip.chip-active {
+      border-color: var(--accent-blue);
+      background: var(--accent-blue-bg);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+      transform: scale(1.02);
+    }
+
+    .stream-chip-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stream-chip-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stream-chip-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stream-chip-id {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .stream-chip-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .stream-chip-meta {
+      font-size: 10px;
+      color: var(--text-sub);
+    }
+
+    .stream-chip-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .stream-empty-hint {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      padding: 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 12px;
+      border: 1px dashed var(--card-border);
+      width: 100%;
+    }
+
+    .stream-footer-info {
+      font-size: 11.5px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 4px;
+    }
+
+    /* ============================================================= */
+    /* SPOTIFY & YOUTUBE-STYLE TIMELINE PLAYER BAR (BOTTOM) */
+    /* ============================================================= */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s var(--spring);
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.08);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      color: #FFFFFF;
+    }
+
+    .player-btn-main.is-playing {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 4px;
+      min-width: 62px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* Draggable & Clickable Track Bar */
+    .timeline-track-container {
+      position: relative;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.08);
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 8px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--accent-blue);
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring), height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 8px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2.5px solid var(--accent-blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 0%;
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    /* Chapter Pips */
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-pip {
+      background: #FFFFFF;
+      height: 10px;
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .timeline-chapter-name {
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timeline-time-badge {
+      color: var(--text-sub);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .player-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* Modal for O(log n) Lookup Demo */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 520px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .search-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .search-result-box {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Custom Binary Search Tree (ScholarBST): Directory &amp; Hierarchical Traversals</h1>
+        <div class="header-sub">Balanced O(log n) lookup index with canonical In-Order, Pre-Order, and Post-Order administrative tree traversals</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="stepTimeline(1)">Step Forward</button>
+        <button class="btn btn-search" onclick="openSearchModal()">O(log n) Lookup</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- TWO-COLUMN WORKSPACE: SIDEBAR TABS (LEFT) + SIMULATION STAGE (RIGHT) -->
+    <div class="main-layout">
+      
+      <!-- LEFT COLUMN: CANONICAL TRAVERSAL TABS & ALGORITHM SPECS -->
+      <aside class="sidebar-tabs-column">
+        
+        <!-- Traversal Selector Card -->
+        <div class="card sidebar-tabs-card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-title">Canonical Traversals</div>
+            </div>
+            <span class="badge badge-blue">3 Algorithms</span>
+          </div>
+
+          <div class="sidebar-tabs-list">
+            <!-- 1. In-Order Traversal (Default) -->
+            <button class="sidebar-tab-btn active" id="tabInOrder" onclick="switchTraversalTab('inorder')">
+              <div class="sidebar-tab-header">
+                <span class="sidebar-tab-name">In-Order Traversal</span>
+                <span class="tab-badge-default">★ Default</span>
+              </div>
+              <div class="sidebar-tab-formula">Left &rarr; Root &rarr; Right</div>
+              <div class="sidebar-tab-desc">Ascending Alphanumeric Order · Sorted Masterlist &amp; Payroll Sheets</div>
+            </button>
+
+            <!-- 2. Pre-Order Traversal -->
+            <button class="sidebar-tab-btn" id="tabPreOrder" onclick="switchTraversalTab('preorder')">
+              <div class="sidebar-tab-header">
+                <span class="sidebar-tab-name">Pre-Order Traversal</span>
+              </div>
+              <div class="sidebar-tab-formula">Root &rarr; Left &rarr; Right</div>
+              <div class="sidebar-tab-desc">Preserves Tree Topology · Structured Backups &amp; System Restores</div>
+            </button>
+
+            <!-- 3. Post-Order Traversal -->
+            <button class="sidebar-tab-btn" id="tabPostOrder" onclick="switchTraversalTab('postorder')">
+              <div class="sidebar-tab-header">
+                <span class="sidebar-tab-name">Post-Order Traversal</span>
+              </div>
+              <div class="sidebar-tab-formula">Left &rarr; Right &rarr; Root</div>
+              <div class="sidebar-tab-desc">Evaluates Children First · Bottom-Up Deletion &amp; Safe Memory Free</div>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT COLUMN: MAIN SIMULATION STAGE -->
+      <main class="simulation-stage">
+        
+        <!-- 1. 2D HIERARCHICAL TREE CANVAS -->
+        <div class="card tree-stage-card">
+          <div class="card-header" style="margin: -24px -20px 14px; border-radius: 18px 18px 0 0;">
+            <div class="card-title-wrap">
+              <div class="card-title">1. ScholarBST Active Memory Geometry</div>
+              <span class="badge badge-blue" id="activeTraversalBadge">In-Order (Left &rarr; Root &rarr; Right)</span>
+            </div>
+            <div class="card-meta">
+              <div>Nodes: <strong>7 Scholars</strong></div>
+              <div>Height: <strong>3 Levels</strong></div>
+              <div>Root Key: <strong>SCH-004</strong></div>
+              <div>Search: <strong>O(log n)</strong></div>
+            </div>
+          </div>
+
+          <!-- Traversal Purpose Banner -->
+          <div class="traversal-purpose-banner" style="margin: -14px -20px 20px;">
+            <div class="purpose-left">
+              <span class="formula-tag" id="bannerFormula">L &rarr; Root &rarr; R</span>
+              <span class="purpose-desc" id="bannerDesc">Traverses tree in strictly ascending alphanumeric ID order for sorted masterlists and payroll releases.</span>
+            </div>
+            <div class="complexity-tag">
+              <span>Time: <strong>O(n)</strong></span>
+              <span>Space: <strong>O(h) stack</strong></span>
+            </div>
+          </div>
+
+          <!-- Visual Tree Canvas with SVG Connectors and Positioned Nodes -->
+          <div class="tree-canvas-wrapper" id="treeCanvasWrapper">
+            <svg class="tree-svg-connectors" id="treeSvg">
+              <!-- Connector branches (Root to Left/Right, Level 2 to Level 3) -->
+              <line id="branch-4-2" class="tree-connector-line" x1="400" y1="52" x2="200" y2="120" />
+              <line id="branch-4-6" class="tree-connector-line" x1="400" y1="52" x2="600" y2="120" />
+              <line id="branch-2-1" class="tree-connector-line" x1="200" y1="140" x2="100" y2="215" />
+              <line id="branch-2-3" class="tree-connector-line" x1="200" y1="140" x2="300" y2="215" />
+              <line id="branch-6-5" class="tree-connector-line" x1="600" y1="140" x2="500" y2="215" />
+              <line id="branch-6-7" class="tree-connector-line" x1="600" y1="140" x2="700" y2="215" />
+            </svg>
+
+            <!-- Level 1: ROOT -->
+            <div id="node-SCH-004" class="bst-node is-root-node" style="left: 50%; top: 38px;" onclick="selectNodeForInspect('SCH-004')">
+              <div class="root-tag-indicator">TREE ROOT</div>
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-004</span>
+                <span class="bst-node-order-badge" id="order-SCH-004">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Maria Santos</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.25</span>
+                <span>Purok 1</span>
+              </div>
+            </div>
+
+            <!-- Level 2: Left Child of Root -->
+            <div id="node-SCH-002" class="bst-node" style="left: 25%; top: 130px;" onclick="selectNodeForInspect('SCH-002')">
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-002</span>
+                <span class="bst-node-order-badge" id="order-SCH-002">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Juan Dela Cruz</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.50</span>
+                <span>Purok 4</span>
+              </div>
+            </div>
+
+            <!-- Level 2: Right Child of Root -->
+            <div id="node-SCH-006" class="bst-node" style="left: 75%; top: 130px;" onclick="selectNodeForInspect('SCH-006')">
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-006</span>
+                <span class="bst-node-order-badge" id="order-SCH-006">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Sarah Diaz</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.35</span>
+                <span>Purok 4</span>
+              </div>
+            </div>
+
+            <!-- Level 3: Left-Left Leaf -->
+            <div id="node-SCH-001" class="bst-node" style="left: 12.5%; top: 230px;" onclick="selectNodeForInspect('SCH-001')">
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-001</span>
+                <span class="bst-node-order-badge" id="order-SCH-001">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Bea Alvarez</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.15</span>
+                <span>Purok 3</span>
+              </div>
+            </div>
+
+            <!-- Level 3: Left-Right Leaf -->
+            <div id="node-SCH-003" class="bst-node" style="left: 37.5%; top: 230px;" onclick="selectNodeForInspect('SCH-003')">
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-003</span>
+                <span class="bst-node-order-badge" id="order-SCH-003">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Carlo Reyes</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.75</span>
+                <span>Purok 2</span>
+              </div>
+            </div>
+
+            <!-- Level 3: Right-Left Leaf -->
+            <div id="node-SCH-005" class="bst-node" style="left: 62.5%; top: 230px;" onclick="selectNodeForInspect('SCH-005')">
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-005</span>
+                <span class="bst-node-order-badge" id="order-SCH-005">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Marco Ramos</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.80</span>
+                <span>Purok 5</span>
+              </div>
+            </div>
+
+            <!-- Level 3: Right-Right Leaf -->
+            <div id="node-SCH-007" class="bst-node" style="left: 87.5%; top: 230px;" onclick="selectNodeForInspect('SCH-007')">
+              <div class="bst-node-top">
+                <span class="bst-node-id">SCH-007</span>
+                <span class="bst-node-order-badge" id="order-SCH-007">&mdash;</span>
+              </div>
+              <div class="bst-node-name">Patricia Lim</div>
+              <div class="bst-node-sub">
+                <span>GWA 1.30</span>
+                <span>Purok 1</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2. EMITTED TRAVERSAL SEQUENCE STREAM (FULL WIDTH) -->
+        <div class="card stream-card-full">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-title">2. Emitted Traversal Sequence Stream</div>
+              <span class="badge badge-purple" id="emittedCountBadge">0 / 7 Emitted</span>
+            </div>
+            <div class="card-meta">
+              <span id="traversalProgressPct">0% Complete</span>
+            </div>
+          </div>
+          <div class="stream-tape-wrapper">
+            <div class="stream-nodes-row" id="streamNodesRow">
+              <div class="stream-empty-hint">Press Play or Step Forward to start traversal stream...</div>
+            </div>
+            <div class="stream-footer-info">
+              <span id="traversalRuleHint">In-Order Rule: Yield left subtree, current node, then right subtree.</span>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) -->
+    <div class="player-bar-card">
+      <div class="player-controls">
+        <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+          <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="timeline-step-label">
+          <span id="timelineCurrentStep">Step 0</span>
+          <span class="timeline-step-sep">/</span>
+          <span id="timelineTotalSteps">8</span>
+        </div>
+      </div>
+
+      <div class="timeline-progress-wrapper">
+        <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+          <div class="timeline-track-bg"></div>
+          <div class="timeline-track-fill" id="timelineTrackFill"></div>
+          <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+          <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+        </div>
+        <div class="timeline-info-row">
+          <div class="timeline-chapter-name" id="timelineChapterName">
+            <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+            <span id="timelineChapterTitle">Initial Tree State &mdash; Ready for In-Order Traversal</span>
+          </div>
+          <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+        </div>
+      </div>
+
+      <div class="player-right-group">
+        <button class="btn btn-sm" id="btnReplay" onclick="restartSimulation()" title="Replay from Beginning">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Replay
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: O(log n) LOOKUP DEMO -->
+  <div class="modal-overlay" id="searchModal" onclick="closeSearchModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-title">ScholarBST O(log n) Lookup Explorer</div>
+        <button class="btn btn-sm" onclick="closeSearchModal()">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-sub);">
+        Binary Search Tree lookups eliminate 50% of candidate keys at every comparison branch. Select a target Scholar ID to trace the exact O(log n) search path from Root:
+      </p>
+      <div class="search-input-group">
+        <select id="modalSelectScholar" class="speed-select" style="flex: 1; padding: 10px;">
+          <option value="SCH-003">SCH-003 &mdash; Carlo Reyes (GWA 1.75)</option>
+          <option value="SCH-001">SCH-001 &mdash; Bea Alvarez (GWA 1.15)</option>
+          <option value="SCH-005">SCH-005 &mdash; Marco Ramos (GWA 1.80)</option>
+          <option value="SCH-007">SCH-007 &mdash; Patricia Lim (GWA 1.30)</option>
+          <option value="SCH-004">SCH-004 &mdash; Maria Santos (Root)</option>
+        </select>
+        <button class="btn btn-primary" onclick="executeLookupDemo()">Trace Search</button>
+      </div>
+      <div class="search-result-box" id="modalSearchResult">
+        <div style="font-weight: 700; color: var(--text-main);">Search Path Analysis:</div>
+        <div id="modalPathSteps" style="color: var(--text-sub); line-height: 1.5;">Click "Trace Search" to compute comparisons.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATA MODEL: BALANCED 7-NODE SCHOLAR BST
+    // -------------------------------------------------------------
+    const scholarsData = {
+      "SCH-001": { id: "SCH-001", name: "Bea Alvarez", gwa: "1.15", purok: "Purok 3", stipend: "₱3,000.00" },
+      "SCH-002": { id: "SCH-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", stipend: "₱3,000.00" },
+      "SCH-003": { id: "SCH-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", stipend: "₱3,000.00" },
+      "SCH-004": { id: "SCH-004", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", stipend: "₱3,000.00" },
+      "SCH-005": { id: "SCH-005", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", stipend: "₱3,000.00" },
+      "SCH-006": { id: "SCH-006", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", stipend: "₱3,000.00" },
+      "SCH-007": { id: "SCH-007", name: "Patricia Lim", gwa: "1.30", purok: "Purok 1", stipend: "₱3,000.00" }
+    };
+
+    // Branch connections for visual path activation
+    const branchMap = {
+      "SCH-004-SCH-002": "branch-4-2",
+      "SCH-004-SCH-006": "branch-4-6",
+      "SCH-002-SCH-001": "branch-2-1",
+      "SCH-002-SCH-003": "branch-2-3",
+      "SCH-006-SCH-005": "branch-6-5",
+      "SCH-006-SCH-007": "branch-6-7"
+    };
+
+    // -------------------------------------------------------------
+    // THREE CANONICAL TRAVERSAL TIMELINES (0 TO 8 STEPS EACH)
+    // -------------------------------------------------------------
+    const traversalPlans = {
+      // 1. IN-ORDER (Left, Root, Right) - STANDARD DEFAULT
+      inorder: {
+        name: "In-Order Traversal",
+        formula: "Left &rarr; Root &rarr; Right",
+        badge: "In-Order (Left &rarr; Root &rarr; Right)",
+        badgeColor: "blue",
+        ruleHint: "In-Order Rule: Yield left subtree, visit current root, then yield right subtree.",
+        desc: "Traverses tree in strictly ascending alphanumeric ID order for sorted masterlists and payroll releases.",
+        steps: [
+          {
+            step: 0,
+            activeNode: null,
+            visitedNodes: [],
+            title: "Initial Tree State",
+            banner: "ScholarBST balanced at root SCH-004 (Maria Santos). Ready for In-Order traversal (L &rarr; Root &rarr; R).",
+            badgeText: "Initial State",
+            badgeColor: "blue"
+          },
+          {
+            step: 1,
+            activeNode: "SCH-001",
+            visitedNodes: ["SCH-001"],
+            title: "Visit SCH-001 (Bea Alvarez)",
+            banner: "Leftmost leaf reached (#1). Emitted: <strong>SCH-001 (Bea Alvarez)</strong>. Sorted masterlist sequence begins.",
+            badgeText: "Yield Leftmost Leaf",
+            badgeColor: "blue"
+          },
+          {
+            step: 2,
+            activeNode: "SCH-002",
+            visitedNodes: ["SCH-001", "SCH-002"],
+            title: "Visit SCH-002 (Juan Dela Cruz)",
+            banner: "Left subtree root visited (#2). Emitted: <strong>SCH-002 (Juan Dela Cruz)</strong>.",
+            badgeText: "Yield Subtree Root",
+            badgeColor: "blue"
+          },
+          {
+            step: 3,
+            activeNode: "SCH-003",
+            visitedNodes: ["SCH-001", "SCH-002", "SCH-003"],
+            title: "Visit SCH-003 (Carlo Reyes)",
+            banner: "Right child of SCH-002 visited (#3). Emitted: <strong>SCH-003 (Carlo Reyes)</strong>. Left subtree complete.",
+            badgeText: "Yield Right Child",
+            badgeColor: "blue"
+          },
+          {
+            step: 4,
+            activeNode: "SCH-004",
+            visitedNodes: ["SCH-001", "SCH-002", "SCH-003", "SCH-004"],
+            title: "Visit SCH-004 (Maria Santos)",
+            banner: "Primary tree ROOT visited (#4). Emitted: <strong>SCH-004 (Maria Santos)</strong>. Moving to right subtree.",
+            badgeText: "Yield Tree ROOT",
+            badgeColor: "green"
+          },
+          {
+            step: 5,
+            activeNode: "SCH-005",
+            visitedNodes: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005"],
+            title: "Visit SCH-005 (Marco Ramos)",
+            banner: "Right subtree leftmost leaf visited (#5). Emitted: <strong>SCH-005 (Marco Ramos)</strong>.",
+            badgeText: "Yield Subtree Left",
+            badgeColor: "blue"
+          },
+          {
+            step: 6,
+            activeNode: "SCH-006",
+            visitedNodes: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006"],
+            title: "Visit SCH-006 (Sarah Diaz)",
+            banner: "Right subtree root visited (#6). Emitted: <strong>SCH-006 (Sarah Diaz)</strong>.",
+            badgeText: "Yield Subtree Root",
+            badgeColor: "blue"
+          },
+          {
+            step: 7,
+            activeNode: "SCH-007",
+            visitedNodes: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007"],
+            title: "Visit SCH-007 (Patricia Lim)",
+            banner: "Rightmost leaf reached (#7). Emitted: <strong>SCH-007 (Patricia Lim)</strong>. All 7 scholars traversed.",
+            badgeText: "Yield Final Node",
+            badgeColor: "blue"
+          },
+          {
+            step: 8,
+            activeNode: null,
+            visitedNodes: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007"],
+            title: "In-Order Traversal Complete",
+            banner: "Masterlist & Payroll Sheet generated in strictly ascending alphanumeric ID order. Auto-stopped.",
+            badgeText: "Report Generated",
+            badgeColor: "green"
+          }
+        ]
+      },
+
+      // 2. PRE-ORDER (Root, Left, Right) - HIERARCHICAL STRUCTURE & BACKUP
+      preorder: {
+        name: "Pre-Order Traversal",
+        formula: "Root &rarr; Left &rarr; Right",
+        badge: "Pre-Order (Root &rarr; Left &rarr; Right)",
+        badgeColor: "purple",
+        ruleHint: "Pre-Order Rule: Visit root first, then recursively traverse left and right subtrees.",
+        desc: "Visits root nodes prior to subtrees, preserving exact hierarchical structure for snapshots and tree rebuilding.",
+        steps: [
+          {
+            step: 0,
+            activeNode: null,
+            visitedNodes: [],
+            title: "Initial Tree State",
+            banner: "ScholarBST ready for Pre-Order traversal (Root &rarr; L &rarr; R). Preserves tree hierarchy for system backups.",
+            badgeText: "Initial State",
+            badgeColor: "purple"
+          },
+          {
+            step: 1,
+            activeNode: "SCH-004",
+            visitedNodes: ["SCH-004"],
+            title: "Visit SCH-004 (Maria Santos)",
+            banner: "Tree ROOT visited first (#1). Emitted: <strong>SCH-004 (Maria Santos)</strong>. Preserves primary root key.",
+            badgeText: "Visit Tree ROOT",
+            badgeColor: "purple"
+          },
+          {
+            step: 2,
+            activeNode: "SCH-002",
+            visitedNodes: ["SCH-004", "SCH-002"],
+            title: "Visit SCH-002 (Juan Dela Cruz)",
+            banner: "Left subtree root visited (#2). Emitted: <strong>SCH-002 (Juan Dela Cruz)</strong>. Top-down descent.",
+            badgeText: "Visit Left Subtree",
+            badgeColor: "purple"
+          },
+          {
+            step: 3,
+            activeNode: "SCH-001",
+            visitedNodes: ["SCH-004", "SCH-002", "SCH-001"],
+            title: "Visit SCH-001 (Bea Alvarez)",
+            banner: "Left child visited (#3). Emitted: <strong>SCH-001 (Bea Alvarez)</strong>.",
+            badgeText: "Visit Left Leaf",
+            badgeColor: "purple"
+          },
+          {
+            step: 4,
+            activeNode: "SCH-003",
+            visitedNodes: ["SCH-004", "SCH-002", "SCH-001", "SCH-003"],
+            title: "Visit SCH-003 (Carlo Reyes)",
+            banner: "Right child visited (#4). Emitted: <strong>SCH-003 (Carlo Reyes)</strong>. Left branch snapshot complete.",
+            badgeText: "Visit Right Child",
+            badgeColor: "purple"
+          },
+          {
+            step: 5,
+            activeNode: "SCH-006",
+            visitedNodes: ["SCH-004", "SCH-002", "SCH-001", "SCH-003", "SCH-006"],
+            title: "Visit SCH-006 (Sarah Diaz)",
+            banner: "Right subtree root visited (#5). Emitted: <strong>SCH-006 (Sarah Diaz)</strong>.",
+            badgeText: "Visit Right Subtree",
+            badgeColor: "purple"
+          },
+          {
+            step: 6,
+            activeNode: "SCH-005",
+            visitedNodes: ["SCH-004", "SCH-002", "SCH-001", "SCH-003", "SCH-006", "SCH-005"],
+            title: "Visit SCH-005 (Marco Ramos)",
+            banner: "Right subtree left child visited (#6). Emitted: <strong>SCH-005 (Marco Ramos)</strong>.",
+            badgeText: "Visit Subtree Left",
+            badgeColor: "purple"
+          },
+          {
+            step: 7,
+            activeNode: "SCH-007",
+            visitedNodes: ["SCH-004", "SCH-002", "SCH-001", "SCH-003", "SCH-006", "SCH-005", "SCH-007"],
+            title: "Visit SCH-007 (Patricia Lim)",
+            banner: "Right subtree right child visited (#7). Emitted: <strong>SCH-007 (Patricia Lim)</strong>.",
+            badgeText: "Visit Subtree Right",
+            badgeColor: "purple"
+          },
+          {
+            step: 8,
+            activeNode: null,
+            visitedNodes: ["SCH-004", "SCH-002", "SCH-001", "SCH-003", "SCH-006", "SCH-005", "SCH-007"],
+            title: "Pre-Order Traversal Complete",
+            banner: "Exact tree hierarchy preserved. Re-inserting in this order reconstructs identical BST geometry without rebalancing. Auto-stopped.",
+            badgeText: "Backup Snapshot Ready",
+            badgeColor: "green"
+          }
+        ]
+      },
+
+      // 3. POST-ORDER (Left, Right, Root) - BOTTOM-UP DELETION & SAFE CLEANUP
+      postorder: {
+        name: "Post-Order Traversal",
+        formula: "Left &rarr; Right &rarr; Root",
+        badge: "Post-Order (Left &rarr; Right &rarr; Root)",
+        badgeColor: "orange",
+        ruleHint: "Post-Order Rule: Evaluate children before parent to ensure 0 dangling memory references.",
+        desc: "Evaluates child nodes before parents, guaranteeing safe, bottom-up tree clearing and cascading dependency deletion.",
+        steps: [
+          {
+            step: 0,
+            activeNode: null,
+            visitedNodes: [],
+            title: "Initial Tree State",
+            banner: "ScholarBST ready for Post-Order traversal (L &rarr; R &rarr; Root). Evaluates children first for memory safety.",
+            badgeText: "Initial State",
+            badgeColor: "orange"
+          },
+          {
+            step: 1,
+            activeNode: "SCH-001",
+            visitedNodes: ["SCH-001"],
+            title: "Visit SCH-001 (Bea Alvarez)",
+            banner: "Leaf child evaluated first (#1). Emitted: <strong>SCH-001 (Bea Alvarez)</strong>. Safe to free without orphan references.",
+            badgeText: "Free Leaf Node",
+            badgeColor: "orange"
+          },
+          {
+            step: 2,
+            activeNode: "SCH-003",
+            visitedNodes: ["SCH-001", "SCH-003"],
+            title: "Visit SCH-003 (Carlo Reyes)",
+            banner: "Sibling leaf evaluated (#2). Emitted: <strong>SCH-003 (Carlo Reyes)</strong>.",
+            badgeText: "Free Sibling Leaf",
+            badgeColor: "orange"
+          },
+          {
+            step: 3,
+            activeNode: "SCH-002",
+            visitedNodes: ["SCH-001", "SCH-003", "SCH-002"],
+            title: "Visit SCH-002 (Juan Dela Cruz)",
+            banner: "Left subtree parent visited (#3) only after both children are safely processed. Emitted: <strong>SCH-002</strong>.",
+            badgeText: "Free Left Parent",
+            badgeColor: "orange"
+          },
+          {
+            step: 4,
+            activeNode: "SCH-005",
+            visitedNodes: ["SCH-001", "SCH-003", "SCH-002", "SCH-005"],
+            title: "Visit SCH-005 (Marco Ramos)",
+            banner: "Right subtree left child evaluated (#4). Emitted: <strong>SCH-005 (Marco Ramos)</strong>.",
+            badgeText: "Free Right Leaf",
+            badgeColor: "orange"
+          },
+          {
+            step: 5,
+            activeNode: "SCH-007",
+            visitedNodes: ["SCH-001", "SCH-003", "SCH-002", "SCH-005", "SCH-007"],
+            title: "Visit SCH-007 (Patricia Lim)",
+            banner: "Right subtree right child evaluated (#5). Emitted: <strong>SCH-007 (Patricia Lim)</strong>.",
+            badgeText: "Free Sibling Leaf",
+            badgeColor: "orange"
+          },
+          {
+            step: 6,
+            activeNode: "SCH-006",
+            visitedNodes: ["SCH-001", "SCH-003", "SCH-002", "SCH-005", "SCH-007", "SCH-006"],
+            title: "Visit SCH-006 (Sarah Diaz)",
+            banner: "Right subtree parent evaluated (#6) after its children. Emitted: <strong>SCH-006 (Sarah Diaz)</strong>.",
+            badgeText: "Free Right Parent",
+            badgeColor: "orange"
+          },
+          {
+            step: 7,
+            activeNode: "SCH-004",
+            visitedNodes: ["SCH-001", "SCH-003", "SCH-002", "SCH-005", "SCH-007", "SCH-006", "SCH-004"],
+            title: "Visit SCH-004 (Maria Santos)",
+            banner: "Tree ROOT visited last (#7). All subtrees safely deallocated before root node release.",
+            badgeText: "Free Tree ROOT",
+            badgeColor: "green"
+          },
+          {
+            step: 8,
+            activeNode: null,
+            visitedNodes: ["SCH-001", "SCH-003", "SCH-002", "SCH-005", "SCH-007", "SCH-006", "SCH-004"],
+            title: "Post-Order Traversal Complete",
+            banner: "Bottom-up memory deallocation finalized with 0 dangling pointers and guaranteed referential integrity. Auto-stopped.",
+            badgeText: "Safe Cleanup Complete",
+            badgeColor: "green"
+          }
+        ]
+      }
+    };
+
+    // -------------------------------------------------------------
+    // RUNTIME STATE
+    // -------------------------------------------------------------
+    let activeTabKey = "inorder"; // Default: In-Order Traversal
+    let currentStepIndex = 0;    // 0 to 8
+    let isAutoplaying = false;
+    let autoplayTimer = null;
+    let speed = 1.0;
+
+    // -------------------------------------------------------------
+    // INITIALIZATION
+    // -------------------------------------------------------------
+    function initSimulation() {
+      currentStepIndex = 0;
+      initTimelinePips();
+      applyTimelineStep(0, false);
+      updateSvgBranchCoordinates();
+    }
+
+    function switchTraversalTab(tabKey) {
+      if (tabKey === activeTabKey) return;
+      pausePlayback();
+      activeTabKey = tabKey;
+
+      // Update Sidebar Tab Buttons UI
+      document.getElementById("tabInOrder").classList.toggle("active", tabKey === "inorder");
+      document.getElementById("tabPreOrder").classList.toggle("active", tabKey === "preorder");
+      document.getElementById("tabPostOrder").classList.toggle("active", tabKey === "postorder");
+
+      // Update Banners & Specs
+      const plan = traversalPlans[activeTabKey];
+      const activeBadge = document.getElementById("activeTraversalBadge");
+      if (activeBadge) {
+        activeBadge.innerHTML = plan.badge;
+        activeBadge.className = `badge badge-${plan.badgeColor}`;
+      }
+      const bannerFormula = document.getElementById("bannerFormula");
+      if (bannerFormula) bannerFormula.innerHTML = plan.formula;
+      const bannerDesc = document.getElementById("bannerDesc");
+      if (bannerDesc) bannerDesc.textContent = plan.desc;
+
+      const sidebarFormula = document.getElementById("sidebarFormula");
+      if (sidebarFormula) sidebarFormula.innerHTML = plan.formula;
+      const sidebarDesc = document.getElementById("sidebarDesc");
+      if (sidebarDesc) sidebarDesc.textContent = plan.desc;
+
+      const ruleHint = document.getElementById("traversalRuleHint");
+      if (ruleHint) ruleHint.textContent = plan.ruleHint;
+
+      // Reset to Step 0 of selected traversal
+      currentStepIndex = 0;
+      applyTimelineStep(0, false);
+    }
+
+    function initTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      if (!pipsContainer) return;
+      pipsContainer.innerHTML = "";
+      const totalSteps = traversalPlans[activeTabKey].steps.length;
+      for (let i = 0; i < totalSteps; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-pip' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // TIMELINE STEP APPLICATION & RENDERING
+    // -------------------------------------------------------------
+    function applyTimelineStep(stepIdx, animate = true) {
+      const currentPlan = traversalPlans[activeTabKey];
+      const maxIndex = currentPlan.steps.length - 1;
+
+      if (stepIdx < 0) stepIdx = 0;
+      if (stepIdx > maxIndex) stepIdx = maxIndex;
+
+      currentStepIndex = stepIdx;
+      const snapshot = currentPlan.steps[stepIdx];
+
+      // 1. Update BST 2D Nodes Visualization
+      updateTreeNodesVisual(snapshot);
+
+      // 2. Update Emitted Stream Tape (Full Width)
+      updateStreamTape(snapshot.visitedNodes, snapshot.activeNode);
+
+      // 3. Update Bottom Spotify/YouTube-style Player Bar
+      updateTimelineUI();
+    }
+
+    function updateTreeNodesVisual(snapshot) {
+      const allNodeIds = ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007"];
+      
+      allNodeIds.forEach(id => {
+        const el = document.getElementById(`node-${id}`);
+        const badgeEl = document.getElementById(`order-${id}`);
+        if (!el || !badgeEl) return;
+
+        // Reset classes
+        el.classList.remove("is-active-visiting", "is-visited");
+
+        const visitIndex = snapshot.visitedNodes.indexOf(id);
+        if (visitIndex !== -1) {
+          // It has been visited
+          el.classList.add("is-visited");
+          badgeEl.textContent = `#${visitIndex + 1}`;
+        } else {
+          badgeEl.textContent = "—";
+        }
+
+        // Is it the currently active visiting node?
+        if (snapshot.activeNode === id) {
+          el.classList.add("is-active-visiting");
+        }
+      });
+
+      // Update active branch SVG lines
+      updateActiveBranchLines(snapshot.activeNode);
+    }
+
+    function updateActiveBranchLines(activeId) {
+      const lineIds = ["branch-4-2", "branch-4-6", "branch-2-1", "branch-2-3", "branch-6-5", "branch-6-7"];
+      lineIds.forEach(lId => {
+        const l = document.getElementById(lId);
+        if (l) l.classList.remove("active-branch");
+      });
+
+      if (!activeId) return;
+
+      // Highlight path from root to activeId
+      const pathToRoot = {
+        "SCH-001": ["branch-4-2", "branch-2-1"],
+        "SCH-002": ["branch-4-2"],
+        "SCH-003": ["branch-4-2", "branch-2-3"],
+        "SCH-004": [],
+        "SCH-005": ["branch-4-6", "branch-6-5"],
+        "SCH-006": ["branch-4-6"],
+        "SCH-007": ["branch-4-6", "branch-6-7"]
+      };
+
+      (pathToRoot[activeId] || []).forEach(bId => {
+        const line = document.getElementById(bId);
+        if (line) line.classList.add("active-branch");
+      });
+    }
+
+    function updateStreamTape(visitedList, activeId) {
+      const streamRow = document.getElementById("streamNodesRow");
+      const badge = document.getElementById("emittedCountBadge");
+      const pctLabel = document.getElementById("traversalProgressPct");
+
+      if (badge) badge.textContent = `${visitedList.length} / 7 Emitted`;
+      const pct = Math.round((visitedList.length / 7) * 100);
+      if (pctLabel) pctLabel.textContent = `${pct}% Complete`;
+
+      if (visitedList.length === 0) {
+        streamRow.innerHTML = `<div class="stream-empty-hint">Press Play or Step Forward to start traversal stream...</div>`;
+        return;
+      }
+
+      streamRow.innerHTML = "";
+      visitedList.forEach((id, idx) => {
+        const s = scholarsData[id];
+        const chip = document.createElement("div");
+        chip.className = `stream-chip ${id === activeId ? 'chip-active' : ''}`;
+        chip.innerHTML = `
+          <div class="stream-chip-num">${idx + 1}</div>
+          <div class="stream-chip-content">
+            <div class="stream-chip-title-row">
+              <span class="stream-chip-id">${id}</span>
+              <span class="stream-chip-name">${s.name}</span>
+            </div>
+            <div class="stream-chip-meta">GWA ${s.gwa} &bull; ${s.purok}</div>
+          </div>
+        `;
+        streamRow.appendChild(chip);
+
+        if (idx < visitedList.length - 1) {
+          const arrow = document.createElement("div");
+          arrow.className = "stream-chip-arrow";
+          arrow.innerHTML = "&rarr;";
+          streamRow.appendChild(arrow);
+        }
+      });
+
+      // Auto scroll stream to end smoothly
+      streamRow.scrollLeft = streamRow.scrollWidth;
+    }
+
+    // Update bottom Spotify/YouTube-like player bar
+    function updateTimelineUI() {
+      const currentPlan = traversalPlans[activeTabKey];
+      const maxIndex = currentPlan.steps.length - 1;
+      const pct = (currentStepIndex / maxIndex) * 100;
+
+      const fill = document.getElementById("timelineTrackFill");
+      const thumb = document.getElementById("timelineThumb");
+      if (fill) fill.style.width = `${pct}%`;
+      if (thumb) thumb.style.left = `${pct}%`;
+
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${maxIndex}`;
+
+      const curr = currentPlan.steps[currentStepIndex];
+      const badgeElem = document.getElementById("timelineChapterBadge");
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (badgeElem) {
+        badgeElem.textContent = `Step ${currentStepIndex}`;
+        badgeElem.className = `badge badge-${curr.badgeColor}`;
+      }
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>${curr.title}</strong> &mdash; <span style="color: var(--text-sub); font-weight: 500;">${curr.banner}</span>`;
+      }
+
+      const statusBadge = document.getElementById("timelineStatusBadge");
+      if (statusBadge) {
+        if (isAutoplaying) {
+          statusBadge.textContent = "Playing";
+          statusBadge.style.color = "var(--accent-orange)";
+        } else if (currentStepIndex === maxIndex) {
+          statusBadge.textContent = "Completed (Auto-Stopped)";
+          statusBadge.style.color = "var(--accent-green)";
+        } else {
+          statusBadge.textContent = "Paused";
+          statusBadge.style.color = "var(--text-sub)";
+        }
+      }
+
+      // Update chapter pips
+      for (let i = 0; i <= maxIndex; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-pip");
+          } else {
+            pip.classList.remove("active-pip");
+          }
+        }
+      }
+
+      // Play/Pause icon synchronization
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+      const btnTimelinePlay = document.getElementById("btnTimelinePlay");
+      const topPlayBtn = document.getElementById("btnPlayPause");
+
+      if (isAutoplaying) {
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+        if (btnTimelinePlay) btnTimelinePlay.classList.add("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = "Pause";
+          topPlayBtn.classList.remove("btn-primary");
+          topPlayBtn.classList.add("btn-active-pause");
+        }
+      } else {
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+        if (btnTimelinePlay) btnTimelinePlay.classList.remove("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = (currentStepIndex === maxIndex) ? "Replay" : "Play";
+          topPlayBtn.classList.remove("btn-active-pause");
+          topPlayBtn.classList.add("btn-primary");
+        }
+      }
+    }
+
+    // Step forward or backward using timeline buttons
+    function stepTimeline(delta) {
+      pausePlayback();
+      const currentPlan = traversalPlans[activeTabKey];
+      const next = Math.max(0, Math.min(currentPlan.steps.length - 1, currentStepIndex + delta));
+      applyTimelineStep(next, true);
+    }
+
+    // Click anywhere on progress track to jump/seek
+    function seekTimelineByClick(event) {
+      pausePlayback();
+      const container = document.getElementById("timelineTrackContainer");
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const width = rect.width;
+      const ratio = Math.max(0, Math.min(1, clickX / width));
+      const currentPlan = traversalPlans[activeTabKey];
+      const targetStep = Math.round(ratio * (currentPlan.steps.length - 1));
+      applyTimelineStep(targetStep, true);
+    }
+
+    function restartSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+      startAutoplay();
+    }
+
+    function resetSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+    }
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER: AUTO-STOP AT END (NO INFINITE LOOP)
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (isAutoplaying) {
+        pausePlayback();
+      } else {
+        const currentPlan = traversalPlans[activeTabKey];
+        if (currentStepIndex >= currentPlan.steps.length - 1) {
+          applyTimelineStep(0, false);
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      isAutoplaying = true;
+      updateTimelineUI();
+      executePlaybackStep();
+    }
+
+    function pausePlayback() {
+      isAutoplaying = false;
+      clearTimeout(autoplayTimer);
+      updateTimelineUI();
+    }
+
+    function executePlaybackStep() {
+      if (!isAutoplaying) return;
+
+      const currentPlan = traversalPlans[activeTabKey];
+      const maxStep = currentPlan.steps.length - 1;
+
+      if (currentStepIndex < maxStep) {
+        currentStepIndex++;
+        applyTimelineStep(currentStepIndex, true);
+
+        // Check if we just reached the end -> AUTO STOP!
+        if (currentStepIndex >= maxStep) {
+          pausePlayback();
+          return;
+        }
+
+        autoplayTimer = setTimeout(executePlaybackStep, 2000 / speed);
+      } else {
+        pausePlayback();
+      }
+    }
+
+    function changeSpeed(val) {
+      speed = parseFloat(val);
+    }
+
+    // -------------------------------------------------------------
+    // DYNAMIC SVG CONNECTOR LINE CALCULATION (RESPONSIVE ALIGNMENT)
+    // -------------------------------------------------------------
+    function updateSvgBranchCoordinates() {
+      const wrapper = document.getElementById("treeCanvasWrapper");
+      if (!wrapper) return;
+      const wrapRect = wrapper.getBoundingClientRect();
+      const width = wrapRect.width;
+
+      // Node centers based on percentage styling
+      const coords = {
+        "4": { x: width * 0.50, y: 38 + 30 },
+        "2": { x: width * 0.25, y: 130 + 30 },
+        "6": { x: width * 0.75, y: 130 + 30 },
+        "1": { x: width * 0.125, y: 230 + 30 },
+        "3": { x: width * 0.375, y: 230 + 30 },
+        "5": { x: width * 0.625, y: 230 + 30 },
+        "7": { x: width * 0.875, y: 230 + 30 }
+      };
+
+      setLineCoords("branch-4-2", coords["4"].x, coords["4"].y, coords["2"].x, coords["2"].y);
+      setLineCoords("branch-4-6", coords["4"].x, coords["4"].y, coords["6"].x, coords["6"].y);
+      setLineCoords("branch-2-1", coords["2"].x, coords["2"].y, coords["1"].x, coords["1"].y);
+      setLineCoords("branch-2-3", coords["2"].x, coords["2"].y, coords["3"].x, coords["3"].y);
+      setLineCoords("branch-6-5", coords["6"].x, coords["6"].y, coords["5"].x, coords["5"].y);
+      setLineCoords("branch-6-7", coords["6"].x, coords["6"].y, coords["7"].x, coords["7"].y);
+    }
+
+    function setLineCoords(id, x1, y1, x2, y2) {
+      const line = document.getElementById(id);
+      if (line) {
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+      }
+    }
+
+    window.addEventListener("resize", updateSvgBranchCoordinates);
+
+    // -------------------------------------------------------------
+    // INTERACTIVE O(log n) LOOKUP MODAL DEMO
+    // -------------------------------------------------------------
+    function openSearchModal() {
+      pausePlayback();
+      const modal = document.getElementById("searchModal");
+      if (modal) modal.style.display = "flex";
+      executeLookupDemo();
+    }
+
+    function closeSearchModal(event) {
+      const modal = document.getElementById("searchModal");
+      if (modal) modal.style.display = "none";
+    }
+
+    function selectNodeForInspect(id) {
+      const select = document.getElementById("modalSelectScholar");
+      if (select) select.value = id;
+      openSearchModal();
+    }
+
+    function executeLookupDemo() {
+      const select = document.getElementById("modalSelectScholar");
+      const targetId = select.value;
+      const target = scholarsData[targetId];
+      const stepsDiv = document.getElementById("modalPathSteps");
+
+      let logHtml = "";
+      let comparisons = 0;
+
+      // Tracing path in BST
+      // Step 1: Compare with Root (SCH-004)
+      comparisons++;
+      if (targetId === "SCH-004") {
+        logHtml += `<div><strong>Comparison 1:</strong> Target <code>${targetId}</code> == Root <code>SCH-004</code>. Found at Root in <strong>1 comparison</strong>!</div>`;
+      } else if (targetId < "SCH-004") {
+        logHtml += `<div><strong>Comparison 1:</strong> <code>${targetId}</code> &lt; Root <code>SCH-004</code> &rarr; Branch LEFT to <code>SCH-002</code> (Eliminated right half of tree!).</div>`;
+        comparisons++;
+        if (targetId === "SCH-002") {
+          logHtml += `<div><strong>Comparison 2:</strong> Target <code>${targetId}</code> == <code>SCH-002</code>. Found in <strong>2 comparisons</strong>!</div>`;
+        } else if (targetId < "SCH-002") {
+          comparisons++;
+          logHtml += `<div><strong>Comparison 2:</strong> <code>${targetId}</code> &lt; <code>SCH-002</code> &rarr; Branch LEFT to <code>SCH-001</code>.</div>`;
+          logHtml += `<div><strong>Comparison 3:</strong> Found <strong>${target.name} (${targetId})</strong> in <strong>3 comparisons</strong>!</div>`;
+        } else {
+          comparisons++;
+          logHtml += `<div><strong>Comparison 2:</strong> <code>${targetId}</code> &gt; <code>SCH-002</code> &rarr; Branch RIGHT to <code>SCH-003</code>.</div>`;
+          logHtml += `<div><strong>Comparison 3:</strong> Found <strong>${target.name} (${targetId})</strong> in <strong>3 comparisons</strong>!</div>`;
+        }
+      } else {
+        logHtml += `<div><strong>Comparison 1:</strong> <code>${targetId}</code> &gt; Root <code>SCH-004</code> &rarr; Branch RIGHT to <code>SCH-006</code> (Eliminated left half of tree!).</div>`;
+        comparisons++;
+        if (targetId === "SCH-006") {
+          logHtml += `<div><strong>Comparison 2:</strong> Target <code>${targetId}</code> == <code>SCH-006</code>. Found in <strong>2 comparisons</strong>!</div>`;
+        } else if (targetId < "SCH-006") {
+          comparisons++;
+          logHtml += `<div><strong>Comparison 2:</strong> <code>${targetId}</code> &lt; <code>SCH-006</code> &rarr; Branch LEFT to <code>SCH-005</code>.</div>`;
+          logHtml += `<div><strong>Comparison 3:</strong> Found <strong>${target.name} (${targetId})</strong> in <strong>3 comparisons</strong>!</div>`;
+        } else {
+          comparisons++;
+          logHtml += `<div><strong>Comparison 2:</strong> <code>${targetId}</code> &gt; <code>SCH-006</code> &rarr; Branch RIGHT to <code>SCH-007</code>.</div>`;
+          logHtml += `<div><strong>Comparison 3:</strong> Found <strong>${target.name} (${targetId})</strong> in <strong>3 comparisons</strong>!</div>`;
+        }
+      }
+
+      logHtml += `
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--card-border); color: var(--accent-green); font-weight: 600;">
+          ✓ O(log n) efficiency: Searched 7 scholars in only ${comparisons} comparisons (worst case height = 3).
+        </div>
+      `;
+
+      stepsDiv.innerHTML = logHtml;
+
+      // Highlight active branches on tree
+      updateActiveBranchLines(targetId);
+      const allNodeIds = ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007"];
+      allNodeIds.forEach(id => {
+        const el = document.getElementById(`node-${id}`);
+        if (el) el.classList.toggle("is-active-visiting", id === targetId);
+      });
+    }
+
+    // Keyboard shortcuts (Space to play/pause, Left/Right arrows to step)
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleAutoplay();
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        stepTimeline(1);
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        stepTimeline(-1);
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initSimulation();
+      // Ensure SVG coordinates adapt after rendering
+      setTimeout(updateSvgBranchCoordinates, 100);
+    });
+  </script>
+</body>
+</html>

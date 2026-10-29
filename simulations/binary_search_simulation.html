@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Search: Student Desk Verification (O(log n))</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-teal: #30B0C7;
+      --accent-teal-bg: #E5F7FA;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+      color: #FFFFFF !important;
+    }
+
+    .btn-target-select {
+      background: var(--accent-teal-bg);
+      color: var(--accent-teal);
+      border-color: rgba(48, 176, 199, 0.3);
+    }
+
+    .btn-target-select:hover {
+      background: var(--accent-teal);
+      color: #FFFFFF;
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .card-meta strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-teal { background: var(--accent-teal-bg); color: var(--accent-teal); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* CARD 1: BISECTION TRACKER */
+    .partition-card {
+      width: 100%;
+    }
+
+    .partition-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .median-trio-box {
+      background: rgba(0, 113, 227, 0.05);
+      border: 1.5px solid rgba(0, 113, 227, 0.15);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .median-trio-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .median-trio-chips {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .trio-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .trio-chip.selected-pivot {
+      background: var(--accent-blue-bg);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+    }
+
+    .partition-track-container {
+      background: rgba(242, 242, 247, 0.5);
+      border: 1.5px dashed rgba(0, 0, 0, 0.12);
+      border-radius: 16px;
+      padding: 24px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .track-slots-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .slot-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .slot-pointers-zone {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .pointer-pin {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .pointer-low { background: var(--accent-blue); color: #fff; }
+    .pointer-mid { background: var(--accent-purple); color: #fff; animation: pulseGlow 1.5s infinite; }
+    .pointer-high { background: var(--accent-orange); color: #fff; }
+    .pointer-target { background: var(--accent-teal); color: #fff; }
+    .pointer-match { background: var(--accent-green); color: #fff; box-shadow: 0 0 8px rgba(52, 199, 89, 0.5); }
+    .pointer-elim { background: #8E8E93; color: #fff; }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(88, 86, 214, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(88, 86, 214, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(88, 86, 214, 0); }
+    }
+
+    .slot-box {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .slot-box.is-in-window {
+      border-color: rgba(0, 113, 227, 0.45);
+      background: #F9FBFF;
+    }
+
+    .slot-box.is-mid {
+      border-color: var(--accent-purple) !important;
+      background: var(--accent-purple-bg) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(88, 86, 214, 0.2);
+    }
+
+    .slot-box.is-match {
+      border-color: var(--accent-green) !important;
+      background: var(--accent-green-bg) !important;
+      transform: scale(1.04);
+      box-shadow: 0 4px 14px rgba(52, 199, 89, 0.3);
+    }
+
+    .slot-box.is-eliminated {
+      opacity: 0.35;
+      background: #F2F2F7 !important;
+      border-color: #E5E5EA !important;
+      filter: grayscale(0.8);
+    }
+
+    .slot-index {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .slot-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .slot-surname {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* CARD 2: ACTIVE CANDIDATE MEMORY BUFFER */
+    .array-stage-card {
+      width: 100%;
+    }
+
+    .array-track-buffer {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .array-cards-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (max-width: 1150px) {
+      .track-slots-row, .array-cards-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .candidate-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .candidate-card.is-in-window {
+      border-color: rgba(0, 113, 227, 0.3);
+    }
+
+    .candidate-card.is-active-mid {
+      border-color: var(--accent-purple) !important;
+      background: #FDFBFF !important;
+      box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.25) !important;
+      transform: translateY(-2px);
+    }
+
+    .candidate-card.is-match-card {
+      border-color: var(--accent-green) !important;
+      background: #F7FCF8 !important;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.3) !important;
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .candidate-card.is-eliminated {
+      opacity: 0.35;
+      background: #FAFAFA !important;
+      border-color: #E5E5EA !important;
+      filter: grayscale(0.7);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-pos-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+    }
+
+    .card-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-income-box {
+      background: rgba(0, 113, 227, 0.06);
+      border: 1px solid rgba(0, 113, 227, 0.18);
+      border-radius: 8px;
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .income-val {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent-blue);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .income-lbl {
+      font-size: 8.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--card-border);
+      padding-top: 5px;
+      margin-top: 2px;
+    }
+
+    /* Verified Student Dossier (Shown on match) */
+    .student-dossier {
+      background: #FFFFFF;
+      border: 1.5px solid var(--accent-green);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: none;
+      box-shadow: 0 4px 16px rgba(52, 199, 89, 0.12);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .student-dossier.visible {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dossier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+    }
+
+    .dossier-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1B7A32;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .dossier-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .dossier-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dossier-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .dossier-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* PLAYER BAR */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 20px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 4px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.05);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      transform: scale(1.06);
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      min-width: 68px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      margin: 0 2px;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .timeline-track-container {
+      position: relative;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 7px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 5px;
+      background: var(--accent-blue);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring);
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 7px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid var(--accent-blue);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-passed {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      gap: 12px;
+    }
+
+    .timeline-chapter-name {
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-time-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-main);
+      transition: all 0.2s var(--spring);
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill:hover {
+      background: #F2F2F7;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Binary Search: Student Desk Verification (O(log n))</h1>
+        <div class="header-sub">Applied strictly to pre-sorted primary keys (Applicant ID &amp; Name) to bisect candidate arrays in sub-millisecond logarithmic time</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="stepTimeline(1)">Step Forward</button>
+        <button class="btn btn-target-select" onclick="focusMatchSlot()">Focus Match</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN SIMULATION STAGE (FULL WIDTH) -->
+    <div class="simulation-stage">
+        
+      <!-- 1. IN-PLACE PARTITIONING & BISECTION TRACKER CARD -->
+      <div class="card partition-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">1. Search Interval &amp; Bisection Range Tracker</div>
+            <span class="badge badge-blue" id="partitionRangeBadge">Active Window [0..7]</span>
+          </div>
+          <div class="card-meta">
+            <div>Pre-condition: <strong>Pre-Sorted Primary Key</strong></div>
+            <div>Time Complexity: <strong>O(log n) Sub-Millisecond</strong></div>
+            <div>Max Bisections: <strong>⌈log₂(8)⌉ = 3 Steps</strong></div>
+          </div>
+        </div>
+
+        <div class="partition-body">
+          <!-- Bisection Trio Inspector -->
+          <div class="median-trio-box" id="medianTrioBox">
+            <div class="median-trio-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              Binary Bisection Inspector
+            </div>
+            <div class="median-trio-chips">
+              <div class="trio-chip" id="chipLow"><span id="lblLow">Low [0]:</span> <span id="valLow">APP-001</span></div>
+              <div class="trio-chip" id="chipMid"><span id="lblMid">Mid [3]:</span> <span id="valMid">APP-004</span></div>
+              <div class="trio-chip" id="chipHigh"><span id="lblHigh">High [7]:</span> <span id="valHigh">APP-008</span></div>
+              <div class="trio-chip selected-pivot" id="chipPivot"><span id="lblPivot">Target Key:</span> <strong id="valPivot">APP-005</strong></div>
+              <div class="trio-chip" id="chipWall" style="border-color: rgba(0, 113, 227, 0.35); background: rgba(0, 113, 227, 0.08); color: var(--accent-blue); font-weight: 700;"><span id="lblWall">Evaluation:</span> <span id="valWall">mid = 0 + (7-0)/2 = 3</span></div>
+            </div>
+          </div>
+
+          <!-- 8 In-Place Pre-Sorted Slots -->
+          <div class="partition-track-container">
+            <div class="track-slots-row" id="slotsTrackRow">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ACTIVE CANDIDATE MEMORY BUFFER -->
+      <div class="card array-stage-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">2. Active Candidate Memory Buffer &amp; Desk Verification Dossier</div>
+            <span class="badge badge-purple" id="arrayStatusBadge">Initial Inquiry Desk Query</span>
+          </div>
+          <div class="card-meta">
+            <div>Pre-Sorted Key: <strong>Applicant ID</strong></div>
+            <div>Desk Latency: <strong>&lt; 0.05 ms</strong></div>
+            <div>Query Target: <strong>APP-005 (Danilo Mercado)</strong></div>
+          </div>
+        </div>
+
+        <div class="array-track-buffer">
+          <div class="array-cards-row" id="applicantCardsRow">
+            <!-- Rendered dynamically -->
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+            <span id="quickComparisonDetail">Comparison: Student presents physical ID at desk. Target search key initialized.</span>
+            <span id="sortProgressPct">0% Resolved</span>
+          </div>
+
+          <!-- Verified Student Dossier (Shown on match) -->
+          <div class="student-dossier" id="studentDossier">
+            <div class="dossier-header">
+              <div class="dossier-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                VERIFIED APPLICANT RECORD FOUND &mdash; OFFICIAL RETRIEVAL COMPLETE
+              </div>
+              <span class="badge badge-green" style="font-size: 11px;">VERIFICATION APPROVED</span>
+            </div>
+            <div class="dossier-grid">
+              <div class="dossier-item">
+                <span class="dossier-label">Applicant ID</span>
+                <span class="dossier-val" style="color: var(--accent-blue);">APP-005</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Full Name</span>
+                <span class="dossier-val">Danilo Jose Mercado</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Institution &amp; Year</span>
+                <span class="dossier-val">Rizal Tech Univ (4th Year)</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Barangay Residence</span>
+                <span class="dossier-val">Purok 1 Maligaya</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Academic Merit (GWA)</span>
+                <span class="dossier-val">1.95 (Collegiate Honors)</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Household Income</span>
+                <span class="dossier-val" style="color: #1B7A32;">₱11,500.00 / mo</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Document Checklist</span>
+                <span class="dossier-val" style="color: var(--accent-purple);">4/4 Attached &amp; Validated</span>
+              </div>
+              <div class="dossier-item">
+                <span class="dossier-label">Desk Retrieval Time</span>
+                <span class="dossier-val" style="color: var(--accent-teal);">0.02 ms (3 Bisections)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) -->
+    <div class="player-bar-card">
+      <div class="player-controls">
+        <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+          <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="timeline-step-label">
+          <span id="timelineCurrentStep">Step 0</span>
+          <span class="timeline-step-sep">/</span>
+          <span id="timelineTotalSteps">9</span>
+        </div>
+      </div>
+
+      <div class="timeline-progress-wrapper">
+        <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+          <div class="timeline-track-bg"></div>
+          <div class="timeline-track-fill" id="timelineTrackFill"></div>
+          <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+          <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+        </div>
+        <div class="timeline-info-row">
+          <div class="timeline-chapter-name" id="timelineChapterName">
+            <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+            <span id="timelineChapterTitle">Student Desk Query &mdash; Target Key APP-005</span>
+          </div>
+          <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+        </div>
+      </div>
+
+      <button class="btn-replay-pill" onclick="resetSimulation()" title="Reset to Beginning">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Replay
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // PRE-SORTED CANDIDATE ROSTER (8 APPLICANTS SORTED BY ID)
+    // -------------------------------------------------------------
+    const candidates = {
+      "APP-001": { id: "APP-001", name: "Patricia Castro", surname: "Castro", gwa: 2.15, income: "₱18,000.00", purok: "Purok 5", school: "Pamantasan Lungsod" },
+      "APP-002": { id: "APP-002", name: "Hannah Del Rosario", surname: "Del Rosario", gwa: 1.80, income: "₱9,000.00", purok: "Purok 3", school: "Barangay National HS" },
+      "APP-003": { id: "APP-003", name: "Bea Fernandez", surname: "Fernandez", gwa: 2.00, income: "₱17,000.00", purok: "Purok 1", school: "City College" },
+      "APP-004": { id: "APP-004", name: "Jerome Lopez", surname: "Lopez", gwa: 2.10, income: "₱14,500.00", purok: "Purok 2", school: "Univ of Caloocan" },
+      "APP-005": { id: "APP-005", name: "Danilo Mercado", surname: "Mercado", gwa: 1.95, income: "₱11,500.00", purok: "Purok 1", school: "Rizal Tech Univ" },
+      "APP-006": { id: "APP-006", name: "Katrina Morales", surname: "Morales", gwa: 1.70, income: "₱12,500.00", purok: "Purok 6", school: "City College" },
+      "APP-007": { id: "APP-007", name: "Carl Navarro", surname: "Navarro", gwa: 2.30, income: "₱24,000.00", purok: "Purok 5", school: "Barangay National HS" },
+      "APP-008": { id: "APP-008", name: "Gabriel Soriano", surname: "Soriano", gwa: 2.25, income: "₱19,000.00", purok: "Purok 3", school: "Polytechnic Univ (PUP)" }
+    };
+
+    // -------------------------------------------------------------
+    // TIMELINE SNAPSHOTS (10 GRANULAR STEPS: 0 to 9 — ZERO SKIPPING)
+    // Target: APP-005 (Danilo Mercado)
+    // -------------------------------------------------------------
+    const timelineSnapshots = [
+      {
+        step: 0,
+        title: "Student Desk Query &mdash; Target Key APP-005 (Danilo Mercado)",
+        badge: "Inquiry Desk",
+        badgeColor: "blue",
+        rangeBadge: "Search Window [0..7]",
+        comparisonText: "Student presents Barangay ID at desk with key <strong>'APP-005'</strong>. Binary search initializes on pre-sorted array of 8 candidates in memory.",
+        progressPct: 0,
+        lblLow: "Low [0]:", lblMid: "Mid [?]:", lblHigh: "High [7]:", lblPivot: "Target Key:", lblWall: "State:",
+        lowVal: "APP-001", midVal: "Pending", highVal: "APP-008", pivotVal: "APP-005", wallInfo: "Array Size: n = 8",
+        slots: [
+          { id: "APP-001", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["low"] },
+          { id: "APP-002", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-003", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-004", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-005", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["target"] },
+          { id: "APP-006", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-007", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-008", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["high"] }
+        ],
+        activeMidId: null, targetId: "APP-005", eliminatedIds: []
+      },
+      {
+        step: 1,
+        title: "Bisection 1 &mdash; Calculate Midpoint: mid = 0 + (7 - 0)/2 = 3 (APP-004)",
+        badge: "Bisection #1",
+        badgeColor: "purple",
+        rangeBadge: "Midpoint [3]: APP-004",
+        comparisonText: "Formula: <code>mid = low + (high - low) / 2 = 0 + (7 - 0) / 2 = 3</code>. Midpoint inspector targets index 3: <strong>APP-004 (Jerome Lopez)</strong>.",
+        progressPct: 15,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Target Key:", lblWall: "Evaluation:",
+        lowVal: "APP-001", midVal: "APP-004", highVal: "APP-008", pivotVal: "APP-005", wallInfo: "mid = 3",
+        slots: [
+          { id: "APP-001", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["low"] },
+          { id: "APP-002", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-003", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-004", isElim: false, isInWindow: true, isMid: true,  isMatch: false, pointers: ["mid"] },
+          { id: "APP-005", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["target"] },
+          { id: "APP-006", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-007", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-008", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["high"] }
+        ],
+        activeMidId: "APP-004", targetId: "APP-005", eliminatedIds: []
+      },
+      {
+        step: 2,
+        title: "Bisection 1 &mdash; Compare: 'APP-004'.compareTo('APP-005') &lt; 0 (Target is Greater)",
+        badge: "Compare < 0",
+        badgeColor: "orange",
+        rangeBadge: "Key Comparison < 0",
+        comparisonText: "Compare mid key vs target: <code>'APP-004'.compareToIgnoreCase('APP-005') < 0</code> (-1). Target lies strictly in the upper half.",
+        progressPct: 28,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Target Key:", lblWall: "Comparison:",
+        lowVal: "APP-001", midVal: "APP-004", highVal: "APP-008", pivotVal: "APP-005", wallInfo: "'APP-004' < 'APP-005'",
+        slots: [
+          { id: "APP-001", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["low"] },
+          { id: "APP-002", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-003", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-004", isElim: false, isInWindow: true, isMid: true,  isMatch: false, pointers: ["mid"] },
+          { id: "APP-005", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["target"] },
+          { id: "APP-006", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-007", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-008", isElim: false, isInWindow: true, isMid: false, isMatch: false, pointers: ["high"] }
+        ],
+        activeMidId: "APP-004", targetId: "APP-005", eliminatedIds: []
+      },
+      {
+        step: 3,
+        title: "Bisection 1 &mdash; Discard Left Half [0..3]: low = mid + 1 = 4",
+        badge: "50% Eliminated",
+        badgeColor: "green",
+        rangeBadge: "Left [0..3] Discarded",
+        comparisonText: "Since array is pre-sorted, target CANNOT exist in [0..3]. Discard entire left half (Castro, Del Rosario, Fernandez, Lopez). Set <code>low = mid + 1 = 4</code>.",
+        progressPct: 40,
+        lblLow: "Low [4]:", lblMid: "Elim [0..3]:", lblHigh: "High [7]:", lblPivot: "Target Key:", lblWall: "New Window:",
+        lowVal: "APP-005", midVal: "4 Discarded", highVal: "APP-008", pivotVal: "APP-005", wallInfo: "Window: [4..7]",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["low", "target"] },
+          { id: "APP-006", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-007", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-008", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["high"] }
+        ],
+        activeMidId: null, targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004"]
+      },
+      {
+        step: 4,
+        title: "Bisection 2 &mdash; Calculate Midpoint: mid = 4 + (7 - 4)/2 = 5 (APP-006)",
+        badge: "Bisection #2",
+        badgeColor: "purple",
+        rangeBadge: "Midpoint [5]: APP-006",
+        comparisonText: "Active window [4..7]: <code>mid = 4 + (7 - 4) / 2 = 4 + 1 = 5</code>. Midpoint inspector targets index 5: <strong>APP-006 (Katrina Morales)</strong>.",
+        progressPct: 52,
+        lblLow: "Low [4]:", lblMid: "Mid [5]:", lblHigh: "High [7]:", lblPivot: "Target Key:", lblWall: "Evaluation:",
+        lowVal: "APP-005", midVal: "APP-006", highVal: "APP-008", pivotVal: "APP-005", wallInfo: "mid = 5",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["low", "target"] },
+          { id: "APP-006", isElim: false, isInWindow: true,  isMid: true,  isMatch: false, pointers: ["mid"] },
+          { id: "APP-007", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-008", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["high"] }
+        ],
+        activeMidId: "APP-006", targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004"]
+      },
+      {
+        step: 5,
+        title: "Bisection 2 &mdash; Compare: 'APP-006'.compareTo('APP-005') &gt; 0 (Target is Smaller)",
+        badge: "Compare > 0",
+        badgeColor: "orange",
+        rangeBadge: "Key Comparison > 0",
+        comparisonText: "Compare mid key vs target: <code>'APP-006'.compareToIgnoreCase('APP-005') > 0</code> (+1). Target lies strictly to the left of index 5.",
+        progressPct: 65,
+        lblLow: "Low [4]:", lblMid: "Mid [5]:", lblHigh: "High [7]:", lblPivot: "Target Key:", lblWall: "Comparison:",
+        lowVal: "APP-005", midVal: "APP-006", highVal: "APP-008", pivotVal: "APP-005", wallInfo: "'APP-006' > 'APP-005'",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["low", "target"] },
+          { id: "APP-006", isElim: false, isInWindow: true,  isMid: true,  isMatch: false, pointers: ["mid"] },
+          { id: "APP-007", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: [] },
+          { id: "APP-008", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["high"] }
+        ],
+        activeMidId: "APP-006", targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004"]
+      },
+      {
+        step: 6,
+        title: "Bisection 2 &mdash; Discard Right Half [5..7]: high = mid - 1 = 4",
+        badge: "87.5% Eliminated",
+        badgeColor: "green",
+        rangeBadge: "Right [5..7] Discarded",
+        comparisonText: "Target CANNOT exist in [5..7]. Discard Morales, Navarro, Soriano. Set <code>high = mid - 1 = 4</code>. Search window isolated to single index <code>[4..4]</code>!",
+        progressPct: 78,
+        lblLow: "Low [4]:", lblMid: "Elim [5..7]:", lblHigh: "High [4]:", lblPivot: "Target Key:", lblWall: "New Window:",
+        lowVal: "APP-005", midVal: "3 Discarded", highVal: "APP-005", pivotVal: "APP-005", wallInfo: "Window: [4..4]",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: false, isMatch: false, pointers: ["low", "high", "target"] },
+          { id: "APP-006", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-007", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-008", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] }
+        ],
+        activeMidId: null, targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-006", "APP-007", "APP-008"]
+      },
+      {
+        step: 7,
+        title: "Bisection 3 &mdash; Final Midpoint: mid = 4 + (4 - 4)/2 = 4 (APP-005)",
+        badge: "Bisection #3",
+        badgeColor: "purple",
+        rangeBadge: "Midpoint [4]: APP-005",
+        comparisonText: "Active window [4..4]: <code>mid = 4 + (4 - 4) / 2 = 4</code>. Inspecting slot 4: <strong>APP-005 (Danilo Mercado)</strong>.",
+        progressPct: 88,
+        lblLow: "Low [4]:", lblMid: "Mid [4]:", lblHigh: "High [4]:", lblPivot: "Target Key:", lblWall: "Evaluation:",
+        lowVal: "APP-005", midVal: "APP-005", highVal: "APP-005", pivotVal: "APP-005", wallInfo: "mid = 4",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: true,  isMatch: false, pointers: ["low", "mid", "high", "target"] },
+          { id: "APP-006", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-007", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-008", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] }
+        ],
+        activeMidId: "APP-005", targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-006", "APP-007", "APP-008"]
+      },
+      {
+        step: 8,
+        title: "Exact Match Confirmed: 'APP-005' == 'APP-005' (cmp == 0) &mdash; Index 4 Located!",
+        badge: "Match Confirmed",
+        badgeColor: "green",
+        rangeBadge: "Exact Match Found",
+        comparisonText: "Exact match verified: <code>'APP-005'.compareToIgnoreCase('APP-005') == 0</code>! Found at index 4 in exactly 3 bisections (0.02 ms).",
+        progressPct: 96,
+        lblLow: "Index Found:", lblMid: "Bisections:", lblHigh: "Latency:", lblPivot: "Result:", lblWall: "Status:",
+        lowVal: "Index 4", midVal: "3 Steps", highVal: "0.02 ms", pivotVal: "MATCH", wallInfo: "Record Retrieved",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: false, isMatch: true,  pointers: ["match"] },
+          { id: "APP-006", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-007", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-008", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] }
+        ],
+        activeMidId: "APP-005", targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-006", "APP-007", "APP-008"]
+      },
+      {
+        step: 9,
+        title: "Desk Record Retrieval &mdash; Danilo Jose Mercado Verified Dossier Displayed",
+        badge: "Verified Complete",
+        badgeColor: "green",
+        rangeBadge: "Dossier Retrieved",
+        comparisonText: "Student verification successful! Complete scholar dossier loaded instantly from memory. Ready for status inquiry or stipend claim release.",
+        progressPct: 100,
+        lblLow: "Applicant ID:", lblMid: "Honor Rank:", lblHigh: "Payout Status:", lblPivot: "Desk Action:", lblWall: "COA Compliance:",
+        lowVal: "APP-005", midVal: "1.95 GWA", highVal: "Approved", pivotVal: "Verified", wallInfo: "Sub-Millisecond Logarithmic",
+        slots: [
+          { id: "APP-001", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-002", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-003", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-004", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-005", isElim: false, isInWindow: true,  isMid: false, isMatch: true,  pointers: ["match"] },
+          { id: "APP-006", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-007", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] },
+          { id: "APP-008", isElim: true,  isInWindow: false, isMid: false, isMatch: false, pointers: ["elim"] }
+        ],
+        activeMidId: "APP-005", targetId: "APP-005", eliminatedIds: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-006", "APP-007", "APP-008"]
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER & TIMELINE ENGINE
+    // -------------------------------------------------------------
+    let currentStepIndex = 0;
+    let autoplayTimer = null;
+    let stepSpeedMs = 2400;
+
+    function initSimulation() {
+      buildTimelinePips();
+      applyTimelineStep(0, false);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          toggleAutoplay();
+        } else if (e.code === "ArrowRight") {
+          e.preventDefault();
+          stepTimeline(1);
+        } else if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          stepTimeline(-1);
+        }
+      });
+    }
+
+    function buildTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      pipsContainer.innerHTML = "";
+      const total = timelineSnapshots.length - 1;
+      for (let i = 0; i <= total; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-passed' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function applyTimelineStep(index, isUserSeeking = false) {
+      if (index < 0) index = 0;
+      if (index >= timelineSnapshots.length) index = timelineSnapshots.length - 1;
+
+      currentStepIndex = index;
+      const snapshot = timelineSnapshots[currentStepIndex];
+
+      // Update Player Scrubber UI
+      const totalSteps = timelineSnapshots.length - 1;
+      const pct = (currentStepIndex / totalSteps) * 100;
+      document.getElementById("timelineTrackFill").style.width = `${pct}%`;
+      document.getElementById("timelineThumb").style.left = `${pct}%`;
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${totalSteps}`;
+      document.getElementById("timelineChapterBadge").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineChapterTitle").textContent = snapshot.title;
+
+      // Update Chapter Pips
+      for (let i = 0; i <= totalSteps; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-passed");
+          } else {
+            pip.classList.remove("active-passed");
+          }
+        }
+      }
+
+      // Render Partition Slots and Candidate Memory Buffer
+      renderPartitionSlots(snapshot);
+      renderCandidateCards(snapshot);
+
+      // Render Verified Dossier on Step 8 & 9
+      const dossier = document.getElementById("studentDossier");
+      if (currentStepIndex >= 8) {
+        dossier.classList.add("visible");
+      } else {
+        dossier.classList.remove("visible");
+      }
+
+      // Auto-stop when reaching final step
+      if (currentStepIndex === totalSteps && autoplayTimer) {
+        pauseAutoplay("Completed (Auto-Stopped)");
+      }
+    }
+
+    function renderPartitionSlots(snapshot) {
+      if (document.getElementById("lblLow")) document.getElementById("lblLow").textContent = snapshot.lblLow || "Low [0]:";
+      if (document.getElementById("lblMid")) document.getElementById("lblMid").textContent = snapshot.lblMid || "Mid [3]:";
+      if (document.getElementById("lblHigh")) document.getElementById("lblHigh").textContent = snapshot.lblHigh || "High [7]:";
+      if (document.getElementById("lblPivot")) document.getElementById("lblPivot").textContent = snapshot.lblPivot || "Target Key:";
+      if (document.getElementById("lblWall")) document.getElementById("lblWall").textContent = snapshot.lblWall || "Evaluation:";
+
+      document.getElementById("valLow").textContent = snapshot.lowVal;
+      document.getElementById("valMid").textContent = snapshot.midVal;
+      document.getElementById("valHigh").textContent = snapshot.highVal;
+      document.getElementById("valPivot").textContent = snapshot.pivotVal;
+      if (document.getElementById("valWall")) {
+        document.getElementById("valWall").textContent = snapshot.wallInfo || "";
+      }
+      
+      const rangeBadgeEl = document.getElementById("partitionRangeBadge");
+      if (rangeBadgeEl) {
+        rangeBadgeEl.textContent = snapshot.rangeBadge;
+        rangeBadgeEl.className = `badge badge-${snapshot.badgeColor || 'blue'}`;
+      }
+
+      const container = document.getElementById("slotsTrackRow");
+      container.innerHTML = "";
+
+      snapshot.slots.forEach((s, idx) => {
+        const col = document.createElement("div");
+        col.className = "slot-column";
+
+        // Pointers zone
+        const ptrsZone = document.createElement("div");
+        ptrsZone.className = "slot-pointers-zone";
+
+        s.pointers.forEach(p => {
+          const pin = document.createElement("span");
+          pin.className = "pointer-pin";
+          if (p === "low") { pin.className += " pointer-low"; pin.textContent = "LOW"; }
+          else if (p === "mid") { pin.className += " pointer-mid"; pin.textContent = "MID"; }
+          else if (p === "high") { pin.className += " pointer-high"; pin.textContent = "HIGH"; }
+          else if (p === "target") { pin.className += " pointer-target"; pin.textContent = "TARGET"; }
+          else if (p === "match") { pin.className += " pointer-match"; pin.textContent = "✓ MATCH"; }
+          else if (p === "elim") { pin.className += " pointer-elim"; pin.textContent = "DISCARD"; }
+          ptrsZone.appendChild(pin);
+        });
+
+        // Slot box
+        const box = document.createElement("div");
+        box.className = `slot-box ${s.isInWindow ? 'is-in-window' : ''} ${s.isMid ? 'is-mid' : ''} ${s.isMatch ? 'is-match' : ''} ${s.isElim ? 'is-eliminated' : ''}`;
+        box.innerHTML = `
+          <span class="slot-index">[${idx}]</span>
+          <span class="slot-id">${s.id}</span>
+          <span class="slot-surname">${candidates[s.id].surname}</span>
+        `;
+
+        col.appendChild(ptrsZone);
+        col.appendChild(box);
+        container.appendChild(col);
+      });
+    }
+
+    function renderCandidateCards(snapshot) {
+      const container = document.getElementById("applicantCardsRow");
+      container.innerHTML = "";
+
+      Object.keys(candidates).forEach((cId, idx) => {
+        const c = candidates[cId];
+        const isMid = (snapshot.activeMidId === c.id);
+        const isTarget = (snapshot.targetId === c.id);
+        const isMatch = (snapshot.step >= 8 && snapshot.targetId === c.id);
+        const isElim = snapshot.eliminatedIds.includes(c.id);
+
+        const card = document.createElement("div");
+        card.className = `candidate-card ${isMid ? 'is-active-mid' : ''} ${isMatch ? 'is-match-card' : ''} ${isElim ? 'is-eliminated' : 'is-in-window'}`;
+
+        let statusBadge = `Pos #${idx}`;
+        if (isMatch) {
+          statusBadge = `<span class="badge badge-green" style="font-size: 8px;">MATCH FOUND</span>`;
+        } else if (isElim) {
+          statusBadge = `<span class="badge" style="background:#E5E5EA; color:#8E8E93; font-size: 8px;">DISCARDED</span>`;
+        } else if (isMid) {
+          statusBadge = `<span class="badge badge-purple" style="font-size: 8px;">MIDPOINT</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="card-top-row">
+            <span class="card-id">${c.id}</span>
+            <div class="card-pos-badge">${statusBadge}</div>
+          </div>
+          <div class="card-name" title="${c.name}"><strong>${c.surname}</strong>, ${c.name.split(' ')[0]}</div>
+          <div class="card-income-box">
+            <span class="income-val">${c.gwa.toFixed(2)} GWA</span>
+            <span class="income-lbl">${c.school.split(' ')[0]}</span>
+          </div>
+          <div class="card-footer">
+            <span>${c.purok}</span>
+            <span style="font-weight: 700; color: ${isMatch ? '#248a3d' : (isElim ? '#8E8E93' : 'var(--accent-blue)')};">
+              ${isMatch ? 'VERIFIED' : (isElim ? 'ELIMINATED' : 'ACTIVE')}
+            </span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById("quickComparisonDetail").innerHTML = snapshot.comparisonText;
+      document.getElementById("sortProgressPct").textContent = `${snapshot.progressPct}% Resolved`;
+      
+      const arrayStatusEl = document.getElementById("arrayStatusBadge");
+      if (arrayStatusEl) {
+        arrayStatusEl.textContent = snapshot.badge;
+        arrayStatusEl.className = `badge badge-${snapshot.badgeColor || 'blue'}`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CONTROLS & TIMELINE NAVIGATION
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (autoplayTimer) {
+        pauseAutoplay("Paused");
+      } else {
+        if (currentStepIndex >= timelineSnapshots.length - 1) {
+          currentStepIndex = 0;
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      if (autoplayTimer) clearInterval(autoplayTimer);
+      updatePlayIcons(true);
+      document.getElementById("timelineStatusBadge").textContent = "Playing...";
+
+      autoplayTimer = setInterval(() => {
+        if (currentStepIndex < timelineSnapshots.length - 1) {
+          applyTimelineStep(currentStepIndex + 1, false);
+        } else {
+          pauseAutoplay("Completed (Auto-Stopped)");
+        }
+      }, stepSpeedMs);
+    }
+
+    function pauseAutoplay(statusText = "Paused") {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+      updatePlayIcons(false);
+      document.getElementById("timelineStatusBadge").textContent = statusText;
+    }
+
+    function updatePlayIcons(isPlaying) {
+      const btnHeader = document.getElementById("btnPlayPause");
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+
+      if (isPlaying) {
+        if (btnHeader) {
+          btnHeader.textContent = "Pause";
+          btnHeader.classList.add("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+      } else {
+        if (btnHeader) {
+          btnHeader.textContent = "Play";
+          btnHeader.classList.remove("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+      }
+    }
+
+    function stepTimeline(direction) {
+      pauseAutoplay("Paused");
+      const target = currentStepIndex + direction;
+      applyTimelineStep(target, true);
+    }
+
+    function seekTimelineByClick(event) {
+      pauseAutoplay("Paused");
+      const container = document.getElementById("timelineTrackContainer");
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      const totalSteps = timelineSnapshots.length - 1;
+      const targetStep = Math.round(ratio * totalSteps);
+      applyTimelineStep(targetStep, true);
+    }
+
+    function focusMatchSlot() {
+      pauseAutoplay("Match Focus");
+      applyTimelineStep(8, true);
+      const matchCard = document.querySelector(".candidate-card.is-match-card");
+      if (matchCard) {
+        matchCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
+
+    function resetSimulation() {
+      pauseAutoplay("Paused");
+      applyTimelineStep(0, true);
+    }
+
+    function changeSpeed(val) {
+      const baseMs = 2400;
+      stepSpeedMs = baseMs / parseFloat(val);
+      if (autoplayTimer) {
+        startAutoplay();
+      }
+    }
+
+    // Launch simulation on DOM ready
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>

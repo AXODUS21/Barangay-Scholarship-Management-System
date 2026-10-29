@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarshipQueue&lt;T&gt; Simulation</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Minimalist Top Control Bar */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange);
+      color: #FFFFFF;
+      border-color: var(--accent-orange);
+    }
+
+    .btn-active-pause:hover {
+      background: #E08500;
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.2px;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* Verification Desk Transition Banner */
+    .desk-banner {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--spring);
+    }
+
+    .desk-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.25);
+      flex-shrink: 0;
+      transition: all 0.3s var(--spring);
+    }
+
+    .desk-banner-text {
+      font-size: 13px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-sub);
+      display: flex;
+      gap: 16px;
+    }
+
+    /* Queue Track Buffer */
+    .queue-track-buffer {
+      background: rgba(242, 242, 247, 0.5);
+      border: 1.5px dashed rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      padding: 28px 20px 20px;
+      min-height: 155px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .queue-track {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      width: 100%;
+      min-height: 100px;
+      transition: all 0.4s var(--spring);
+    }
+
+    /* Singly-Linked Node */
+    .node {
+      background: #FFFFFF;
+      border: 1.5px solid var(--accent-blue);
+      border-radius: 14px;
+      display: flex;
+      align-items: stretch;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      position: relative;
+      min-width: 210px;
+      height: 94px;
+      transition: transform 0.4s var(--spring), opacity 0.35s ease;
+      animation: nodeEnter 0.4s var(--spring);
+    }
+
+    @keyframes nodeEnter {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.94);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .node-exit {
+      opacity: 0 !important;
+      transform: translateY(-24px) scale(0.9) !important;
+      transition: all 0.35s var(--spring) !important;
+    }
+
+    .node-data {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+    }
+
+    .node-id-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .node-id {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .node-pos {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      background: var(--accent-blue-bg);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .node-name {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .node-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Next Pointer Compartment */
+    .node-next {
+      width: 42px;
+      border-left: 1.5px dashed rgba(0, 113, 227, 0.25);
+      background: rgba(232, 242, 253, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+
+    .next-text {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .next-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+    }
+
+    /* Pointer Connector Arrow */
+    .arrow-connector {
+      position: absolute;
+      right: -32px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 2px;
+      background: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .arrow-connector::after {
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--accent-blue);
+      margin-right: -1px;
+    }
+
+    /* Terminal Null Marker */
+    .null-marker {
+      background: #E5E5EA;
+      border: 1px solid #D1D1D6;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      margin-left: 4px;
+    }
+
+    /* Pointer Badges (HEAD and TAIL) */
+    .pointer-tag {
+      position: absolute;
+      top: -14px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      z-index: 5;
+      transition: all 0.35s var(--spring);
+    }
+
+    .pointer-tag-head {
+      left: 10px;
+      background: var(--accent-green);
+      color: #FFFFFF;
+    }
+
+    .pointer-tag-tail {
+      right: 10px;
+      background: var(--accent-orange);
+      color: #FFFFFF;
+    }
+
+    .pointer-tag::after {
+      content: "";
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+      border-top: 4px solid currentColor;
+    }
+
+    /* Middle Row: Active Slots & Waitlist */
+    .middle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .slot-box {
+      background: #FFFFFF;
+      border: 1.5px solid #E5E5EA;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: all 0.35s var(--spring);
+    }
+
+    .slot-box.filled {
+      border-color: var(--accent-green);
+      background: var(--accent-green-bg);
+    }
+
+    .slot-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+
+    .slot-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .slot-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+
+    .btn-slot-drop {
+      appearance: none;
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      background: #FFFFFF;
+      color: var(--accent-red);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      align-self: flex-start;
+      margin-top: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-slot-drop:hover {
+      background: var(--accent-red);
+      color: #FFFFFF;
+      border-color: var(--accent-red);
+    }
+
+    .empty-placeholder {
+      color: var(--text-muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 70px;
+    }
+
+    /* ============================================================= */
+    /* SPOTIFY & YOUTUBE-STYLE TIMELINE PLAYER BAR (BOTTOM COMPONENT) */
+    /* ============================================================= */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s var(--spring);
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.08);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      color: #FFFFFF;
+    }
+
+    .player-btn-main.is-playing {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 4px;
+      min-width: 62px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* Draggable & Clickable Track Bar */
+    .timeline-track-container {
+      position: relative;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.08);
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 8px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--accent-blue);
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring), height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 8px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2.5px solid var(--accent-blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 0%;
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    /* Chapter Pips (Like YouTube Chapter Markers) */
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-pip {
+      background: #FFFFFF;
+      height: 10px;
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .timeline-chapter-name {
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timeline-time-badge {
+      color: var(--text-sub);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .player-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Custom FIFO Queue: ScholarshipQueue&lt;T&gt; Simulation</h1>
+        <div class="header-sub">Singly-linked generic memory list with explicit head and tail pointers guaranteeing O(1) fairness</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="manualEnqueue()">Enqueue</button>
+        <button class="btn" onclick="manualDequeue()">Dequeue</button>
+        <button class="btn" onclick="manualDropAndPromote()">Drop &amp; Promote</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="simulation-stage">
+      
+      <!-- Primary Intake Screening Queue -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">1. Primary Applicant Screening Queue</div>
+          </div>
+          <div class="card-meta">
+            <div>Length: <strong id="primaryQueueSize">3</strong></div>
+            <div>Head: <strong id="primaryHeadLabel">APP-001</strong></div>
+            <div>Tail: <strong id="primaryTailLabel">APP-003</strong></div>
+          </div>
+        </div>
+
+        <div class="queue-track-buffer">
+          <div id="primaryQueueTrack" class="queue-track"></div>
+        </div>
+      </div>
+
+      <!-- Active Scholars & Waitlist Queue -->
+      <div class="middle-grid">
+        
+        <!-- Active Approved Scholars -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-title">2. Approved Active Scholars</div>
+              <span class="badge badge-green" id="activeCapacityBadge">2 / 2 Slots</span>
+            </div>
+          </div>
+          <div class="slots-grid" id="slotsContainer"></div>
+        </div>
+
+        <!-- Secondary FIFO Waitlist Queue -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-title">3. Secondary FIFO Waitlist Queue</div>
+              <span class="badge badge-orange">Auto-Promote on Vacancy</span>
+            </div>
+            <div class="card-meta">
+              <div>Waitlist: <strong id="waitlistCount">2</strong></div>
+            </div>
+          </div>
+          <div class="queue-track-buffer" style="min-height: 120px; padding: 22px 14px 14px;">
+            <div id="waitlistQueueTrack" class="queue-track" style="min-height: 75px;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM) -->
+      <div class="player-bar-card">
+        <div class="player-controls">
+          <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+            <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+          <div class="timeline-step-label">
+            <span id="timelineCurrentStep">Step 0</span>
+            <span class="timeline-step-sep">/</span>
+            <span id="timelineTotalSteps">8</span>
+          </div>
+        </div>
+
+        <div class="timeline-progress-wrapper">
+          <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+            <div class="timeline-track-bg"></div>
+            <div class="timeline-track-fill" id="timelineTrackFill"></div>
+            <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+            <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+          </div>
+          <div class="timeline-info-row">
+            <div class="timeline-chapter-name" id="timelineChapterName">
+              <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+              <span id="timelineChapterTitle">Initial Queue State</span>
+            </div>
+            <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+          </div>
+        </div>
+
+        <div class="player-right-group">
+          <button class="btn btn-sm" id="btnReplay" onclick="restartSimulation()" title="Replay from Beginning">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Replay
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATA MODEL & STATE MANAGEMENT
+    // -------------------------------------------------------------
+    let isAutoplaying = false;
+    let autoplayTimer = null;
+    let speed = 1.0;
+    let currentStepIndex = 0; // Current position on timeline (0..8)
+
+    // Queues and Active Roster State
+    let primaryQueue = [];
+    let waitlistQueue = [];
+    let activeSlots = [];
+
+    // =============================================================
+    // COMPLETE PRE-RECORDED TIMELINE SNAPSHOTS (0 TO 8)
+    // Tracks Maria Santos (APP-001) with clarity from Screening -> Waitlist -> Slot 01
+    // =============================================================
+    const simulationTimeline = [
+      {
+        step: 0,
+        title: "Initial FIFO Queue State",
+        badge: "Initial State",
+        badgeColor: "blue",
+        bannerText: "Singly-linked FIFO Screening Queue initialized with HEAD (APP-001) and TAIL (APP-003). 2 Active Slots filled, 2 on Waitlist.",
+        primaryQueue: [
+          { id: "APP-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", time: "08:30 AM" },
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" },
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-010", name: "Bea Alvarez", gwa: "1.15", purok: "Purok 3", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-011", name: "Daniel Cruz", gwa: "1.30", purok: "Purok 1", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-004", name: "Elena Gomez", gwa: "1.20", purok: "Purok 3", time: "08:15 AM" },
+          { id: "APP-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", time: "08:20 AM" }
+        ]
+      },
+      {
+        step: 1,
+        title: "Screening Dequeue (Maria Santos → Waitlist TAIL)",
+        badge: "FIFO Dequeue",
+        badgeColor: "blue",
+        bannerText: "<strong>APP-001 (Maria Santos)</strong> dequeued from Screening HEAD. Active slots full (2/2) &rarr; Enqueued to TAIL of Waitlist as W#3.",
+        primaryQueue: [
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" },
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-010", name: "Bea Alvarez", gwa: "1.15", purok: "Purok 3", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-011", name: "Daniel Cruz", gwa: "1.30", purok: "Purok 1", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-004", name: "Elena Gomez", gwa: "1.20", purok: "Purok 3", time: "08:15 AM" },
+          { id: "APP-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", time: "08:20 AM" },
+          { id: "APP-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", time: "08:30 AM" }
+        ]
+      },
+      {
+        step: 2,
+        title: "Intake Enqueue (Marco Ramos to Screening TAIL)",
+        badge: "FIFO Enqueue",
+        badgeColor: "blue",
+        bannerText: "New applicant <strong>APP-006 (Marco Ramos)</strong> registered &rarr; Enqueued to TAIL of Screening Queue in O(1) time.",
+        primaryQueue: [
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" },
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" },
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-010", name: "Bea Alvarez", gwa: "1.15", purok: "Purok 3", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-011", name: "Daniel Cruz", gwa: "1.30", purok: "Purok 1", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-004", name: "Elena Gomez", gwa: "1.20", purok: "Purok 3", time: "08:15 AM" },
+          { id: "APP-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", time: "08:20 AM" },
+          { id: "APP-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", time: "08:30 AM" }
+        ]
+      },
+      {
+        step: 3,
+        title: "Slot 01 Vacancy & Auto-Promotion (Elena Gomez)",
+        badge: "Auto-Promoted",
+        badgeColor: "green",
+        bannerText: "Bea Alvarez graduated from Slot 01. <strong>APP-004 (Elena Gomez)</strong> dequeued from HEAD of Waitlist &rarr; Awarded Slot 01!",
+        primaryQueue: [
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" },
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" },
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-004", name: "Elena Gomez", gwa: "1.20", purok: "Purok 3", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-011", name: "Daniel Cruz", gwa: "1.30", purok: "Purok 1", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", time: "08:20 AM" },
+          { id: "APP-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", time: "08:30 AM" }
+        ]
+      },
+      {
+        step: 4,
+        title: "Screening Dequeue (Juan Dela Cruz → Waitlist TAIL)",
+        badge: "FIFO Dequeue",
+        badgeColor: "blue",
+        bannerText: "<strong>APP-002 (Juan Dela Cruz)</strong> verified and dequeued from Screening HEAD. Active slots full (2/2) &rarr; Enqueued to Waitlist TAIL.",
+        primaryQueue: [
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" },
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-004", name: "Elena Gomez", gwa: "1.20", purok: "Purok 3", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-011", name: "Daniel Cruz", gwa: "1.30", purok: "Purok 1", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", time: "08:20 AM" },
+          { id: "APP-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", time: "08:30 AM" },
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" }
+        ]
+      },
+      {
+        step: 5,
+        title: "Slot 02 Vacancy & Auto-Promotion (Sarah Diaz)",
+        badge: "Auto-Promoted",
+        badgeColor: "green",
+        bannerText: "Daniel Cruz graduated from Slot 02. <strong>APP-005 (Sarah Diaz)</strong> auto-promoted to Slot 02! <strong>Maria Santos</strong> advances to HEAD of Waitlist (W#1)!",
+        primaryQueue: [
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" },
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-004", name: "Elena Gomez", gwa: "1.20", purok: "Purok 3", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", time: "08:30 AM" },
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" }
+        ]
+      },
+      {
+        step: 6,
+        title: "Slot 01 Vacancy & Auto-Promotion (Maria Santos)",
+        badge: "Auto-Promoted",
+        badgeColor: "green",
+        bannerText: "Slot 01 vacancy opened! <strong>APP-001 (Maria Santos)</strong> dequeued from HEAD of Waitlist &rarr; Awarded <strong>Slot 01</strong> as Active Scholar!",
+        primaryQueue: [
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" },
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" }
+        ]
+      },
+      {
+        step: 7,
+        title: "Screening Dequeue (Carlo Reyes → Waitlist TAIL)",
+        badge: "FIFO Dequeue",
+        badgeColor: "blue",
+        bannerText: "<strong>APP-003 (Carlo Reyes)</strong> dequeued from Screening HEAD. Active slots full (2/2) &rarr; Enqueued to Waitlist TAIL as W#2.",
+        primaryQueue: [
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" },
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" }
+        ]
+      },
+      {
+        step: 8,
+        title: "Final Audited FIFO Queue State",
+        badge: "Simulation Complete",
+        badgeColor: "green",
+        bannerText: "FIFO simulation complete. Every applicant strictly served in arrival order with zero starvation. Maria Santos is now an Active Scholar. Auto-stopped.",
+        primaryQueue: [
+          { id: "APP-006", name: "Marco Ramos", gwa: "1.80", purok: "Purok 5", time: "08:42 AM" }
+        ],
+        activeSlots: [
+          { slot: 1, scholar: { id: "SCH-001", name: "Maria Santos", gwa: "1.25", purok: "Purok 1", stipend: "₱3,000" } },
+          { slot: 2, scholar: { id: "SCH-005", name: "Sarah Diaz", gwa: "1.35", purok: "Purok 4", stipend: "₱3,000" } }
+        ],
+        waitlistQueue: [
+          { id: "APP-002", name: "Juan Dela Cruz", gwa: "1.50", purok: "Purok 4", time: "08:32 AM" },
+          { id: "APP-003", name: "Carlo Reyes", gwa: "1.75", purok: "Purok 2", time: "08:35 AM" }
+        ]
+      }
+    ];
+
+    // Dynamic pool for user manual clicks
+    let applicantSerial = 7;
+    const applicantPool = [
+      { name: "Karen Navarro", gwa: "1.60", purok: "Purok 6" },
+      { name: "Rosa Dizon", gwa: "1.15", purok: "Purok 2" },
+      { name: "Joshua Bautista", gwa: "1.40", purok: "Purok 3" },
+      { name: "Patricia Lim", gwa: "1.30", purok: "Purok 1" }
+    ];
+
+    function createApplicant() {
+      const template = applicantPool[(applicantSerial - 1) % applicantPool.length];
+      const idNum = String(applicantSerial).padStart(3, '0');
+      const timeStr = new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+      applicantSerial++;
+      return {
+        id: `APP-${idNum}`,
+        name: template.name,
+        gwa: template.gwa,
+        purok: template.purok,
+        time: timeStr
+      };
+    }
+
+    // -------------------------------------------------------------
+    // INITIALIZATION & TIMELINE LOGIC
+    // -------------------------------------------------------------
+    function initSimulation() {
+      currentStepIndex = 0;
+      initTimelinePips();
+      applyTimelineStep(0, false);
+    }
+
+    function initTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      if (!pipsContainer) return;
+      pipsContainer.innerHTML = "";
+      for (let i = 0; i < simulationTimeline.length; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-pip' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function renderAll() {
+      renderPrimaryQueue();
+      renderSlots();
+      renderWaitlistQueue();
+      updateTimelineUI();
+    }
+
+    // Apply specific snapshot from the timeline
+    function applyTimelineStep(stepIdx, animate = true) {
+      if (stepIdx < 0) stepIdx = 0;
+      if (stepIdx >= simulationTimeline.length) stepIdx = simulationTimeline.length - 1;
+
+      currentStepIndex = stepIdx;
+      const snapshot = simulationTimeline[stepIdx];
+
+      // Clone snapshot state
+      primaryQueue = JSON.parse(JSON.stringify(snapshot.primaryQueue));
+      activeSlots = JSON.parse(JSON.stringify(snapshot.activeSlots));
+      waitlistQueue = JSON.parse(JSON.stringify(snapshot.waitlistQueue));
+
+      renderAll();
+    }
+
+    // Update bottom Spotify/YouTube-like timeline bar
+    function updateTimelineUI() {
+      const maxIndex = simulationTimeline.length - 1;
+      const pct = (currentStepIndex / maxIndex) * 100;
+
+      const fill = document.getElementById("timelineTrackFill");
+      const thumb = document.getElementById("timelineThumb");
+      if (fill) fill.style.width = `${pct}%`;
+      if (thumb) thumb.style.left = `${pct}%`;
+
+      const curStepEl = document.getElementById("timelineCurrentStep");
+      const totStepEl = document.getElementById("timelineTotalSteps");
+      if (curStepEl) curStepEl.textContent = `Step ${currentStepIndex}`;
+      if (totStepEl) totStepEl.textContent = `${maxIndex}`;
+
+      const curr = simulationTimeline[currentStepIndex];
+      const badgeElem = document.getElementById("timelineChapterBadge");
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (badgeElem) {
+        badgeElem.textContent = `Step ${currentStepIndex}`;
+        badgeElem.className = `badge badge-${curr.badgeColor}`;
+      }
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>${curr.title}</strong> &mdash; <span style="color: var(--text-sub); font-weight: 500;">${curr.bannerText}</span>`;
+      }
+
+      const statusBadge = document.getElementById("timelineStatusBadge");
+      if (statusBadge) {
+        if (isAutoplaying) {
+          statusBadge.textContent = "Playing";
+          statusBadge.style.color = "var(--accent-orange)";
+        } else if (currentStepIndex === maxIndex) {
+          statusBadge.textContent = "Completed (Auto-Stopped)";
+          statusBadge.style.color = "var(--accent-green)";
+        } else {
+          statusBadge.textContent = "Paused";
+          statusBadge.style.color = "var(--text-sub)";
+        }
+      }
+
+      // Update chapter pips
+      for (let i = 0; i <= maxIndex; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-pip");
+          } else {
+            pip.classList.remove("active-pip");
+          }
+        }
+      }
+
+      // Play/Pause icon synchronization
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+      const btnTimelinePlay = document.getElementById("btnTimelinePlay");
+      const topPlayBtn = document.getElementById("btnPlayPause");
+
+      if (isAutoplaying) {
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+        if (btnTimelinePlay) btnTimelinePlay.classList.add("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = "Pause";
+          topPlayBtn.classList.remove("btn-primary");
+          topPlayBtn.classList.add("btn-active-pause");
+        }
+      } else {
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+        if (btnTimelinePlay) btnTimelinePlay.classList.remove("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = (currentStepIndex === maxIndex) ? "Replay" : "Play";
+          topPlayBtn.classList.remove("btn-active-pause");
+          topPlayBtn.classList.add("btn-primary");
+        }
+      }
+    }
+
+    // Step forward or backward using timeline buttons
+    function stepTimeline(delta) {
+      pausePlayback();
+      const next = Math.max(0, Math.min(simulationTimeline.length - 1, currentStepIndex + delta));
+      applyTimelineStep(next, true);
+    }
+
+    // Click anywhere on progress track to jump/seek
+    function seekTimelineByClick(event) {
+      pausePlayback();
+      const container = document.getElementById("timelineTrackContainer");
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const width = rect.width;
+      const ratio = Math.max(0, Math.min(1, clickX / width));
+      const targetStep = Math.round(ratio * (simulationTimeline.length - 1));
+      applyTimelineStep(targetStep, true);
+    }
+
+    // -------------------------------------------------------------
+    // RENDERING COMPONENTS
+    // -------------------------------------------------------------
+    function renderPrimaryQueue() {
+      const track = document.getElementById("primaryQueueTrack");
+      if (!track) return;
+      track.innerHTML = "";
+
+      const length = primaryQueue.length;
+      document.getElementById("primaryQueueSize").textContent = length;
+      document.getElementById("primaryHeadLabel").textContent = length > 0 ? primaryQueue[0].id : "null";
+      document.getElementById("primaryTailLabel").textContent = length > 0 ? primaryQueue[length - 1].id : "null";
+
+      if (length === 0) {
+        track.innerHTML = `<div class="empty-placeholder">Screening Queue Empty (head &rarr; null)</div>`;
+        return;
+      }
+
+      primaryQueue.forEach((app, idx) => {
+        const node = document.createElement("div");
+        node.className = "node";
+        node.id = `node-pri-${app.id}`;
+
+        const isHead = (idx === 0);
+        const isTail = (idx === length - 1);
+
+        let pointerTags = "";
+        if (isHead) pointerTags += `<div class="pointer-tag pointer-tag-head">HEAD</div>`;
+        if (isTail) pointerTags += `<div class="pointer-tag pointer-tag-tail">TAIL</div>`;
+
+        node.innerHTML = `
+          ${pointerTags}
+          <div class="node-data">
+            <div class="node-id-row">
+              <span class="node-id">${app.id}</span>
+              <span class="node-pos">#${idx + 1}</span>
+            </div>
+            <div class="node-name">${app.name}</div>
+            <div class="node-meta">
+              <span>GWA ${app.gwa}</span>
+              <span>${app.purok}</span>
+              <span>${app.time}</span>
+            </div>
+          </div>
+          <div class="node-next">
+            <span class="next-text">next</span>
+            <div class="next-dot"></div>
+          </div>
+          ${!isTail ? `<div class="arrow-connector"></div>` : ""}
+        `;
+        track.appendChild(node);
+      });
+
+      const nullEl = document.createElement("div");
+      nullEl.className = "null-marker";
+      nullEl.textContent = "null";
+      track.appendChild(nullEl);
+    }
+
+    function renderSlots() {
+      const container = document.getElementById("slotsContainer");
+      if (!container) return;
+      container.innerHTML = "";
+
+      let filledCount = 0;
+      activeSlots.forEach((s, idx) => {
+        const box = document.createElement("div");
+        box.className = `slot-box ${s.scholar ? 'filled' : ''}`;
+
+        if (s.scholar) {
+          filledCount++;
+          box.innerHTML = `
+            <div class="slot-top">
+              <span>SLOT 0${s.slot}</span>
+              <span class="badge badge-green">ACTIVE</span>
+            </div>
+            <div class="slot-name">${s.scholar.name}</div>
+            <div class="slot-sub">${s.scholar.stipend} | ${s.scholar.purok}</div>
+            <button class="btn-slot-drop" onclick="dropSlot(${idx})">Drop Scholar</button>
+          `;
+        } else {
+          box.innerHTML = `
+            <div class="slot-top">
+              <span>SLOT 0${s.slot}</span>
+              <span class="badge badge-orange">VACANT</span>
+            </div>
+            <div class="slot-name" style="color: var(--text-muted);">Awaiting Candidate</div>
+            <div class="slot-sub" style="color: var(--text-muted);">Auto-fill from Waitlist</div>
+          `;
+        }
+        container.appendChild(box);
+      });
+
+      const badge = document.getElementById("activeCapacityBadge");
+      if (badge) badge.textContent = `${filledCount} / ${activeSlots.length} Slots`;
+    }
+
+    function renderWaitlistQueue() {
+      const track = document.getElementById("waitlistQueueTrack");
+      if (!track) return;
+      track.innerHTML = "";
+      
+      const countEl = document.getElementById("waitlistCount");
+      if (countEl) countEl.textContent = waitlistQueue.length;
+
+      if (waitlistQueue.length === 0) {
+        track.innerHTML = `<div class="empty-placeholder">Waitlist Empty (head &rarr; null)</div>`;
+        return;
+      }
+
+      waitlistQueue.forEach((app, idx) => {
+        const node = document.createElement("div");
+        node.className = "node";
+        node.style.minWidth = "180px";
+        node.style.height = "76px";
+        node.style.borderColor = "var(--accent-orange)";
+
+        const isHead = (idx === 0);
+        const isTail = (idx === waitlistQueue.length - 1);
+
+        let pointerTags = "";
+        if (isHead) pointerTags += `<div class="pointer-tag pointer-tag-head" style="background: var(--accent-orange);">HEAD</div>`;
+        if (isTail) pointerTags += `<div class="pointer-tag pointer-tag-tail" style="background: #8E8E93;">TAIL</div>`;
+
+        node.innerHTML = `
+          ${pointerTags}
+          <div class="node-data" style="padding: 8px 10px;">
+            <div class="node-id-row">
+              <span class="node-id" style="font-size: 11px;">${app.id}</span>
+              <span class="node-pos" style="color: var(--accent-orange); background: var(--accent-orange-bg); font-size: 9px;">W#${idx + 1}</span>
+            </div>
+            <div class="node-name" style="font-size: 11px;">${app.name}</div>
+            <div class="node-meta" style="font-size: 10px;">
+              <span>GWA ${app.gwa}</span>
+              <span>${app.purok}</span>
+            </div>
+          </div>
+          <div class="node-next" style="width: 36px; background: rgba(255, 149, 0, 0.1); border-left-color: rgba(255, 149, 0, 0.3);">
+            <span class="next-text" style="color: var(--accent-orange); font-size: 8px;">next</span>
+            <div class="next-dot" style="background: var(--accent-orange); width: 7px; height: 7px;"></div>
+          </div>
+          ${!isTail ? `<div class="arrow-connector" style="background: var(--accent-orange); right: -32px;"></div>` : ""}
+        `;
+        track.appendChild(node);
+      });
+
+      const nullEl = document.createElement("div");
+      nullEl.className = "null-marker";
+      nullEl.textContent = "null";
+      track.appendChild(nullEl);
+    }
+
+    // -------------------------------------------------------------
+    // INTERACTIVE CONTROLS & MANUAL QUEUE ACTIONS
+    // -------------------------------------------------------------
+    function manualEnqueue() {
+      pausePlayback();
+      const newApp = createApplicant();
+      primaryQueue.push(newApp);
+      renderAll();
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>Manual Enqueue</strong> &mdash; <span style="color: var(--text-sub);">Enqueued ${newApp.name} (${newApp.id}) to TAIL of Screening Queue.</span>`;
+      }
+    }
+
+    function manualDequeue() {
+      pausePlayback();
+      if (primaryQueue.length === 0) return;
+      const extracted = primaryQueue.shift();
+      const vacantSlotIndex = activeSlots.findIndex(s => s.scholar === null);
+      if (vacantSlotIndex !== -1) {
+        activeSlots[vacantSlotIndex].scholar = {
+          id: `SCH-${extracted.id.replace('APP-', '')}`,
+          name: extracted.name,
+          gwa: extracted.gwa,
+          purok: extracted.purok,
+          stipend: "₱3,000"
+        };
+      } else {
+        waitlistQueue.push(extracted);
+      }
+      renderAll();
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>Manual Dequeue</strong> &mdash; <span style="color: var(--text-sub);">Dequeued ${extracted.name} (${extracted.id}) from Screening HEAD.</span>`;
+      }
+    }
+
+    function manualDropAndPromote() {
+      pausePlayback();
+      const filledIndex = activeSlots.findIndex(s => s.scholar !== null);
+      if (filledIndex !== -1) {
+        dropSlot(filledIndex);
+      } else if (waitlistQueue.length > 0) {
+        promoteIntoSlot(0);
+      }
+    }
+
+    function dropSlot(slotIndex) {
+      pausePlayback();
+      const dropped = activeSlots[slotIndex].scholar;
+      activeSlots[slotIndex].scholar = null;
+      renderSlots();
+      promoteIntoSlot(slotIndex);
+    }
+
+    function promoteIntoSlot(slotIndex) {
+      if (waitlistQueue.length === 0) return;
+      const promoted = waitlistQueue.shift();
+      activeSlots[slotIndex].scholar = {
+        id: `SCH-${promoted.id.replace('APP-', '')}`,
+        name: promoted.name,
+        gwa: promoted.gwa,
+        purok: promoted.purok,
+        stipend: "₱3,000"
+      };
+      renderAll();
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>Waitlist Promotion</strong> &mdash; <span style="color: var(--text-sub);">${promoted.name} (${promoted.id}) promoted into Slot 0${slotIndex + 1}!</span>`;
+      }
+    }
+
+    function restartSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+      startAutoplay();
+    }
+
+    function resetSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+    }
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER: AUTO-STOP AT END (NO INFINITE LOOP)
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (isAutoplaying) {
+        pausePlayback();
+      } else {
+        // If already at end, restart from step 0
+        if (currentStepIndex >= simulationTimeline.length - 1) {
+          applyTimelineStep(0, false);
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      isAutoplaying = true;
+      updateTimelineUI();
+      executePlaybackStep();
+    }
+
+    function pausePlayback() {
+      isAutoplaying = false;
+      clearTimeout(autoplayTimer);
+      updateTimelineUI();
+    }
+
+    // Plays sequentially through the timeline and AUTO-STOPS at Step 8!
+    function executePlaybackStep() {
+      if (!isAutoplaying) return;
+
+      const maxStep = simulationTimeline.length - 1;
+      if (currentStepIndex < maxStep) {
+        currentStepIndex++;
+        applyTimelineStep(currentStepIndex, true);
+
+        // Check if we just reached the end
+        if (currentStepIndex >= maxStep) {
+          // AUTO-STOP: Stop playback and do not loop!
+          pausePlayback();
+          return;
+        }
+
+        // Schedule next step
+        autoplayTimer = setTimeout(executePlaybackStep, 2200 / speed);
+      } else {
+        // Already at end -> Auto-stop
+        pausePlayback();
+      }
+    }
+
+    function changeSpeed(val) {
+      speed = parseFloat(val);
+    }
+
+    // Keyboard navigation (Space to play/pause, Left/Right arrows to step)
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleAutoplay();
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        stepTimeline(1);
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        stepTimeline(-1);
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>

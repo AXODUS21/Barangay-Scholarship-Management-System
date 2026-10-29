@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge Sort for Academic Merit (GWA): Divide-and-Conquer Stability Simulation</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-teal: #30B0C7;
+      --accent-teal-bg: #E5F7FA;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Minimalist Top Control Bar */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange);
+      color: #FFFFFF;
+      border-color: var(--accent-orange);
+    }
+
+    .btn-active-pause:hover {
+      background: #E08500;
+    }
+
+    .btn-tie-focus {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+      border-color: rgba(88, 86, 214, 0.25);
+    }
+
+    .btn-tie-focus:hover {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* SIMULATION STAGE (FULL WIDTH) */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .card-meta strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-teal { background: var(--accent-teal-bg); color: var(--accent-teal); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* ------------------------------------------------------------- */
+    /* 1. DIVIDE-AND-CONQUER TREE GRAPH / RECURSION STAGE */
+    /* ------------------------------------------------------------- */
+    .tree-stage-card {
+      width: 100%;
+    }
+
+    .recursion-tree-view {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .tree-level-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .tree-level-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .tree-blocks-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .array-block {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+    }
+
+    .array-block.is-active-split {
+      border-color: var(--accent-orange) !important;
+      background: var(--accent-orange-bg) !important;
+      transform: scale(1.03);
+      box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2);
+    }
+
+    .array-block.is-active-merge {
+      border-color: var(--accent-blue) !important;
+      background: var(--accent-blue-bg) !important;
+      transform: scale(1.03);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+    }
+
+    .array-block.is-sorted-complete {
+      border-color: var(--accent-green) !important;
+      background: #F8FDF9 !important;
+    }
+
+    .mini-chip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.1;
+    }
+
+    .mini-chip small {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .mini-chip.chip-tie {
+      border: 1px solid var(--accent-purple);
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+    }
+
+    /* ------------------------------------------------------------- */
+    /* 2. ACTIVE APPLICANT ARRAY TRACK (FULL WIDTH) */
+    /* ------------------------------------------------------------- */
+    .array-stage-card {
+      width: 100%;
+    }
+
+    .array-track-buffer {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .array-cards-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (max-width: 1150px) {
+      .array-cards-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .applicant-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .applicant-card.in-left-half {
+      border-left: 3.5px solid var(--accent-blue);
+    }
+
+    .applicant-card.in-right-half {
+      border-left: 3.5px solid var(--accent-orange);
+    }
+
+    .applicant-card.is-comparing {
+      border-color: var(--accent-blue) !important;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.22), 0 8px 16px rgba(0, 113, 227, 0.12) !important;
+      transform: translateY(-4px) scale(1.03);
+      z-index: 5;
+    }
+
+    .applicant-card.is-tie-highlight {
+      border-color: var(--accent-purple) !important;
+      background: #FDFBFF !important;
+      box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.25) !important;
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-pos-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+    }
+
+    .card-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-grade-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+
+    .card-gwa {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-green);
+    }
+
+    .card-scale {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 5px;
+      text-transform: uppercase;
+    }
+
+    .scale-college {
+      background: var(--accent-blue-bg);
+      color: var(--accent-blue);
+    }
+
+    .scale-hs {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+    }
+
+    .card-footer {
+      font-size: 9.5px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      padding-top: 4px;
+      border-top: 1px dashed rgba(0, 0, 0, 0.06);
+    }
+
+    /* ============================================================= */
+    /* SPOTIFY & YOUTUBE-STYLE TIMELINE PLAYER BAR (BOTTOM) */
+    /* ============================================================= */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s var(--spring);
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.08);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      color: #FFFFFF;
+    }
+
+    .player-btn-main.is-playing {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 4px;
+      min-width: 62px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* Draggable & Clickable Track Bar */
+    .timeline-track-container {
+      position: relative;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.08);
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 8px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--accent-blue);
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring), height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 8px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2.5px solid var(--accent-blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 0%;
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    /* Chapter Pips */
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-pip {
+      background: #FFFFFF;
+      height: 10px;
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .timeline-chapter-name {
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timeline-time-badge {
+      color: var(--text-sub);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .player-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Custom Merge Sort: Academic Merit (GWA) &amp; Stability Simulation</h1>
+        <div class="header-sub">Guaranteed O(n log n) divide-and-conquer sorting with strict tie-breaking stability</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="stepTimeline(1)">Step Forward</button>
+        <button class="btn btn-tie-focus" onclick="highlightStabilityTies()">Focus Tie (1.25 GWA)</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN SIMULATION STAGE (FULL WIDTH) -->
+    <div class="simulation-stage">
+        
+        <!-- 1. DIVIDE-AND-CONQUER TREE GRAPH / RECURSION STAGE -->
+        <div class="card tree-stage-card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-title">1. Recursive Divide-and-Conquer Hierarchy</div>
+              <span class="badge badge-blue" id="treeStatusBadge">Level 0: Initial Array</span>
+            </div>
+            <div class="card-meta">
+              <div>Candidates: <strong>8 Students</strong></div>
+              <div>Tree Depth: <strong>log₂(8) = 3 Passes</strong></div>
+            </div>
+          </div>
+
+          <div class="recursion-tree-view">
+            <!-- Level 0: 8-item array -->
+            <div class="tree-level-row">
+              <div class="tree-level-label">Level 0 (8)</div>
+              <div class="tree-blocks-row">
+                <div class="array-block" id="block-lvl0">
+                  <div class="mini-chip chip-tie">APP-001<small>1.25</small></div>
+                  <div class="mini-chip">APP-002<small>1.75</small></div>
+                  <div class="mini-chip">APP-003<small>2.20</small></div>
+                  <div class="mini-chip">APP-004<small>1.80</small></div>
+                  <div class="mini-chip">APP-005<small>2.10</small></div>
+                  <div class="mini-chip chip-tie">APP-006<small>1.25</small></div>
+                  <div class="mini-chip">APP-007<small>1.95</small></div>
+                  <div class="mini-chip">APP-008<small>1.10</small></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Level 1: Halves (4 + 4) -->
+            <div class="tree-level-row">
+              <div class="tree-level-label">Level 1 (4, 4)</div>
+              <div class="tree-blocks-row">
+                <div class="array-block" id="block-lvl1-left">
+                  <div class="mini-chip chip-tie">APP-001<small>1.25</small></div>
+                  <div class="mini-chip">APP-002<small>1.75</small></div>
+                  <div class="mini-chip">APP-003<small>2.20</small></div>
+                  <div class="mini-chip">APP-004<small>1.80</small></div>
+                </div>
+                <div class="array-block" id="block-lvl1-right">
+                  <div class="mini-chip">APP-005<small>2.10</small></div>
+                  <div class="mini-chip chip-tie">APP-006<small>1.25</small></div>
+                  <div class="mini-chip">APP-007<small>1.95</small></div>
+                  <div class="mini-chip">APP-008<small>1.10</small></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Level 2: Quarters (2, 2, 2, 2) -->
+            <div class="tree-level-row">
+              <div class="tree-level-label">Level 2 (2, 2)</div>
+              <div class="tree-blocks-row">
+                <div class="array-block" id="block-lvl2-q1">
+                  <div class="mini-chip chip-tie">APP-001<small>1.25</small></div>
+                  <div class="mini-chip">APP-002<small>1.75</small></div>
+                </div>
+                <div class="array-block" id="block-lvl2-q2">
+                  <div class="mini-chip">APP-003<small>2.20</small></div>
+                  <div class="mini-chip">APP-004<small>1.80</small></div>
+                </div>
+                <div class="array-block" id="block-lvl2-q3">
+                  <div class="mini-chip">APP-005<small>2.10</small></div>
+                  <div class="mini-chip chip-tie">APP-006<small>1.25</small></div>
+                </div>
+                <div class="array-block" id="block-lvl2-q4">
+                  <div class="mini-chip">APP-007<small>1.95</small></div>
+                  <div class="mini-chip">APP-008<small>1.10</small></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Level 3: Singletons (Base Cases 1 x 8) -->
+            <div class="tree-level-row">
+              <div class="tree-level-label">Level 3 (Base)</div>
+              <div class="tree-blocks-row">
+                <div class="array-block" id="block-s1"><div class="mini-chip chip-tie">001</div></div>
+                <div class="array-block" id="block-s2"><div class="mini-chip">002</div></div>
+                <div class="array-block" id="block-s3"><div class="mini-chip">003</div></div>
+                <div class="array-block" id="block-s4"><div class="mini-chip">004</div></div>
+                <div class="array-block" id="block-s5"><div class="mini-chip">005</div></div>
+                <div class="array-block" id="block-s6"><div class="mini-chip chip-tie">006</div></div>
+                <div class="array-block" id="block-s7"><div class="mini-chip">007</div></div>
+                <div class="array-block" id="block-s8"><div class="mini-chip">008</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. ACTIVE APPLICANT ARRAY TRACK (FULL WIDTH) -->
+        <div class="card array-stage-card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-title">2. Active Applicant Memory Buffer</div>
+              <span class="badge badge-purple" id="arrayStatusBadge">Initial Unsorted Sequence</span>
+            </div>
+            <div class="card-meta">
+              <div>Slots: <strong>5 Available</strong></div>
+              <div>Cutoff Line: <strong>Rank #5</strong></div>
+            </div>
+          </div>
+
+          <div class="array-track-buffer">
+            <div class="array-cards-row" id="applicantCardsRow">
+              <!-- Rendered dynamically -->
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+              <span id="mergeComparisonDetail">Comparison: Initial state awaiting divide-and-conquer execution.</span>
+              <span id="sortProgressPct">0% Sorted</span>
+            </div>
+          </div>
+        </div>
+
+    </div>
+
+    <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) -->
+    <div class="player-bar-card">
+      <div class="player-controls">
+        <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+          <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="timeline-step-label">
+          <span id="timelineCurrentStep">Step 0</span>
+          <span class="timeline-step-sep">/</span>
+          <span id="timelineTotalSteps">8</span>
+        </div>
+      </div>
+
+      <div class="timeline-progress-wrapper">
+        <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+          <div class="timeline-track-bg"></div>
+          <div class="timeline-track-fill" id="timelineTrackFill"></div>
+          <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+          <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+        </div>
+        <div class="timeline-info-row">
+          <div class="timeline-chapter-name" id="timelineChapterName">
+            <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+            <span id="timelineChapterTitle">Initial Candidate Pool &mdash; Unsorted Arrival Order</span>
+          </div>
+          <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+        </div>
+      </div>
+
+      <div class="player-right-group">
+        <button class="btn btn-sm" id="btnReplay" onclick="restartSimulation()" title="Replay from Beginning">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Replay
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATA MODEL: 8 REALISTIC APPLICANTS
+    // Features exact 1.25 GWA tie between APP-001 (Maria) & APP-006 (Bea)
+    // and collegiate (1.00-5.00) vs high school (75%-100%) scales
+    // -------------------------------------------------------------
+    const applicants = [
+      { id: "APP-001", name: "Maria Santos", gwa: 1.25, gwaText: "1.25", scale: "College", purok: "Purok 1", time: "08:30 AM", arrivalOrder: 1, normScore: 1.25 },
+      { id: "APP-002", name: "Juan Dela Cruz", gwa: 1.75, gwaText: "1.75", scale: "College", purok: "Purok 4", time: "08:32 AM", arrivalOrder: 2, normScore: 1.75 },
+      { id: "APP-003", name: "Carlo Reyes", gwa: 2.20, gwaText: "2.20", scale: "College", purok: "Purok 2", time: "08:35 AM", arrivalOrder: 3, normScore: 2.20 },
+      { id: "APP-004", name: "Hannah Del Rosario", gwa: 1.80, gwaText: "1.80", scale: "College", purok: "Purok 3", time: "08:38 AM", arrivalOrder: 4, normScore: 1.80 },
+      { id: "APP-005", name: "Jerome Lopez", gwa: 2.10, gwaText: "2.10", scale: "College", purok: "Purok 5", time: "08:40 AM", arrivalOrder: 5, normScore: 2.10 },
+      { id: "APP-006", name: "Bea Alvarez", gwa: 1.25, gwaText: "1.25", scale: "College", purok: "Purok 3", time: "08:42 AM", arrivalOrder: 6, normScore: 1.25 },
+      { id: "APP-007", name: "Danilo Mercado", gwa: 1.95, gwaText: "1.95", scale: "College", purok: "Purok 1", time: "08:45 AM", arrivalOrder: 7, normScore: 1.95 },
+      { id: "APP-008", name: "Katrina Morales", gwa: 1.10, gwaText: "1.10", scale: "College", purok: "Purok 2", time: "08:48 AM", arrivalOrder: 8, normScore: 1.10 }
+    ];
+
+    // -------------------------------------------------------------
+    // DETERMINISTIC MERGE SORT TIMELINE SNAPSHOTS (STEPS 0 TO 8)
+    // -------------------------------------------------------------
+    const simulationTimeline = [
+      {
+        step: 0,
+        title: "Initial Candidate Pool (Unsorted Arrival Order)",
+        badge: "Initial State",
+        badgeColor: "blue",
+        bannerText: "8 verified applicants awaiting merit ranking. Note <strong>APP-001 (Maria)</strong> and <strong>APP-006 (Bea)</strong> tied at 1.25 GWA.",
+        treeHighlight: "lvl0",
+        comparisonText: "Initial array in original submission arrival order (08:30 AM to 08:48 AM).",
+        progressPct: 0,
+        activeLvlBadge: "Level 0: Initial Array",
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-006", "APP-007", "APP-008"],
+        comparingIds: [],
+        leftSubarray: [],
+        rightSubarray: []
+      },
+      {
+        step: 1,
+        title: "Divide Pass 1: Halving Array (mid = 3)",
+        badge: "Divide (Halves)",
+        badgeColor: "orange",
+        bannerText: "<code>mergeSortGWAHelper(0, 7)</code> &rarr; Split array into Left Half (0..3) and Right Half (4..7).",
+        treeHighlight: "lvl1",
+        comparisonText: "Divided into Left [APP-001..APP-004] and Right [APP-005..APP-008].",
+        progressPct: 15,
+        activeLvlBadge: "Level 1: Halves Split",
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-006", "APP-007", "APP-008"],
+        comparingIds: [],
+        leftSubarray: ["APP-001", "APP-002", "APP-003", "APP-004"],
+        rightSubarray: ["APP-005", "APP-006", "APP-007", "APP-008"]
+      },
+      {
+        step: 2,
+        title: "Divide Pass 2: Quartering Subarrays (Pairs)",
+        badge: "Divide (Quarters)",
+        badgeColor: "orange",
+        bannerText: "Recursive partitioning divides halves into 4 two-element subarrays: [0..1], [2..3], [4..5], [6..7].",
+        treeHighlight: "lvl2",
+        comparisonText: "Subarrays quartered into 4 blocks of size 2.",
+        progressPct: 25,
+        activeLvlBadge: "Level 2: Quarter Split",
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-006", "APP-007", "APP-008"],
+        comparingIds: [],
+        leftSubarray: ["APP-001", "APP-002", "APP-005", "APP-006"],
+        rightSubarray: ["APP-003", "APP-004", "APP-007", "APP-008"]
+      },
+      {
+        step: 3,
+        title: "Base Case: Reaching Singletons (N = 1)",
+        badge: "Base Case N=1",
+        badgeColor: "purple",
+        bannerText: "Recursion reaches single elements. A single-element array is trivially sorted by definition.",
+        treeHighlight: "lvl3",
+        comparisonText: "Every element is isolated: [001], [002], [003], [004], [005], [006], [007], [008].",
+        progressPct: 35,
+        activeLvlBadge: "Level 3: Base Case (N=1)",
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-006", "APP-007", "APP-008"],
+        comparingIds: [],
+        leftSubarray: [],
+        rightSubarray: []
+      },
+      {
+        step: 4,
+        title: "Merge Pass 1: Merging Singletons into Sorted Pairs",
+        badge: "Merge Pass 1",
+        badgeColor: "blue",
+        bannerText: "Adjacent singletons merged: [001, 002], [004(1.80), 003(2.20)], [006, 005], [008(1.10), 007(1.95)].",
+        treeHighlight: "lvl2-merged",
+        comparisonText: "Merged pairs: Hannah (1.80) ranks above Carlo (2.20); Katrina (1.10) ranks above Danilo (1.95).",
+        progressPct: 50,
+        activeLvlBadge: "Merged to Size 2",
+        array: ["APP-001", "APP-002", "APP-004", "APP-003", "APP-006", "APP-005", "APP-008", "APP-007"],
+        comparingIds: ["APP-003", "APP-004", "APP-007", "APP-008"],
+        leftSubarray: ["APP-001", "APP-004", "APP-006", "APP-008"],
+        rightSubarray: ["APP-002", "APP-003", "APP-005", "APP-007"]
+      },
+      {
+        step: 5,
+        title: "Merge Pass 2A: Merging Left Half into 4 Sorted Items",
+        badge: "Merge Left Half",
+        badgeColor: "blue",
+        bannerText: "Merging [001, 002] and [004, 003] &rarr; Left half sorted: <strong>001 (1.25) &rarr; 002 (1.75) &rarr; 004 (1.80) &rarr; 003 (2.20)</strong>.",
+        treeHighlight: "lvl1-left-merged",
+        comparisonText: "Left half fully sorted: 1.25 &le; 1.75 &le; 1.80 &le; 2.20.",
+        progressPct: 65,
+        activeLvlBadge: "Left 4 Sorted",
+        array: ["APP-001", "APP-002", "APP-004", "APP-003", "APP-006", "APP-005", "APP-008", "APP-007"],
+        comparingIds: ["APP-001", "APP-002", "APP-004", "APP-003"],
+        leftSubarray: ["APP-001", "APP-002", "APP-004", "APP-003"],
+        rightSubarray: ["APP-006", "APP-005", "APP-008", "APP-007"]
+      },
+      {
+        step: 6,
+        title: "Merge Pass 2B: Merging Right Half into 4 Sorted Items",
+        badge: "Merge Right Half",
+        badgeColor: "blue",
+        bannerText: "Merging [006, 005] and [008, 007] &rarr; Right half sorted: <strong>008 (1.10) &rarr; 006 (1.25) &rarr; 007 (1.95) &rarr; 005 (2.10)</strong>.",
+        treeHighlight: "lvl1-right-merged",
+        comparisonText: "Right half fully sorted: 1.10 &le; 1.25 &le; 1.95 &le; 2.10.",
+        progressPct: 80,
+        activeLvlBadge: "Right 4 Sorted",
+        array: ["APP-001", "APP-002", "APP-004", "APP-003", "APP-008", "APP-006", "APP-007", "APP-005"],
+        comparingIds: ["APP-008", "APP-006", "APP-007", "APP-005"],
+        leftSubarray: ["APP-001", "APP-002", "APP-004", "APP-003"],
+        rightSubarray: ["APP-008", "APP-006", "APP-007", "APP-005"]
+      },
+      {
+        step: 7,
+        title: "Final Merge & Stability Tie Test: Maria vs Bea (1.25)",
+        badge: "Stability Verified",
+        badgeColor: "purple",
+        bannerText: "Crucial stability test: <code>compareMerit(Maria, Bea) == 0</code>. Because <code>cmp &le; 0</code>, <strong>Maria Santos</strong> is selected first!",
+        treeHighlight: "final-merge",
+        comparisonText: "Stability guarantee: Left candidate Maria (Arrival #1) placed ahead of Bea (Arrival #6) upon tie.",
+        progressPct: 92,
+        activeLvlBadge: "Final Merge In Progress",
+        array: ["APP-008", "APP-001", "APP-006", "APP-002", "APP-004", "APP-007", "APP-005", "APP-003"],
+        comparingIds: ["APP-001", "APP-006"],
+        leftSubarray: ["APP-008", "APP-001"],
+        rightSubarray: ["APP-006", "APP-002", "APP-004", "APP-007", "APP-005", "APP-003"]
+      },
+      {
+        step: 8,
+        title: "Official Sorted Academic Merit Masterlist",
+        badge: "Sorting Complete",
+        badgeColor: "green",
+        bannerText: "Merge Sort complete in O(n log n) time. Top 5 awarded Official Slots; excess candidates routed to Waitlist Queue. Auto-stopped.",
+        treeHighlight: "complete",
+        comparisonText: "Final ranking: #1 Katrina (1.10), #2 Maria (1.25, #1), #3 Bea (1.25, #6), #4 Juan (1.75), #5 Hannah (1.80).",
+        progressPct: 100,
+        activeLvlBadge: "Ranked Masterlist Ready",
+        array: ["APP-008", "APP-001", "APP-006", "APP-002", "APP-004", "APP-007", "APP-005", "APP-003"],
+        comparingIds: [],
+        leftSubarray: [],
+        rightSubarray: []
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // RUNTIME STATE
+    // -------------------------------------------------------------
+    let currentStepIndex = 0;
+    let isAutoplaying = false;
+    let autoplayTimer = null;
+    let speed = 1.0;
+
+    // -------------------------------------------------------------
+    // INITIALIZATION & TIMELINE LOGIC
+    // -------------------------------------------------------------
+    function initSimulation() {
+      currentStepIndex = 0;
+      initTimelinePips();
+      applyTimelineStep(0, false);
+    }
+
+    function initTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      if (!pipsContainer) return;
+      pipsContainer.innerHTML = "";
+      for (let i = 0; i < simulationTimeline.length; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-pip' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function applyTimelineStep(stepIdx, animate = true) {
+      if (stepIdx < 0) stepIdx = 0;
+      if (stepIdx >= simulationTimeline.length) stepIdx = simulationTimeline.length - 1;
+
+      currentStepIndex = stepIdx;
+      const snapshot = simulationTimeline[stepIdx];
+
+      // 1. Render Active Array Cards
+      renderApplicantCards(snapshot);
+
+      // 2. Update Recursion Tree Highlights
+      updateRecursionTree(snapshot);
+
+      // 3. Update Bottom Spotify/YouTube-style Player Bar
+      updateTimelineUI();
+    }
+
+    function renderApplicantCards(snapshot) {
+      const container = document.getElementById("applicantCardsRow");
+      if (!container) return;
+      container.innerHTML = "";
+
+      const appMap = {};
+      applicants.forEach(a => { appMap[a.id] = a; });
+
+      snapshot.array.forEach((id, idx) => {
+        const a = appMap[id];
+        const isLeft = snapshot.leftSubarray.includes(id);
+        const isRight = snapshot.rightSubarray.includes(id);
+        const isComparing = snapshot.comparingIds.includes(id);
+        const isTie = (id === "APP-001" || id === "APP-006");
+
+        let halfClass = "";
+        if (isLeft) halfClass = "in-left-half";
+        if (isRight) halfClass = "in-right-half";
+
+        const card = document.createElement("div");
+        card.className = `applicant-card ${halfClass} ${isComparing ? 'is-comparing' : ''} ${isTie ? 'is-tie-highlight' : ''}`;
+
+        // Top 5 slots threshold check on final step
+        let slotStatusBadge = `Rank #${idx + 1}`;
+        if (snapshot.step === 8) {
+          if (idx < 5) {
+            slotStatusBadge = `<span class="badge badge-green" style="font-size: 8px;">SLOT 0${idx + 1}</span>`;
+          } else {
+            slotStatusBadge = `<span class="badge badge-orange" style="font-size: 8px;">WAITLIST</span>`;
+          }
+        }
+
+        card.innerHTML = `
+          <div class="card-top-row">
+            <span class="card-id">${a.id}</span>
+            <div class="card-pos-badge">${slotStatusBadge}</div>
+          </div>
+          <div class="card-name" title="${a.name}">${a.name}</div>
+          <div class="card-grade-row">
+            <span class="card-gwa">${a.gwaText}</span>
+            <span class="card-scale scale-college">Collegiate</span>
+          </div>
+          <div class="card-footer">
+            <span>Score: ${a.normScore.toFixed(2)}</span>
+            <span>Order #${a.arrivalOrder}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById("mergeComparisonDetail").innerHTML = snapshot.comparisonText;
+      document.getElementById("sortProgressPct").textContent = `${snapshot.progressPct}% Sorted`;
+      document.getElementById("arrayStatusBadge").textContent = snapshot.badge;
+      document.getElementById("treeStatusBadge").textContent = snapshot.activeLvlBadge;
+    }
+
+    function updateRecursionTree(snapshot) {
+      // Clear all active tree block classes
+      const allBlocks = document.querySelectorAll(".array-block");
+      allBlocks.forEach(b => {
+        b.classList.remove("is-active-split", "is-active-merge", "is-sorted-complete");
+      });
+
+      const b0 = document.getElementById("block-lvl0");
+      const b1L = document.getElementById("block-lvl1-left");
+      const b1R = document.getElementById("block-lvl1-right");
+      const b2Q1 = document.getElementById("block-lvl2-q1");
+      const b2Q2 = document.getElementById("block-lvl2-q2");
+      const b2Q3 = document.getElementById("block-lvl2-q3");
+      const b2Q4 = document.getElementById("block-lvl2-q4");
+
+      if (snapshot.treeHighlight === "lvl0") {
+        if (b0) b0.classList.add("is-active-split");
+      } else if (snapshot.treeHighlight === "lvl1") {
+        if (b1L) b1L.classList.add("is-active-split");
+        if (b1R) b1R.classList.add("is-active-split");
+      } else if (snapshot.treeHighlight === "lvl2") {
+        if (b2Q1) b2Q1.classList.add("is-active-split");
+        if (b2Q2) b2Q2.classList.add("is-active-split");
+        if (b2Q3) b2Q3.classList.add("is-active-split");
+        if (b2Q4) b2Q4.classList.add("is-active-split");
+      } else if (snapshot.treeHighlight === "lvl3") {
+        for (let i = 1; i <= 8; i++) {
+          const s = document.getElementById(`block-s${i}`);
+          if (s) s.classList.add("is-active-split");
+        }
+      } else if (snapshot.treeHighlight === "lvl2-merged") {
+        if (b2Q1) b2Q1.classList.add("is-active-merge");
+        if (b2Q2) b2Q2.classList.add("is-active-merge");
+        if (b2Q3) b2Q3.classList.add("is-active-merge");
+        if (b2Q4) b2Q4.classList.add("is-active-merge");
+      } else if (snapshot.treeHighlight === "lvl1-left-merged") {
+        if (b1L) b1L.classList.add("is-active-merge");
+      } else if (snapshot.treeHighlight === "lvl1-right-merged") {
+        if (b1R) b1R.classList.add("is-active-merge");
+      } else if (snapshot.treeHighlight === "final-merge" || snapshot.treeHighlight === "complete") {
+        if (b0) b0.classList.add("is-sorted-complete");
+      }
+    }
+
+    function updateTimelineUI() {
+      const maxIndex = simulationTimeline.length - 1;
+      const pct = (currentStepIndex / maxIndex) * 100;
+
+      const fill = document.getElementById("timelineTrackFill");
+      const thumb = document.getElementById("timelineThumb");
+      if (fill) fill.style.width = `${pct}%`;
+      if (thumb) thumb.style.left = `${pct}%`;
+
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${maxIndex}`;
+
+      const curr = simulationTimeline[currentStepIndex];
+      const badgeElem = document.getElementById("timelineChapterBadge");
+      const titleElem = document.getElementById("timelineChapterTitle");
+      if (badgeElem) {
+        badgeElem.textContent = `Step ${currentStepIndex}`;
+        badgeElem.className = `badge badge-${curr.badgeColor}`;
+      }
+      if (titleElem) {
+        titleElem.innerHTML = `<strong>${curr.title}</strong> &mdash; <span style="color: var(--text-sub); font-weight: 500;">${curr.bannerText}</span>`;
+      }
+
+      const statusBadge = document.getElementById("timelineStatusBadge");
+      if (statusBadge) {
+        if (isAutoplaying) {
+          statusBadge.textContent = "Playing";
+          statusBadge.style.color = "var(--accent-orange)";
+        } else if (currentStepIndex === maxIndex) {
+          statusBadge.textContent = "Completed (Auto-Stopped)";
+          statusBadge.style.color = "var(--accent-green)";
+        } else {
+          statusBadge.textContent = "Paused";
+          statusBadge.style.color = "var(--text-sub)";
+        }
+      }
+
+      // Update chapter pips
+      for (let i = 0; i <= maxIndex; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-pip");
+          } else {
+            pip.classList.remove("active-pip");
+          }
+        }
+      }
+
+      // Play/Pause icon synchronization
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+      const btnTimelinePlay = document.getElementById("btnTimelinePlay");
+      const topPlayBtn = document.getElementById("btnPlayPause");
+
+      if (isAutoplaying) {
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+        if (btnTimelinePlay) btnTimelinePlay.classList.add("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = "Pause";
+          topPlayBtn.classList.remove("btn-primary");
+          topPlayBtn.classList.add("btn-active-pause");
+        }
+      } else {
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+        if (btnTimelinePlay) btnTimelinePlay.classList.remove("is-playing");
+        if (topPlayBtn) {
+          topPlayBtn.textContent = (currentStepIndex === maxIndex) ? "Replay" : "Play";
+          topPlayBtn.classList.remove("btn-active-pause");
+          topPlayBtn.classList.add("btn-primary");
+        }
+      }
+    }
+
+    function stepTimeline(delta) {
+      pausePlayback();
+      const next = Math.max(0, Math.min(simulationTimeline.length - 1, currentStepIndex + delta));
+      applyTimelineStep(next, true);
+    }
+
+    function seekTimelineByClick(event) {
+      pausePlayback();
+      const container = document.getElementById("timelineTrackContainer");
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const width = rect.width;
+      const ratio = Math.max(0, Math.min(1, clickX / width));
+      const targetStep = Math.round(ratio * (simulationTimeline.length - 1));
+      applyTimelineStep(targetStep, true);
+    }
+
+    function restartSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+      startAutoplay();
+    }
+
+    function resetSimulation() {
+      pausePlayback();
+      applyTimelineStep(0, false);
+    }
+
+    function toggleAutoplay() {
+      if (isAutoplaying) {
+        pausePlayback();
+      } else {
+        if (currentStepIndex >= simulationTimeline.length - 1) {
+          applyTimelineStep(0, false);
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      isAutoplaying = true;
+      updateTimelineUI();
+      executePlaybackStep();
+    }
+
+    function pausePlayback() {
+      isAutoplaying = false;
+      clearTimeout(autoplayTimer);
+      updateTimelineUI();
+    }
+
+    function executePlaybackStep() {
+      if (!isAutoplaying) return;
+
+      const maxStep = simulationTimeline.length - 1;
+      if (currentStepIndex < maxStep) {
+        currentStepIndex++;
+        applyTimelineStep(currentStepIndex, true);
+
+        // Auto-stop at Step 8!
+        if (currentStepIndex >= maxStep) {
+          pausePlayback();
+          return;
+        }
+
+        autoplayTimer = setTimeout(executePlaybackStep, 2200 / speed);
+      } else {
+        pausePlayback();
+      }
+    }
+
+    function changeSpeed(val) {
+      speed = parseFloat(val);
+    }
+
+    // Direct jump to Step 7 (Stability Proof Tie)
+    function highlightStabilityTies() {
+      pausePlayback();
+      applyTimelineStep(7, true);
+    }
+
+    // Keyboard shortcuts (Space to play/pause, Left/Right arrows to step)
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleAutoplay();
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        stepTimeline(1);
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        stepTimeline(-1);
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>

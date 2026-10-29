@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linear Search: Dynamic Multi-Attribute Demographic Filtering</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-teal: #30B0C7;
+      --accent-teal-bg: #E5F7FA;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Minimalist Top Header & Controls */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+      color: #FFFFFF !important;
+    }
+
+    .btn-filter-preset {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+      border-color: rgba(88, 86, 214, 0.25);
+    }
+
+    .btn-filter-preset:hover {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    .btn-filter-preset.active {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(88, 86, 214, 0.3);
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .card-meta strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-teal { background: var(--accent-teal-bg); color: var(--accent-teal); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* CARD 1: SCAN CURSOR & PREDICATE INSPECTOR */
+    .partition-card {
+      width: 100%;
+    }
+
+    .partition-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .inspector-trio-box {
+      background: rgba(0, 113, 227, 0.04);
+      border: 1.5px solid rgba(0, 113, 227, 0.14);
+      border-radius: 14px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .inspector-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inspector-chips {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .inspector-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .inspector-chip.highlight-query {
+      background: var(--accent-blue-bg);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .inspector-chip.highlight-result {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green);
+      color: #1B7A32;
+    }
+
+    .inspector-chip.highlight-skip {
+      background: #F2F2F7;
+      border-color: #D1D1D6;
+      color: var(--text-muted);
+    }
+
+    /* Slots Track Row */
+    .partition-track-container {
+      background: rgba(242, 242, 247, 0.5);
+      border: 1.5px dashed rgba(0, 0, 0, 0.12);
+      border-radius: 16px;
+      padding: 24px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .track-slots-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .slot-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .slot-pointers-zone {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .pointer-pin {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .pointer-scan {
+      background: var(--accent-blue);
+      color: #fff;
+      animation: scanGlow 1.4s infinite;
+    }
+
+    .pointer-match {
+      background: var(--accent-green);
+      color: #fff;
+      box-shadow: 0 0 8px rgba(52, 199, 89, 0.4);
+    }
+
+    .pointer-skip {
+      background: #8E8E93;
+      color: #fff;
+    }
+
+    .pointer-pending {
+      background: rgba(0, 0, 0, 0.08);
+      color: var(--text-muted);
+    }
+
+    @keyframes scanGlow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.5); }
+      70% { box-shadow: 0 0 0 6px rgba(0, 113, 227, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0); }
+    }
+
+    .slot-box {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .slot-box.is-scanning {
+      border-color: var(--accent-blue) !important;
+      background: var(--accent-blue-bg) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
+    }
+
+    .slot-box.is-match {
+      border-color: var(--accent-green) !important;
+      background: var(--accent-green-bg) !important;
+      box-shadow: 0 2px 10px rgba(52, 199, 89, 0.25);
+    }
+
+    .slot-box.is-skip {
+      opacity: 0.45;
+      background: #F9F9FB !important;
+      border-color: #E5E5EA !important;
+    }
+
+    .slot-index {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .slot-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .slot-key-val {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* CARD 2: APPLICANT DATASET & DYNAMIC FILTER BUFFER */
+    .array-stage-card {
+      width: 100%;
+    }
+
+    .array-track-buffer {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .array-cards-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (max-width: 1150px) {
+      .track-slots-row, .array-cards-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .candidate-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .candidate-card.is-active-scan {
+      border-color: var(--accent-blue) !important;
+      background: #FDFEFE !important;
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.25) !important;
+      transform: translateY(-2px);
+    }
+
+    .candidate-card.is-match-card {
+      border-color: var(--accent-green) !important;
+      background: #F7FCF8 !important;
+      box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.3) !important;
+    }
+
+    .candidate-card.is-skip-card {
+      opacity: 0.4;
+      background: #FAFAFA !important;
+      border-color: #E5E5EA !important;
+      filter: grayscale(0.6);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-pos-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+    }
+
+    .card-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-attr-box {
+      background: rgba(0, 113, 227, 0.05);
+      border: 1px solid rgba(0, 113, 227, 0.15);
+      border-radius: 8px;
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .attr-purok {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .attr-purok.matched-highlight {
+      color: #1B7A32;
+      background: #E8F8EA;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .attr-school {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .attr-school.matched-highlight {
+      color: #1B7A32;
+      background: #E8F8EA;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--card-border);
+      padding-top: 5px;
+      margin-top: 2px;
+    }
+
+    /* DYNAMIC FILTERED BUFFER TABLE (MATCHED SCHOLARS) */
+    .filtered-buffer-section {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .buffer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+    }
+
+    .buffer-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .buffer-count-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--accent-green-bg);
+      color: #1B7A32;
+    }
+
+    .buffer-empty-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .buffer-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .buffer-item-card {
+      background: #FAFCFA;
+      border: 1px solid rgba(52, 199, 89, 0.35);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(52, 199, 89, 0.08);
+      animation: itemPopIn 0.3s var(--spring);
+    }
+
+    @keyframes itemPopIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .buffer-item-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .buffer-item-id {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--accent-blue);
+    }
+
+    .buffer-item-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .buffer-item-meta {
+      font-size: 11px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* PLAYER BAR */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 20px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 4px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.05);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      transform: scale(1.06);
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      min-width: 68px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      margin: 0 2px;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .timeline-track-container {
+      position: relative;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 7px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 5px;
+      background: var(--accent-blue);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring);
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 7px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid var(--accent-blue);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-passed {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      gap: 12px;
+    }
+
+    .timeline-chapter-name {
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-time-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-main);
+      transition: all 0.2s var(--spring);
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill:hover {
+      background: #F2F2F7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Linear Search: Dynamic Multi-Attribute Demographic Filtering (O(n))</h1>
+        <div class="header-sub">Sequential full-roster scanning across unsorted demographic attributes (Residential Zone &amp; School) without secondary indexing overhead</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="stepTimeline(1)">Step Forward</button>
+        <button class="btn btn-filter-preset active" id="presetPurok" onclick="switchPreset('purok1')">Zone: Purok 1</button>
+        <button class="btn btn-filter-preset" id="presetBSU" onclick="switchPreset('bsu')">School: BatStateU</button>
+        <button class="btn btn-filter-preset" id="presetDLSL" onclick="switchPreset('dlsl')">School: DLSL</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN SIMULATION STAGE (FULL WIDTH) -->
+    <div class="simulation-stage">
+        
+      <!-- 1. SCAN CURSOR & PREDICATE INSPECTOR CARD -->
+      <div class="card partition-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">1. Keystroke Scan Cursor &amp; Demographic Predicate Inspector</div>
+            <span class="badge badge-blue" id="scanStatusBadge">Cursor Initialized [Index 0]</span>
+          </div>
+          <div class="card-meta">
+            <div>Algorithm: <strong>Linear Search (O(n))</strong></div>
+            <div>Secondary Index Overhead: <strong>0 KB (Zero-BTree)</strong></div>
+            <div>Filter Flexibility: <strong>Multi-Attribute Ad-Hoc</strong></div>
+          </div>
+        </div>
+
+        <div class="partition-body">
+          <!-- Inspector Chips Box -->
+          <div class="inspector-trio-box" id="inspectorTrioBox">
+            <div class="inspector-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              Sequential Predicate Scanner
+            </div>
+            <div class="inspector-chips">
+              <div class="inspector-chip" id="chipIndex"><span id="lblIndex">Scan Index:</span> <strong id="valIndex">[0]</strong></div>
+              <div class="inspector-chip" id="chipTarget"><span id="lblTarget">Candidate:</span> <span id="valTarget">APP-001 (Castro)</span></div>
+              <div class="inspector-chip highlight-query" id="chipQuery"><span id="lblQuery">Filter Query:</span> <strong id="valQuery">"Purok 1"</strong></div>
+              <div class="inspector-chip" id="chipTestedAttr"><span id="lblTestedAttr">Attribute Checked:</span> <span id="valTestedAttr">"Purok 5"</span></div>
+              <div class="inspector-chip highlight-skip" id="chipEvaluation"><span id="lblEval">Evaluation:</span> <strong id="valEval">"Purok 5".contains("Purok 1") == false</strong></div>
+            </div>
+          </div>
+
+          <!-- 8 Sequential Slots -->
+          <div class="partition-track-container">
+            <div class="track-slots-row" id="slotsTrackRow">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ACTIVE CANDIDATE DATASET & DYNAMIC MATCHED BUFFER -->
+      <div class="card array-stage-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">2. Full Applicant Dataset &amp; Real-Time Filtered Results Buffer</div>
+            <span class="badge badge-purple" id="arrayStatusBadge">Sequential Traversal</span>
+          </div>
+          <div class="card-meta">
+            <div>Dataset Size: <strong>8 Records</strong></div>
+            <div>Scanned So Far: <strong id="scannedCountMeta">0 / 8</strong></div>
+            <div>Matches Collected: <strong id="matchedCountMeta" style="color: #1B7A32;">0 Matches</strong></div>
+          </div>
+        </div>
+
+        <div class="array-track-buffer">
+          <div class="array-cards-row" id="applicantCardsRow">
+            <!-- Rendered dynamically -->
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+            <span id="quickComparisonDetail">Barangay desk officer types query into search box. Scanner initiates sequential scan from head to tail.</span>
+            <span id="sortProgressPct">0% Traversed</span>
+          </div>
+
+          <!-- Dynamic Filtered Buffer (Live Matched Scholars) -->
+          <div class="filtered-buffer-section">
+            <div class="buffer-header">
+              <div class="buffer-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                DYNAMIC MATCHED BUFFER (Ad-Hoc Keystroke Output)
+              </div>
+              <span class="buffer-count-badge" id="bufferCountBadge">0 Scholars Matched</span>
+            </div>
+            <div id="bufferEmptyNote" class="buffer-empty-note">
+              No matching applicants accumulated yet. Scanner is evaluating records sequentially...
+            </div>
+            <div class="buffer-cards-grid" id="bufferCardsGrid" style="display: none;">
+              <!-- Accumulated matched cards will populate dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) -->
+    <div class="player-bar-card">
+      <div class="player-controls">
+        <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+          <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="timeline-step-label">
+          <span id="timelineCurrentStep">Step 0</span>
+          <span class="timeline-step-sep">/</span>
+          <span id="timelineTotalSteps">9</span>
+        </div>
+      </div>
+
+      <div class="timeline-progress-wrapper">
+        <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+          <div class="timeline-track-bg"></div>
+          <div class="timeline-track-fill" id="timelineTrackFill"></div>
+          <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+          <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+        </div>
+        <div class="timeline-info-row">
+          <div class="timeline-chapter-name" id="timelineChapterName">
+            <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+            <span id="timelineChapterTitle">Desk Keystroke Query &mdash; Filter 'Purok 1'</span>
+          </div>
+          <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+        </div>
+      </div>
+
+      <button class="btn-replay-pill" onclick="resetSimulation()" title="Reset to Beginning">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Replay
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATASET: 8 APPLICANTS WITH REALISTIC BARANGAY & SCHOOL ATTRIBUTES
+    // -------------------------------------------------------------
+    const dataset = [
+      { id: "APP-001", name: "Patricia Anne Castro", surname: "Castro", purok: "Purok 5", school: "Pamantasan Lungsod", gwa: 2.15, income: "₱18,000.00" },
+      { id: "APP-002", name: "Hannah Sophia Del Rosario", surname: "Del Rosario", purok: "Purok 3", school: "Batangas State University", gwa: 1.80, income: "₱9,000.00" },
+      { id: "APP-003", name: "Bea Camille Fernandez", surname: "Fernandez", purok: "Purok 1", school: "City College", gwa: 2.00, income: "₱17,000.00" },
+      { id: "APP-004", name: "Jerome Patrick Lopez", surname: "Lopez", purok: "Purok 2", school: "Univ of Caloocan", gwa: 2.10, income: "₱14,500.00" },
+      { id: "APP-005", name: "Danilo Jose Mercado", surname: "Mercado", purok: "Purok 1", school: "Rizal Tech Univ", gwa: 1.95, income: "₱11,500.00" },
+      { id: "APP-006", name: "Katrina Denise Morales", surname: "Morales", purok: "Purok 6", school: "City College", gwa: 1.70, income: "₱12,500.00" },
+      { id: "APP-007", name: "Carl Anthony Navarro", surname: "Navarro", purok: "Purok 5", school: "De La Salle Lipa", gwa: 2.30, income: "₱24,000.00" },
+      { id: "APP-008", name: "Gabriel Luis Soriano", surname: "Soriano", purok: "Purok 1", school: "Batangas State University", gwa: 2.25, income: "₱19,000.00" }
+    ];
+
+    // -------------------------------------------------------------
+    // PRESET SCENARIOS GENERATOR
+    // -------------------------------------------------------------
+    const presets = {
+      purok1: {
+        id: "purok1",
+        label: "Zone: Purok 1",
+        filterField: "purok",
+        filterFieldName: "Residential Zone",
+        query: "Purok 1",
+        btnId: "presetPurok"
+      },
+      bsu: {
+        id: "bsu",
+        label: "School: BatStateU",
+        filterField: "school",
+        filterFieldName: "Educational Institution",
+        query: "Batangas State University",
+        btnId: "presetBSU"
+      },
+      dlsl: {
+        id: "dlsl",
+        label: "School: DLSL",
+        filterField: "school",
+        filterFieldName: "Educational Institution",
+        query: "De La Salle Lipa",
+        btnId: "presetDLSL"
+      }
+    };
+
+    let activePreset = presets.purok1;
+    let timelineSnapshots = [];
+
+    function buildSnapshotsForPreset(preset) {
+      const field = preset.filterField;
+      const query = preset.query;
+      const targetQueryLower = query.toLowerCase();
+
+      const snapshots = [];
+
+      // Step 0: Initial Keystroke Query State
+      snapshots.push({
+        step: 0,
+        scanIndex: -1,
+        title: `Keystroke Query &mdash; Filter ${preset.filterFieldName}: "${query}"`,
+        badge: "Query Initialized",
+        badgeColor: "blue",
+        scanStatusBadge: "Ready to Scan [0..7]",
+        comparisonText: `Barangay officer filters applicants by <strong>${preset.filterFieldName}: "${query}"</strong>. Linear Search initializes pointer at index 0 without secondary index overhead.`,
+        progressPct: 0,
+        valIndex: "Pending",
+        valTarget: "Cursor at Head",
+        valQuery: `"${query}"`,
+        valTestedAttr: "Awaiting index 0",
+        valEval: "AlgorithmUtils.linearSearch() invoked",
+        isMatch: false,
+        slotStates: dataset.map(d => ({ id: d.id, state: "pending" })),
+        matchedIds: [],
+        scannedCount: 0
+      });
+
+      const accumulatedMatches = [];
+
+      for (let i = 0; i < dataset.length; i++) {
+        const item = dataset[i];
+        const attrVal = item[field];
+        const isMatch = attrVal.toLowerCase().includes(targetQueryLower);
+
+        if (isMatch) {
+          accumulatedMatches.push(item);
+        }
+
+        const slotStates = dataset.map((d, idx) => {
+          if (idx < i) {
+            const prevMatch = d[field].toLowerCase().includes(targetQueryLower);
+            return { id: d.id, state: prevMatch ? "match" : "skip" };
+          } else if (idx === i) {
+            return { id: d.id, state: "scanning" };
+          } else {
+            return { id: d.id, state: "pending" };
+          }
+        });
+
+        const pct = Math.round(((i + 1) / dataset.length) * 100);
+
+        snapshots.push({
+          step: i + 1,
+          scanIndex: i,
+          title: `Inspect Slot [${i}] &mdash; ${item.id} (${item.surname}): ${isMatch ? 'MATCH FOUND' : 'NO MATCH'}`,
+          badge: isMatch ? `Match #${accumulatedMatches.length} Found` : `Slot [${i}] Evaluated`,
+          badgeColor: isMatch ? "green" : "orange",
+          scanStatusBadge: `Scanning Index [${i}] of 7`,
+          comparisonText: isMatch
+            ? `Index [${i}] <strong>${item.name}</strong> (${item.id}): <code>${field} = "${attrVal}"</code> CONTAINS <code>"${query}"</code> &rarr; <strong>MATCH!</strong> Added to filtered buffer.`
+            : `Index [${i}] <strong>${item.name}</strong> (${item.id}): <code>${field} = "${attrVal}"</code> does not match <code>"${query}"</code> &rarr; Skipped. Pointer advances to [${i + 1 < dataset.length ? i + 1 : 'end'}].`,
+          progressPct: pct,
+          valIndex: `[${i}]`,
+          valTarget: `${item.id} (${item.surname})`,
+          valQuery: `"${query}"`,
+          valTestedAttr: `"${attrVal}"`,
+          valEval: `"${attrVal}".toLowerCase().contains("${query.toLowerCase()}") == ${isMatch}`,
+          isMatch: isMatch,
+          slotStates: slotStates,
+          matchedIds: accumulatedMatches.map(m => m.id),
+          scannedCount: i + 1
+        });
+      }
+
+      // Final Step (Step 9): Scan Complete & Buffer Export Ready
+      snapshots.push({
+        step: 9,
+        scanIndex: 8,
+        title: `Linear Scan Complete &mdash; ${accumulatedMatches.length} Scholars Successfully Filtered`,
+        badge: "Scan Finished",
+        badgeColor: "green",
+        scanStatusBadge: `All 8 Records Scanned in O(n) Time`,
+        comparisonText: `Sequential traversal complete! Inspected all 8 applicants. Exactly <strong>${accumulatedMatches.length} matching scholars</strong> isolated in memory for immediate desk report or payroll export.`,
+        progressPct: 100,
+        valIndex: "Complete",
+        valTarget: "All 8 Scanned",
+        valQuery: `"${query}"`,
+        valTestedAttr: "100% Inspected",
+        valEval: `Return ${accumulatedMatches.length} matched records in sub-millisecond time`,
+        isMatch: true,
+        slotStates: dataset.map(d => {
+          const match = d[field].toLowerCase().includes(targetQueryLower);
+          return { id: d.id, state: match ? "match" : "skip" };
+        }),
+        matchedIds: accumulatedMatches.map(m => m.id),
+        scannedCount: 8
+      });
+
+      return snapshots;
+    }
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER & TIMELINE ENGINE
+    // -------------------------------------------------------------
+    let currentStepIndex = 0;
+    let autoplayTimer = null;
+    let stepSpeedMs = 2400;
+
+    function initSimulation() {
+      timelineSnapshots = buildSnapshotsForPreset(activePreset);
+      buildTimelinePips();
+      applyTimelineStep(0, false);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          toggleAutoplay();
+        } else if (e.code === "ArrowRight") {
+          e.preventDefault();
+          stepTimeline(1);
+        } else if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          stepTimeline(-1);
+        }
+      });
+    }
+
+    function switchPreset(presetKey) {
+      pauseAutoplay("Preset Changed");
+      activePreset = presets[presetKey];
+
+      // Update button active state
+      document.querySelectorAll(".btn-filter-preset").forEach(btn => btn.classList.remove("active"));
+      const activeBtn = document.getElementById(activePreset.btnId);
+      if (activeBtn) activeBtn.classList.add("active");
+
+      // Rebuild snapshots
+      timelineSnapshots = buildSnapshotsForPreset(activePreset);
+      buildTimelinePips();
+      applyTimelineStep(0, false);
+    }
+
+    function buildTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      pipsContainer.innerHTML = "";
+      const total = timelineSnapshots.length - 1;
+      for (let i = 0; i <= total; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-passed' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function applyTimelineStep(index, isUserSeeking = false) {
+      if (index < 0) index = 0;
+      if (index >= timelineSnapshots.length) index = timelineSnapshots.length - 1;
+
+      currentStepIndex = index;
+      const snapshot = timelineSnapshots[currentStepIndex];
+
+      // Update Player Scrubber UI
+      const totalSteps = timelineSnapshots.length - 1;
+      const pct = (currentStepIndex / totalSteps) * 100;
+      document.getElementById("timelineTrackFill").style.width = `${pct}%`;
+      document.getElementById("timelineThumb").style.left = `${pct}%`;
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${totalSteps}`;
+      document.getElementById("timelineChapterBadge").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineChapterTitle").textContent = snapshot.title;
+
+      // Update Chapter Pips
+      for (let i = 0; i <= totalSteps; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-passed");
+          } else {
+            pip.classList.remove("active-passed");
+          }
+        }
+      }
+
+      // Render Slots and Candidate Cards
+      renderPartitionSlots(snapshot);
+      renderCandidateCards(snapshot);
+      renderFilteredBuffer(snapshot);
+
+      // Auto-stop when reaching final step
+      if (currentStepIndex === totalSteps && autoplayTimer) {
+        pauseAutoplay("Completed (Auto-Stopped)");
+      }
+    }
+
+    function renderPartitionSlots(snapshot) {
+      document.getElementById("valIndex").textContent = snapshot.valIndex;
+      document.getElementById("valTarget").textContent = snapshot.valTarget;
+      document.getElementById("valQuery").textContent = snapshot.valQuery;
+      document.getElementById("valTestedAttr").textContent = snapshot.valTestedAttr;
+      document.getElementById("valEval").textContent = snapshot.valEval;
+
+      const evalChip = document.getElementById("chipEvaluation");
+      if (snapshot.isMatch) {
+        evalChip.className = "inspector-chip highlight-result";
+      } else {
+        evalChip.className = "inspector-chip highlight-skip";
+      }
+
+      const scanBadgeEl = document.getElementById("scanStatusBadge");
+      if (scanBadgeEl) {
+        scanBadgeEl.textContent = snapshot.scanStatusBadge;
+        scanBadgeEl.className = `badge badge-${snapshot.badgeColor || 'blue'}`;
+      }
+
+      const container = document.getElementById("slotsTrackRow");
+      container.innerHTML = "";
+
+      snapshot.slotStates.forEach((s, idx) => {
+        const col = document.createElement("div");
+        col.className = "slot-column";
+
+        // Pointers zone
+        const ptrsZone = document.createElement("div");
+        ptrsZone.className = "slot-pointers-zone";
+
+        const pin = document.createElement("span");
+        pin.className = "pointer-pin";
+
+        if (s.state === "scanning") {
+          pin.className += " pointer-scan";
+          pin.textContent = "SCAN [i]";
+        } else if (s.state === "match") {
+          pin.className += " pointer-match";
+          pin.textContent = "✓ MATCH";
+        } else if (s.state === "skip") {
+          pin.className += " pointer-skip";
+          pin.textContent = "✗ SKIP";
+        } else {
+          pin.className += " pointer-pending";
+          pin.textContent = "WAIT";
+        }
+        ptrsZone.appendChild(pin);
+
+        // Slot box
+        const d = dataset[idx];
+        const box = document.createElement("div");
+        box.className = `slot-box ${s.state === 'scanning' ? 'is-scanning' : ''} ${s.state === 'match' ? 'is-match' : ''} ${s.state === 'skip' ? 'is-skip' : ''}`;
+        
+        const displayAttr = (activePreset.filterField === "purok") ? d.purok : d.school.split(" ")[0];
+
+        box.innerHTML = `
+          <span class="slot-index">[${idx}]</span>
+          <span class="slot-id">${d.id}</span>
+          <span class="slot-key-val" title="${d[activePreset.filterField]}">${displayAttr}</span>
+        `;
+
+        col.appendChild(ptrsZone);
+        col.appendChild(box);
+        container.appendChild(col);
+      });
+    }
+
+    function renderCandidateCards(snapshot) {
+      const container = document.getElementById("applicantCardsRow");
+      container.innerHTML = "";
+
+      dataset.forEach((c, idx) => {
+        const stateObj = snapshot.slotStates[idx];
+        const isScanning = (stateObj.state === "scanning");
+        const isMatch = (stateObj.state === "match");
+        const isSkip = (stateObj.state === "skip");
+
+        const card = document.createElement("div");
+        card.className = `candidate-card ${isScanning ? 'is-active-scan' : ''} ${isMatch ? 'is-match-card' : ''} ${isSkip ? 'is-skip-card' : ''}`;
+
+        let statusBadge = `Pos #${idx}`;
+        if (isMatch) {
+          statusBadge = `<span class="badge badge-green" style="font-size: 8px;">MATCH</span>`;
+        } else if (isSkip) {
+          statusBadge = `<span class="badge" style="background:#E5E5EA; color:#8E8E93; font-size: 8px;">SKIPPED</span>`;
+        } else if (isScanning) {
+          statusBadge = `<span class="badge badge-blue" style="font-size: 8px;">EXAMINING</span>`;
+        }
+
+        const isPurokMatch = (activePreset.filterField === "purok" && (isMatch || isScanning) && c.purok.toLowerCase().includes(activePreset.query.toLowerCase()));
+        const isSchoolMatch = (activePreset.filterField === "school" && (isMatch || isScanning) && c.school.toLowerCase().includes(activePreset.query.toLowerCase()));
+
+        card.innerHTML = `
+          <div class="card-top-row">
+            <span class="card-id">${c.id}</span>
+            <div class="card-pos-badge">${statusBadge}</div>
+          </div>
+          <div class="card-name" title="${c.name}"><strong>${c.surname}</strong>, ${c.name.split(' ')[0]}</div>
+          <div class="card-attr-box">
+            <span class="attr-purok ${isPurokMatch ? 'matched-highlight' : ''}">${c.purok}</span>
+            <span class="attr-school ${isSchoolMatch ? 'matched-highlight' : ''}" title="${c.school}">${c.school}</span>
+          </div>
+          <div class="card-footer">
+            <span>${c.gwa.toFixed(2)} GWA</span>
+            <span style="font-weight: 700; color: ${isMatch ? '#248a3d' : (isSkip ? '#8E8E93' : 'var(--accent-blue)')};">
+              ${isMatch ? 'IN BUFFER' : (isSkip ? 'PASSED' : 'PENDING')}
+            </span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById("quickComparisonDetail").innerHTML = snapshot.comparisonText;
+      document.getElementById("sortProgressPct").textContent = `${snapshot.progressPct}% Traversed`;
+      document.getElementById("scannedCountMeta").textContent = `${snapshot.scannedCount} / 8`;
+      document.getElementById("matchedCountMeta").textContent = `${snapshot.matchedIds.length} Matches`;
+      
+      const arrayStatusEl = document.getElementById("arrayStatusBadge");
+      if (arrayStatusEl) {
+        arrayStatusEl.textContent = snapshot.badge;
+        arrayStatusEl.className = `badge badge-${snapshot.badgeColor || 'blue'}`;
+      }
+    }
+
+    function renderFilteredBuffer(snapshot) {
+      const bufferGrid = document.getElementById("bufferCardsGrid");
+      const emptyNote = document.getElementById("bufferEmptyNote");
+      const countBadge = document.getElementById("bufferCountBadge");
+
+      const matchedApplicants = dataset.filter(d => snapshot.matchedIds.includes(d.id));
+
+      countBadge.textContent = `${matchedApplicants.length} Scholars Matched`;
+
+      if (matchedApplicants.length === 0) {
+        emptyNote.style.display = "block";
+        bufferGrid.style.display = "none";
+        bufferGrid.innerHTML = "";
+      } else {
+        emptyNote.style.display = "none";
+        bufferGrid.style.display = "grid";
+        bufferGrid.innerHTML = "";
+
+        matchedApplicants.forEach(m => {
+          const item = document.createElement("div");
+          item.className = "buffer-item-card";
+          item.innerHTML = `
+            <div class="buffer-item-row-top">
+              <span class="buffer-item-id">${m.id}</span>
+              <span class="badge badge-green" style="font-size: 9px;">VERIFIED MATCH</span>
+            </div>
+            <div class="buffer-item-name">${m.name}</div>
+            <div class="buffer-item-meta">
+              <span><strong>Zone:</strong> ${m.purok}</span>
+              <span><strong>GWA:</strong> ${m.gwa.toFixed(2)}</span>
+            </div>
+            <div class="buffer-item-meta">
+              <span style="color: var(--accent-blue);"><strong>School:</strong> ${m.school}</span>
+              <span style="color: #1B7A32;"><strong>Income:</strong> ${m.income}</span>
+            </div>
+          `;
+          bufferGrid.appendChild(item);
+        });
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CONTROLS & TIMELINE NAVIGATION
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (autoplayTimer) {
+        pauseAutoplay("Paused");
+      } else {
+        if (currentStepIndex >= timelineSnapshots.length - 1) {
+          currentStepIndex = 0;
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      if (autoplayTimer) clearInterval(autoplayTimer);
+      updatePlayIcons(true);
+      document.getElementById("timelineStatusBadge").textContent = "Scanning...";
+
+      autoplayTimer = setInterval(() => {
+        if (currentStepIndex < timelineSnapshots.length - 1) {
+          applyTimelineStep(currentStepIndex + 1, false);
+        } else {
+          pauseAutoplay("Completed (Auto-Stopped)");
+        }
+      }, stepSpeedMs);
+    }
+
+    function pauseAutoplay(statusText = "Paused") {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+      updatePlayIcons(false);
+      document.getElementById("timelineStatusBadge").textContent = statusText;
+    }
+
+    function updatePlayIcons(isPlaying) {
+      const btnHeader = document.getElementById("btnPlayPause");
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+
+      if (isPlaying) {
+        if (btnHeader) {
+          btnHeader.textContent = "Pause";
+          btnHeader.classList.add("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+      } else {
+        if (btnHeader) {
+          btnHeader.textContent = "Play";
+          btnHeader.classList.remove("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+      }
+    }
+
+    function stepTimeline(direction) {
+      pauseAutoplay("Paused");
+      const target = currentStepIndex + direction;
+      applyTimelineStep(target, true);
+    }
+
+    function seekTimelineByClick(event) {
+      pauseAutoplay("Paused");
+      const container = document.getElementById("timelineTrackContainer");
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      const totalSteps = timelineSnapshots.length - 1;
+      const targetStep = Math.round(ratio * totalSteps);
+      applyTimelineStep(targetStep, true);
+    }
+
+    function resetSimulation() {
+      pauseAutoplay("Paused");
+      applyTimelineStep(0, true);
+    }
+
+    function changeSpeed(val) {
+      const baseMs = 2400;
+      stepSpeedMs = baseMs / parseFloat(val);
+      if (autoplayTimer) {
+        startAutoplay();
+      }
+    }
+
+    // Launch simulation on DOM ready
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>

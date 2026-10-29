@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Sort for Financial Need (Income): In-Place Partitioning Efficiency</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-teal: #30B0C7;
+      --accent-teal-bg: #E5F7FA;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Minimalist Top Header & Controls */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-pivot-focus {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+      border-color: rgba(88, 86, 214, 0.25);
+    }
+
+    .btn-pivot-focus:hover {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Full-Width Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .card-meta strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-teal { background: var(--accent-teal-bg); color: var(--accent-teal); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* ------------------------------------------------------------- */
+    /* 1. IN-PLACE PARTITIONING & PIVOT TRACKER CARD */
+    /* ------------------------------------------------------------- */
+    .partition-card {
+      width: 100%;
+    }
+
+    .partition-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Median-of-Three Spotlight Pill */
+    .median-trio-box {
+      background: rgba(88, 86, 214, 0.05);
+      border: 1.5px solid rgba(88, 86, 214, 0.15);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .median-trio-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .median-trio-chips {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .trio-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .trio-chip.selected-pivot {
+      background: var(--accent-purple-bg);
+      border-color: var(--accent-purple);
+      color: var(--accent-purple);
+      box-shadow: 0 0 0 2px rgba(88, 86, 214, 0.2);
+    }
+
+    /* Pointers & Array Track Visualizer */
+    .partition-track-container {
+      background: rgba(242, 242, 247, 0.5);
+      border: 1.5px dashed rgba(0, 0, 0, 0.12);
+      border-radius: 16px;
+      padding: 24px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .track-slots-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .slot-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    /* Pointer Pin Indicators above each slot */
+    .slot-pointers-zone {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .pointer-pin {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .pointer-low { background: var(--accent-blue); color: #fff; }
+    .pointer-mid { background: var(--accent-teal); color: #fff; }
+    .pointer-high { background: var(--accent-orange); color: #fff; }
+    .pointer-pivot { background: var(--accent-purple); color: #fff; animation: pulseGlow 1.5s infinite; }
+    .pointer-i { background: #5856D6; color: #fff; }
+    .pointer-j { background: #FF9500; color: #fff; }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(88, 86, 214, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(88, 86, 214, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(88, 86, 214, 0); }
+    }
+
+    /* In-Place Slot Box */
+    .slot-box {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .slot-box.is-in-window {
+      border-color: rgba(0, 113, 227, 0.4);
+      background: #F9FBFF;
+    }
+
+    .slot-box.is-pivot {
+      border-color: var(--accent-purple) !important;
+      background: var(--accent-purple-bg) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(88, 86, 214, 0.18);
+    }
+
+    .slot-box.is-comparing {
+      border-color: var(--accent-orange) !important;
+      background: var(--accent-orange-bg) !important;
+      transform: scale(1.03);
+    }
+
+    .slot-box.is-locked-sorted {
+      border-color: var(--accent-green) !important;
+      background: var(--accent-green-bg) !important;
+    }
+
+    .slot-index {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .slot-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .slot-income {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* 2. ACTIVE APPLICANT MEMORY BUFFER */
+    /* ------------------------------------------------------------- */
+    .array-stage-card {
+      width: 100%;
+    }
+
+    .array-track-buffer {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .array-cards-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (max-width: 1150px) {
+      .track-slots-row, .array-cards-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .applicant-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .applicant-card.is-active-pivot {
+      border-color: var(--accent-purple) !important;
+      background: #FDFBFF !important;
+      box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.22) !important;
+      transform: translateY(-2px);
+    }
+
+    .applicant-card.is-active-i {
+      border-color: var(--accent-blue) !important;
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.28) !important;
+      transform: translateY(-2px);
+    }
+
+    .applicant-card.is-active-j {
+      border-color: var(--accent-orange) !important;
+      box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.28) !important;
+      transform: translateY(-2px);
+    }
+
+    .applicant-card.is-less-pivot {
+      border-left: 3.5px solid var(--accent-green);
+    }
+
+    .applicant-card.is-greater-pivot {
+      border-left: 3.5px solid var(--accent-orange);
+    }
+
+    .applicant-card.is-comparing {
+      box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.25), 0 8px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-4px) scale(1.02);
+      z-index: 5;
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-pos-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+    }
+
+    .card-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-income-box {
+      background: rgba(52, 199, 89, 0.08);
+      border: 1px solid rgba(52, 199, 89, 0.2);
+      border-radius: 8px;
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .income-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1B7A32;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .income-lbl {
+      font-size: 9px;
+      font-weight: 600;
+      color: #3B874F;
+      text-transform: uppercase;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--card-border);
+      padding-top: 5px;
+      margin-top: 2px;
+    }
+
+    /* ============================================================= */
+    /* SPOTIFY & YOUTUBE-STYLE TIMELINE PLAYER BAR (BOTTOM) */
+    /* ============================================================= */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 20px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 4px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.05);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      transform: scale(1.06);
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      min-width: 68px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .timeline-track-container {
+      position: relative;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 7px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 5px;
+      background: var(--accent-blue);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring);
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 7px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid var(--accent-blue);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-passed {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      gap: 12px;
+    }
+
+    .timeline-chapter-name {
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-time-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-main);
+      transition: all 0.2s var(--spring);
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill:hover {
+      background: #F2F2F7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Custom Quick Sort: Financial Need (Income) &amp; In-Place Partitioning</h1>
+        <div class="header-sub">In-place median-of-three partitioning with O(n log n) efficiency, minimal O(log n) stack space, and quota allocation</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="stepTimeline(1)">Step Forward</button>
+        <button class="btn btn-pivot-focus" onclick="focusMedianPivot()">Focus Pivot</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN SIMULATION STAGE (FULL WIDTH) -->
+    <div class="simulation-stage">
+        
+      <!-- 1. IN-PLACE PARTITIONING & PIVOT TRACKER CARD -->
+      <div class="card partition-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">1. In-Place Partitioning &amp; Pivot Tracker</div>
+            <span class="badge badge-purple" id="partitionRangeBadge">Global Range [0..7]</span>
+          </div>
+          <div class="card-meta">
+            <div>Aux Space: <strong>O(log n) Stack</strong></div>
+            <div>Pivot Mode: <strong>Median-of-Three</strong></div>
+            <div>Order: <strong>Poorest &rarr; Wealthiest</strong></div>
+          </div>
+        </div>
+
+        <div class="partition-body">
+          <!-- Median of Three Trio Inspector -->
+          <div class="median-trio-box" id="medianTrioBox">
+            <div class="median-trio-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+              Median-of-Three Selection
+            </div>
+            <div class="median-trio-chips">
+              <div class="trio-chip" id="chipLow"><span id="lblLow">Low [0]:</span> <span id="valLow">₱14,500</span></div>
+              <div class="trio-chip" id="chipMid"><span id="lblMid">Mid [3]:</span> <span id="valMid">₱24,000</span></div>
+              <div class="trio-chip" id="chipHigh"><span id="lblHigh">High [7]:</span> <span id="valHigh">₱12,500</span></div>
+              <div class="trio-chip selected-pivot" id="chipPivot"><span id="lblPivot">Selected Pivot:</span> <strong id="valPivot">₱14,500</strong></div>
+              <div class="trio-chip" id="chipWall" style="border-color: rgba(88, 86, 214, 0.35); background: rgba(88, 86, 214, 0.08); color: var(--accent-purple); font-weight: 700;"><span id="lblWall">Pointers:</span> <span id="valWall">i = 0 (→) · j = 6 (←)</span></div>
+            </div>
+          </div>
+
+          <!-- 8 In-Place Slots with Pin Pointers -->
+          <div class="partition-track-container">
+            <div class="track-slots-row" id="slotsTrackRow">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ACTIVE APPLICANT MEMORY BUFFER -->
+      <div class="card array-stage-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">2. Active Applicant Memory Buffer</div>
+            <span class="badge badge-purple" id="arrayStatusBadge">Initial Unsorted Sequence</span>
+          </div>
+          <div class="card-meta">
+            <div>Slots: <strong>5 Available</strong></div>
+            <div>Cutoff Line: <strong>Rank #5</strong></div>
+          </div>
+        </div>
+
+        <div class="array-track-buffer">
+          <div class="array-cards-row" id="applicantCardsRow">
+            <!-- Rendered dynamically -->
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+            <span id="quickComparisonDetail">Comparison: Initial state awaiting median-of-three in-place partitioning.</span>
+            <span id="sortProgressPct">0% Sorted</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) -->
+    <div class="player-bar-card">
+      <div class="player-controls">
+        <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+          <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="timeline-step-label">
+          <span id="timelineCurrentStep">Step 0</span>
+          <span class="timeline-step-sep">/</span>
+          <span id="timelineTotalSteps">14</span>
+        </div>
+      </div>
+
+      <div class="timeline-progress-wrapper">
+        <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+          <div class="timeline-track-bg"></div>
+          <div class="timeline-track-fill" id="timelineTrackFill"></div>
+          <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+          <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+        </div>
+        <div class="timeline-info-row">
+          <div class="timeline-chapter-name" id="timelineChapterName">
+            <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+            <span id="timelineChapterTitle">Initial Candidate Pool &mdash; Unsorted Arrival Order</span>
+          </div>
+          <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+        </div>
+      </div>
+
+      <button class="btn-replay-pill" onclick="resetSimulation()" title="Reset to Beginning">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Replay
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATA MODEL: 8 Real Candidates sorted by Monthly Family Income
+    // Algorithm: AlgorithmUtils.quickSortByIncome(candidates, true)
+    // -------------------------------------------------------------
+    const applicants = {
+      "APP-001": { id: "APP-001", name: "Hannah Del Rosario", income: 9000, incomeFmt: "₱9,000.00", gwa: 1.80, purok: "Purok 3", arrivalOrder: 3 },
+      "APP-002": { id: "APP-002", name: "Danilo Mercado", income: 11500, incomeFmt: "₱11,500.00", gwa: 1.95, purok: "Purok 1", arrivalOrder: 5 },
+      "APP-003": { id: "APP-003", name: "Katrina Morales", income: 12500, incomeFmt: "₱12,500.00", gwa: 1.70, purok: "Purok 6", arrivalOrder: 8 },
+      "APP-004": { id: "APP-004", name: "Jerome Lopez", income: 14500, incomeFmt: "₱14,500.00", gwa: 2.10, purok: "Purok 2", arrivalOrder: 1 },
+      "APP-005": { id: "APP-005", name: "Bea Fernandez", income: 17000, incomeFmt: "₱17,000.00", gwa: 2.00, purok: "Purok 1", arrivalOrder: 6 },
+      "APP-006": { id: "APP-006", name: "Patricia Castro", income: 18000, incomeFmt: "₱18,000.00", gwa: 2.15, purok: "Purok 5", arrivalOrder: 2 },
+      "APP-007": { id: "APP-007", name: "Gabriel Soriano", income: 19000, incomeFmt: "₱19,000.00", gwa: 2.25, purok: "Purok 3", arrivalOrder: 7 },
+      "APP-008": { id: "APP-008", name: "Carl Navarro", income: 24000, incomeFmt: "₱24,000.00", gwa: 2.30, purok: "Purok 4", arrivalOrder: 4 }
+    };
+
+    // -------------------------------------------------------------
+    // TIMELINE SNAPSHOTS (Two-Pointer Inward Partitioning: Hoare Scheme)
+    // Pointer i starts at Start (0) -> moving right
+    // Pointer j starts at End (6, before pivot 7) <- moving left
+    // -------------------------------------------------------------
+    const timelineSnapshots = [
+      {
+        step: 0,
+        title: "Initial Candidate Intake — Unsorted Income Sequence",
+        badge: "Initial State",
+        badgeColor: "purple",
+        bannerText: "8 verified applicants awaiting financial need ranking. Income values range from ₱9,000 to ₱24,000.",
+        rangeBadge: "Global Array [0..7]",
+        comparisonText: "Initial unsorted array in submission arrival order: [14.5k, 18k, 9k, 24k, 11.5k, 17k, 19k, 12.5k].",
+        progressPct: 0,
+        lowVal: "₱14,500",
+        midVal: "₱24,000",
+        highVal: "₱12,500",
+        pivotVal: "Awaiting Median",
+        wallInfo: "Pointers: i (start), j (end)",
+        slots: [
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: ["low"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: ["mid"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: ["high"] }
+        ],
+        array: ["APP-004", "APP-006", "APP-001", "APP-008", "APP-002", "APP-005", "APP-007", "APP-003"],
+        activePivotId: null,
+        activeIId: null,
+        activeJId: null,
+        lessIds: [],
+        greaterIds: []
+      },
+      {
+        step: 1,
+        title: "Median-of-Three Selection & Initial Pointer Positions",
+        badge: "Pivot Chosen",
+        badgeColor: "purple",
+        bannerText: "Median of low [0]=₱14.5k, mid [3]=₱24k, and high [7]=₱12.5k is <strong>₱14,500</strong>. Swapped to [7] as pivot. Pointer <code>i</code> starts at [0] &rarr;, <code>j</code> starts at [6] &larr; (before pivot).",
+        rangeBadge: "Pivot: ₱14,500 at [7]",
+        comparisonText: "Two-pointer setup: Left pointer i starts at index 0 moving rightward; Right pointer j starts at index 6 (before pivot) moving leftward.",
+        progressPct: 10,
+        lowVal: "₱14,500",
+        midVal: "₱24,000",
+        highVal: "₱12,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "i = 0 (→) · j = 6 (←)",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-006", "APP-001", "APP-008", "APP-002", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-003",
+        activeJId: "APP-007",
+        lessIds: [],
+        greaterIds: []
+      },
+      {
+        step: 2,
+        title: "Advance i Rightward: STOPS at Patricia (Slot [1], ₱18,000 > Pivot)",
+        badge: "i STOPS at [1]",
+        badgeColor: "orange",
+        bannerText: "Slot [0] (Katrina, ₱12.5k) &le; ₱14.5k &rarr; <code>i</code> advances. Slot [1] (Patricia, ₱18k) &gt; ₱14.5k &rarr; <strong>i STOPS at [1]</strong> (misplaced on left side)!",
+        rangeBadge: "i halted at [1]",
+        comparisonText: "Pointer i searches for values > Pivot (too wealthy for left partition). Finds Patricia (₱18,000 > ₱14,500) and halts at index 1.",
+        progressPct: 20,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "i halted at [1] · j scanning",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-006", "APP-001", "APP-008", "APP-002", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-006",
+        activeJId: "APP-007",
+        lessIds: ["APP-003"],
+        greaterIds: ["APP-006"]
+      },
+      {
+        step: 3,
+        title: "Advance j Leftward: STOPS at Danilo (Slot [4], ₱11,500 < Pivot)",
+        badge: "j STOPS at [4]",
+        badgeColor: "orange",
+        bannerText: "Slots [6] (₱19k) and [5] (₱17k) &ge; ₱14.5k &rarr; <code>j</code> moves left. Slot [4] (Danilo, ₱11.5k) &le; ₱14.5k &rarr; <strong>j STOPS at [4]</strong>!",
+        rangeBadge: "Both Pointers Halted",
+        comparisonText: "Pointer j searches for values < Pivot (higher financial need misplaced on right). Finds Danilo (₱11,500 < ₱14,500) and halts at index 4.",
+        progressPct: 32,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "i at [1], j at [4] (i < j)",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-006", "APP-001", "APP-008", "APP-002", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-006",
+        activeJId: "APP-002",
+        lessIds: ["APP-003"],
+        greaterIds: ["APP-006", "APP-005", "APP-007"]
+      },
+      {
+        step: 4,
+        title: "In-Place SWAP: Exchange i (Slot [1]) & j (Slot [4])",
+        badge: "In-Place Swap",
+        badgeColor: "green",
+        bannerText: "Both pointers halted with <code>i < j (1 < 4)</code>. <strong>SWAP [1] (Patricia, ₱18k) &harr; [4] (Danilo, ₱11.5k)</strong> in place!",
+        rangeBadge: "Swapped: Slot [1] & [4]",
+        comparisonText: "In-place exchange complete: Danilo (₱11,500) brought to left side; Patricia (₱18,000) shifted to right side.",
+        progressPct: 45,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "Swapped [1] & [4]",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-002", "APP-001", "APP-008", "APP-006", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-002",
+        activeJId: "APP-006",
+        lessIds: ["APP-003", "APP-002"],
+        greaterIds: ["APP-006", "APP-005", "APP-007"]
+      },
+      {
+        step: 5,
+        title: "Resume i Rightward: Advances to Carl (Slot [3], ₱24,000 > Pivot)",
+        badge: "i STOPS at [3]",
+        badgeColor: "orange",
+        bannerText: "Slot [2] (Hannah, ₱9k) &le; ₱14.5k &rarr; <code>i</code> advances. Slot [3] (Carl, ₱24k) &gt; ₱14.5k &rarr; <strong>i STOPS at [3]</strong>!",
+        rangeBadge: "i halted at [3]",
+        comparisonText: "Pointer i advances to index 3 and stops at Carl (₱24,000 > ₱14,500).",
+        progressPct: 55,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "i halted at [3]",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-002", "APP-001", "APP-008", "APP-006", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-008",
+        activeJId: "APP-006",
+        lessIds: ["APP-003", "APP-002", "APP-001"],
+        greaterIds: ["APP-008", "APP-006"]
+      },
+      {
+        step: 6,
+        title: "Resume j Leftward: Pointers Cross at i = 3, j = 2",
+        badge: "Pointers Crossed!",
+        badgeColor: "purple",
+        bannerText: "From [4], <code>j</code> moves left past [3] (₱24k) to [2] (₱9k &le; ₱14.5k) &rarr; <strong>POINTERS CROSSED: i=3 &gt; j=2</strong>!",
+        rangeBadge: "Crossing: i=3, j=2",
+        comparisonText: "Pointers have crossed (i >= j). Partition scan loop terminates! Pivot will now be swapped into index i = 3.",
+        progressPct: 65,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "Crossed: i = 3, j = 2",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-002", "APP-001", "APP-008", "APP-006", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-008",
+        activeJId: "APP-001",
+        lessIds: ["APP-003", "APP-002", "APP-001"],
+        greaterIds: ["APP-008", "APP-006", "APP-005", "APP-007"]
+      },
+      {
+        step: 7,
+        title: "Place Pivot at Crossing Index: swap(list, i, high)",
+        badge: "Pivot #1 Locked",
+        badgeColor: "green",
+        bannerText: "<code>swap(list, 3, 7)</code> places Pivot <strong>₱14,500 (Jerome)</strong> at slot [3]. Pivot permanently locked sorted!",
+        rangeBadge: "Slot [3] Locked Sorted",
+        comparisonText: "Pivot ₱14,500 is locked: all candidates left [0..2] are &le; ₱14.5k; all candidates right [4..7] are &ge; ₱14.5k.",
+        progressPct: 75,
+        lowVal: "₱9,000",
+        midVal: "₱14,500",
+        highVal: "₱19,000",
+        pivotVal: "₱14,500 Locked",
+        wallInfo: "Pivot Locked at Slot [3]",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: true,  isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-005", income: "₱17.0k", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] }
+        ],
+        array: ["APP-003", "APP-002", "APP-001", "APP-004", "APP-006", "APP-005", "APP-007", "APP-008"],
+        activePivotId: "APP-004",
+        activeIId: null,
+        activeJId: null,
+        lessIds: ["APP-003", "APP-002", "APP-001"],
+        greaterIds: ["APP-006", "APP-005", "APP-007", "APP-008"]
+      },
+      {
+        step: 8,
+        title: "Left Subarray [0..2] Partitioning & Slots [0..3] Locked",
+        badge: "Slots [0..3] Locked",
+        badgeColor: "green",
+        bannerText: "Left subarray <code>[0..2]</code> partitioned around median ₱11.5k: Hannah (₱9k), Danilo (₱11.5k), Katrina (₱12.5k). Slots [0..3] permanently locked!",
+        rangeBadge: "Slots [0..3] Locked",
+        comparisonText: "Top 4 financial need positions permanently locked: [0] Hannah (₱9k), [1] Danilo (₱11.5k), [2] Katrina (₱12.5k), [3] Jerome (₱14.5k).",
+        progressPct: 62,
+        lblLow: "Low [0]:",
+        lblMid: "Mid [1]:",
+        lblHigh: "High [2]:",
+        lblPivot: "Subarray [0..2]:",
+        lblWall: "Slots [0..3]:",
+        lowVal: "₱9,000",
+        midVal: "₱11,500",
+        highVal: "₱14,500",
+        pivotVal: "Slots [0..3] Locked",
+        wallInfo: "Slots [0..3] Locked",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: ["low"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: ["mid"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: ["high"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-006", "APP-005", "APP-007", "APP-008"],
+        activePivotId: null,
+        activeIId: null,
+        activeJId: null,
+        lessIds: ["APP-001", "APP-002", "APP-003", "APP-004"],
+        greaterIds: []
+      },
+      {
+        step: 9,
+        title: "Right Subarray [4..7]: Median Pivot Selected & Pointers Set",
+        badge: "Right Half Active",
+        badgeColor: "purple",
+        bannerText: "Right subarray <code>[4..7]</code> active! Median of low [4]=₱18k, mid [5]=₱17k, high [7]=₱24k is <strong>₱18,000 (Patricia)</strong>. Swapped to [7]. Pointer <code>i</code> at [4] &rarr;, <code>j</code> at [6] &larr;.",
+        rangeBadge: "Subarray [4..7] Active",
+        comparisonText: "Median-of-three selects Patricia (₱18,000) as pivot at slot [7]. Left pointer i starts at index 4; Right pointer j starts at index 6 (before pivot).",
+        progressPct: 70,
+        lblLow: "Low [4]:",
+        lblMid: "Mid [5]:",
+        lblHigh: "High [7]:",
+        lblPivot: "Selected Pivot:",
+        lblWall: "Pointers:",
+        lowVal: "₱18,000",
+        midVal: "₱17,000",
+        highVal: "₱24,000",
+        pivotVal: "₱18,000 (APP-006)",
+        wallInfo: "i = 4 (→) · j = 6 (←)",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-008", "APP-005", "APP-007", "APP-006"],
+        activePivotId: "APP-006",
+        activeIId: "APP-008",
+        activeJId: "APP-007",
+        lessIds: ["APP-001", "APP-002", "APP-003", "APP-004"],
+        greaterIds: []
+      },
+      {
+        step: 10,
+        title: "Advance i & j: i STOPS at Carl [4], j STOPS at Bea [5]",
+        badge: "Both Pointers Halted",
+        badgeColor: "orange",
+        bannerText: "Slot [4] (Carl, ₱24k) &gt; ₱18k &rarr; <strong>i STOPS at [4]</strong>. <code>j</code> moves left past [6] (₱19k) to [5] (Bea, ₱17k &le; ₱18k) &rarr; <strong>j STOPS at [5]</strong>!",
+        rangeBadge: "i at [4], j at [5]",
+        comparisonText: "Misplaced pair identified: Carl (₱24,000 > ₱18,000) on left; Bea (₱17,000 < ₱18,000) on right. Ready for in-place swap.",
+        progressPct: 78,
+        lblLow: "Low [4]:",
+        lblMid: "Mid [5]:",
+        lblHigh: "High [7]:",
+        lblPivot: "Selected Pivot:",
+        lblWall: "Pointers:",
+        lowVal: "₱18,000",
+        midVal: "₱17,000",
+        highVal: "₱24,000",
+        pivotVal: "₱18,000 (APP-006)",
+        wallInfo: "i at [4], j at [5] (i < j)",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-008", "APP-005", "APP-007", "APP-006"],
+        activePivotId: "APP-006",
+        activeIId: "APP-008",
+        activeJId: "APP-005",
+        lessIds: ["APP-001", "APP-002", "APP-003", "APP-004"],
+        greaterIds: ["APP-008", "APP-007"]
+      },
+      {
+        step: 11,
+        title: "In-Place SWAP: Exchange i (Slot [4]) & j (Slot [5])",
+        badge: "In-Place Swap",
+        badgeColor: "green",
+        bannerText: "Both pointers halted with <code>i < j (4 < 5)</code>. <strong>SWAP [4] (Carl, ₱24k) &harr; [5] (Bea, ₱17k)</strong> in place!",
+        rangeBadge: "Swapped: Slot [4] & [5]",
+        comparisonText: "In-place exchange complete: Bea (₱17,000) brought to left side of subarray; Carl (₱24,000) shifted to right side.",
+        progressPct: 85,
+        lblLow: "Low [4]:",
+        lblMid: "Mid [5]:",
+        lblHigh: "High [7]:",
+        lblPivot: "Selected Pivot:",
+        lblWall: "Pointers:",
+        lowVal: "₱18,000",
+        midVal: "₱17,000",
+        highVal: "₱24,000",
+        pivotVal: "₱18,000 (APP-006)",
+        wallInfo: "Swapped [4] & [5]",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-008", "APP-007", "APP-006"],
+        activePivotId: "APP-006",
+        activeIId: "APP-005",
+        activeJId: "APP-008",
+        lessIds: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005"],
+        greaterIds: ["APP-008", "APP-007"]
+      },
+      {
+        step: 12,
+        title: "Resume Scanning: Pointers Cross at i = 5, j = 4",
+        badge: "Pointers Crossed!",
+        badgeColor: "purple",
+        bannerText: "<code>i</code> advances to [5] (Carl, ₱24k > ₱18k); <code>j</code> moves left to [4] (Bea, ₱17k < ₱18k) &rarr; <strong>POINTERS CROSSED (i=5 >= j=4)</strong>!",
+        rangeBadge: "Crossing: i=5, j=4",
+        comparisonText: "Pointers have crossed. Partition scan loop for right subarray terminates! Pivot will now swap into index i = 5.",
+        progressPct: 90,
+        lblLow: "Low [4]:",
+        lblMid: "Mid [5]:",
+        lblHigh: "High [7]:",
+        lblPivot: "Selected Pivot:",
+        lblWall: "Pointers:",
+        lowVal: "₱18,000",
+        midVal: "₱17,000",
+        highVal: "₱24,000",
+        pivotVal: "₱18,000 (APP-006)",
+        wallInfo: "Crossed: i = 5, j = 4",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-008", "APP-007", "APP-006"],
+        activePivotId: "APP-006",
+        activeIId: "APP-008",
+        activeJId: "APP-005",
+        lessIds: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005"],
+        greaterIds: ["APP-008", "APP-007"]
+      },
+      {
+        step: 13,
+        title: "Place Pivot at Slot [5]: swap(list, 5, 7) — All Slots Locked",
+        badge: "All Slots Locked",
+        badgeColor: "green",
+        bannerText: "<code>swap(list, 5, 7)</code> places Pivot <strong>₱18,000 (Patricia)</strong> at slot [5]. Bea (₱17k) at [4] & Gabriel (₱19k) < Carl (₱24k) resolved!",
+        rangeBadge: "All 8 Slots Locked",
+        comparisonText: "All partitions resolved! Full array is now strictly ordered in continuous ascending financial need.",
+        progressPct: 96,
+        lblLow: "Min [0]:",
+        lblMid: "Pivot [5]:",
+        lblHigh: "Max [7]:",
+        lblPivot: "All 8 Sorted:",
+        lblWall: "State:",
+        lowVal: "₱9,000",
+        midVal: "₱18,000",
+        highVal: "₱24,000",
+        pivotVal: "All 8 Slots Locked",
+        wallInfo: "All 8 Slots Locked",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: false, isPivot: true,  isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-006", "APP-007", "APP-008"],
+        activePivotId: null,
+        activeIId: null,
+        activeJId: null,
+        lessIds: [],
+        greaterIds: []
+      },
+      {
+        step: 14,
+        title: "Official Financial Need Masterlist & Top 5 Slot Allocation",
+        badge: "Sorting Complete",
+        badgeColor: "green",
+        bannerText: "Quick Sort complete! Top 5 poorest candidates awarded Official Slots; excess candidates routed to Waitlist Queue. Auto-stopped.",
+        rangeBadge: "Allocation Finalized",
+        comparisonText: "Final ranking: #1 Hannah (₱9k), #2 Danilo (₱11.5k), #3 Katrina (₱12.5k), #4 Jerome (₱14.5k), #5 Bea (₱17k).",
+        progressPct: 100,
+        lblLow: "Rank #1 (Min):",
+        lblMid: "Rank #5 (Cutoff):",
+        lblHigh: "Rank #8 (Max):",
+        lblPivot: "Masterlist:",
+        lblWall: "Allocation:",
+        lowVal: "₱9,000",
+        midVal: "₱14,500",
+        highVal: "₱24,000",
+        pivotVal: "Approved",
+        wallInfo: "Masterlist Finalized",
+        slots: [
+          { id: "APP-001", income: "₱9.0k",  isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot1"] },
+          { id: "APP-002", income: "₱11.5k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot2"] },
+          { id: "APP-003", income: "₱12.5k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot3"] },
+          { id: "APP-004", income: "₱14.5k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot4"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot5"] },
+          { id: "APP-006", income: "₱18.0k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["wait"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["wait"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["wait"] }
+        ],
+        array: ["APP-001", "APP-002", "APP-003", "APP-004", "APP-005", "APP-006", "APP-007", "APP-008"],
+        activePivotId: null,
+        activeIId: null,
+        activeJId: null,
+        lessIds: [],
+        greaterIds: []
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER & TIMELINE ENGINE
+    // -------------------------------------------------------------
+    let currentStepIndex = 0;
+    let autoplayTimer = null;
+    let stepSpeedMs = 2400;
+
+    function initSimulation() {
+      buildTimelinePips();
+      applyTimelineStep(0, false);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          toggleAutoplay();
+        } else if (e.code === "ArrowRight") {
+          e.preventDefault();
+          stepTimeline(1);
+        } else if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          stepTimeline(-1);
+        }
+      });
+    }
+
+    function buildTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      pipsContainer.innerHTML = "";
+      const total = timelineSnapshots.length - 1;
+      for (let i = 0; i <= total; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-passed' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function applyTimelineStep(index, isUserSeeking = false) {
+      if (index < 0) index = 0;
+      if (index >= timelineSnapshots.length) index = timelineSnapshots.length - 1;
+
+      currentStepIndex = index;
+      const snapshot = timelineSnapshots[currentStepIndex];
+
+      // Update Player Scrubber UI
+      const totalSteps = timelineSnapshots.length - 1;
+      const pct = (currentStepIndex / totalSteps) * 100;
+      document.getElementById("timelineTrackFill").style.width = `${pct}%`;
+      document.getElementById("timelineThumb").style.left = `${pct}%`;
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${totalSteps}`;
+      document.getElementById("timelineChapterBadge").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineChapterTitle").textContent = snapshot.title;
+
+      // Update Chapter Pips
+      for (let i = 0; i <= totalSteps; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-passed");
+          } else {
+            pip.classList.remove("active-passed");
+          }
+        }
+      }
+
+      // Render Partition Slots and Applicant Memory Buffer
+      renderPartitionSlots(snapshot);
+      renderApplicantCards(snapshot);
+
+      // Auto-stop when reaching final step
+      if (currentStepIndex === totalSteps && autoplayTimer) {
+        pauseAutoplay("Completed (Auto-Stopped)");
+      }
+    }
+
+    function renderPartitionSlots(snapshot) {
+      if (document.getElementById("lblLow")) document.getElementById("lblLow").textContent = snapshot.lblLow || "Low [0]:";
+      if (document.getElementById("lblMid")) document.getElementById("lblMid").textContent = snapshot.lblMid || "Mid [3]:";
+      if (document.getElementById("lblHigh")) document.getElementById("lblHigh").textContent = snapshot.lblHigh || "High [7]:";
+      if (document.getElementById("lblPivot")) document.getElementById("lblPivot").textContent = snapshot.lblPivot || "Selected Pivot:";
+      if (document.getElementById("lblWall")) document.getElementById("lblWall").textContent = snapshot.lblWall || "Pointers:";
+
+      document.getElementById("valLow").textContent = snapshot.lowVal;
+      document.getElementById("valMid").textContent = snapshot.midVal;
+      document.getElementById("valHigh").textContent = snapshot.highVal;
+      document.getElementById("valPivot").textContent = snapshot.pivotVal;
+      if (document.getElementById("valWall")) {
+        document.getElementById("valWall").textContent = snapshot.wallInfo || "";
+      }
+      const rangeBadgeEl = document.getElementById("partitionRangeBadge");
+      if (rangeBadgeEl) {
+        rangeBadgeEl.textContent = snapshot.rangeBadge;
+        rangeBadgeEl.className = `badge badge-${snapshot.badgeColor || 'purple'}`;
+      }
+
+      const container = document.getElementById("slotsTrackRow");
+      container.innerHTML = "";
+
+      snapshot.slots.forEach((s, idx) => {
+        const col = document.createElement("div");
+        col.className = "slot-column";
+
+        // Pointers zone
+        const ptrsZone = document.createElement("div");
+        ptrsZone.className = "slot-pointers-zone";
+
+        s.pointers.forEach(p => {
+          const pin = document.createElement("span");
+          pin.className = "pointer-pin";
+          if (p === "low") { pin.className += " pointer-low"; pin.textContent = "LOW"; }
+          else if (p === "mid") { pin.className += " pointer-mid"; pin.textContent = "MID"; }
+          else if (p === "high") { pin.className += " pointer-high"; pin.textContent = "HIGH"; }
+          else if (p === "pivot") { pin.className += " pointer-pivot"; pin.textContent = "PIVOT"; }
+          else if (p === "i") { pin.className += " pointer-i"; pin.textContent = "i →"; }
+          else if (p === "j") { pin.className += " pointer-j"; pin.textContent = "← j"; }
+          else if (p === "locked") { pin.className += " pointer-pin"; pin.style.background = "var(--accent-green)"; pin.style.color = "#fff"; pin.textContent = "✓ LOCK"; }
+          else if (p.startsWith("slot")) { pin.className += " pointer-pin"; pin.style.background = "var(--accent-green)"; pin.style.color = "#fff"; pin.textContent = "SLOT"; }
+          else if (p === "wait") { pin.className += " pointer-pin"; pin.style.background = "var(--accent-orange)"; pin.style.color = "#fff"; pin.textContent = "WAIT"; }
+          ptrsZone.appendChild(pin);
+        });
+
+        // Slot box
+        const box = document.createElement("div");
+        box.className = `slot-box ${s.isWindow ? 'is-in-window' : ''} ${s.isPivot ? 'is-pivot' : ''} ${s.isLocked ? 'is-locked-sorted' : ''} ${s.isScanning ? 'is-comparing' : ''}`;
+        box.innerHTML = `
+          <span class="slot-index">[${idx}]</span>
+          <span class="slot-id">${s.id}</span>
+          <span class="slot-income">${s.income}</span>
+        `;
+
+        col.appendChild(ptrsZone);
+        col.appendChild(box);
+        container.appendChild(col);
+      });
+    }
+
+    function renderApplicantCards(snapshot) {
+      const container = document.getElementById("applicantCardsRow");
+      container.innerHTML = "";
+
+      snapshot.array.forEach((appId, idx) => {
+        const a = applicants[appId];
+        const isPivot = (snapshot.activePivotId === a.id);
+        const isI = (snapshot.activeIId === a.id);
+        const isJ = (snapshot.activeJId === a.id);
+        const isLess = snapshot.lessIds && snapshot.lessIds.includes(a.id);
+        const isGreater = snapshot.greaterIds && snapshot.greaterIds.includes(a.id);
+
+        const card = document.createElement("div");
+        card.className = `applicant-card ${isPivot ? 'is-active-pivot' : ''} ${isI ? 'is-active-i' : ''} ${isJ ? 'is-active-j' : ''} ${isLess ? 'is-less-pivot' : ''} ${isGreater ? 'is-greater-pivot' : ''}`;
+
+        let slotStatusBadge = `Rank #${idx + 1}`;
+        if (snapshot.step === 14) {
+          if (idx < 5) {
+            slotStatusBadge = `<span class="badge badge-green" style="font-size: 8px;">SLOT 0${idx + 1}</span>`;
+          } else {
+            slotStatusBadge = `<span class="badge badge-orange" style="font-size: 8px;">WAITLIST</span>`;
+          }
+        }
+
+        card.innerHTML = `
+          <div class="card-top-row">
+            <span class="card-id">${a.id}</span>
+            <div class="card-pos-badge">${slotStatusBadge}</div>
+          </div>
+          <div class="card-name" title="${a.name}">${a.name}</div>
+          <div class="card-income-box">
+            <span class="income-val">${a.incomeFmt}</span>
+            <span class="income-lbl">Household Income</span>
+          </div>
+          <div class="card-footer">
+            <span>GWA: ${a.gwa.toFixed(2)}</span>
+            <span>Order #${a.arrivalOrder}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById("quickComparisonDetail").innerHTML = snapshot.comparisonText;
+      document.getElementById("sortProgressPct").textContent = `${snapshot.progressPct}% Sorted`;
+      const arrayStatusEl = document.getElementById("arrayStatusBadge");
+      if (arrayStatusEl) {
+        arrayStatusEl.textContent = snapshot.badge;
+        arrayStatusEl.className = `badge badge-${snapshot.badgeColor || 'blue'}`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CONTROLS & TIMELINE NAVIGATION
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (autoplayTimer) {
+        pauseAutoplay("Paused");
+      } else {
+        if (currentStepIndex >= timelineSnapshots.length - 1) {
+          currentStepIndex = 0;
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      if (autoplayTimer) clearInterval(autoplayTimer);
+      updatePlayIcons(true);
+      document.getElementById("timelineStatusBadge").textContent = "Playing...";
+
+      autoplayTimer = setInterval(() => {
+        if (currentStepIndex < timelineSnapshots.length - 1) {
+          applyTimelineStep(currentStepIndex + 1, false);
+        } else {
+          pauseAutoplay("Completed (Auto-Stopped)");
+        }
+      }, stepSpeedMs);
+    }
+
+    function pauseAutoplay(statusText = "Paused") {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+      updatePlayIcons(false);
+      document.getElementById("timelineStatusBadge").textContent = statusText;
+    }
+
+    function updatePlayIcons(isPlaying) {
+      const btnHeader = document.getElementById("btnPlayPause");
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+
+      if (isPlaying) {
+        if (btnHeader) {
+          btnHeader.textContent = "Pause";
+          btnHeader.classList.add("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+      } else {
+        if (btnHeader) {
+          btnHeader.textContent = "Play";
+          btnHeader.classList.remove("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+      }
+    }
+
+    function stepTimeline(direction) {
+      pauseAutoplay("Paused");
+      const target = currentStepIndex + direction;
+      applyTimelineStep(target, true);
+    }
+
+    function seekTimelineByClick(event) {
+      pauseAutoplay("Paused");
+      const container = document.getElementById("timelineTrackContainer");
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      const totalSteps = timelineSnapshots.length - 1;
+      const targetStep = Math.round(ratio * totalSteps);
+      applyTimelineStep(targetStep, true);
+    }
+
+    function focusMedianPivot() {
+      pauseAutoplay("Pivot Focus");
+      applyTimelineStep(1, true);
+      const pivotCard = document.querySelector(".applicant-card.is-active-pivot");
+      if (pivotCard) {
+        pivotCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
+
+    function resetSimulation() {
+      pauseAutoplay("Paused");
+      applyTimelineStep(0, true);
+    }
+
+    function changeSpeed(val) {
+      const baseMs = 2400;
+      stepSpeedMs = baseMs / parseFloat(val);
+      if (autoplayTimer) {
+        startAutoplay();
+      }
+    }
+
+    // Launch simulation
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>

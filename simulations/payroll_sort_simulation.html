@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Sort for Alphabetical Payroll Ordering (COA Compliance)</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1D1D1F;
+      --text-sub: #6E6E73;
+      --text-muted: #86868B;
+      --accent-blue: #0071E3;
+      --accent-blue-bg: #E8F2FD;
+      --accent-green: #34C759;
+      --accent-green-bg: #EBF9EE;
+      --accent-purple: #5856D6;
+      --accent-purple-bg: #F0EFFC;
+      --accent-orange: #FF9500;
+      --accent-orange-bg: #FFF5E5;
+      --accent-teal: #30B0C7;
+      --accent-teal-bg: #E5F7FA;
+      --accent-red: #FF3B30;
+      --accent-red-bg: #FEECEB;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 1260px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Minimalist Top Header & Controls */
+    header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-main);
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      background: #F2F2F7;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-primary:hover {
+      background: #0077ED;
+    }
+
+    .btn-active-pause {
+      background: var(--accent-orange) !important;
+      border-color: var(--accent-orange) !important;
+      color: #FFFFFF !important;
+    }
+
+    .btn-pivot-focus {
+      background: var(--accent-purple-bg);
+      color: var(--accent-purple);
+      border-color: rgba(88, 86, 214, 0.25);
+    }
+
+    .btn-pivot-focus:hover {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    .speed-select {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Full-Width Simulation Stage */
+    .simulation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .card-meta strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .badge-blue { background: var(--accent-blue-bg); color: var(--accent-blue); }
+    .badge-green { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
+    .badge-orange { background: var(--accent-orange-bg); color: var(--accent-orange); }
+    .badge-teal { background: var(--accent-teal-bg); color: var(--accent-teal); }
+    .badge-red { background: var(--accent-red-bg); color: var(--accent-red); }
+
+    /* ------------------------------------------------------------- */
+    /* 1. IN-PLACE PARTITIONING & PIVOT TRACKER CARD */
+    /* ------------------------------------------------------------- */
+    .partition-card {
+      width: 100%;
+    }
+
+    .partition-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Median-of-Three Spotlight Pill */
+    .median-trio-box {
+      background: rgba(88, 86, 214, 0.05);
+      border: 1.5px solid rgba(88, 86, 214, 0.15);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .median-trio-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .median-trio-chips {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .trio-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .trio-chip.selected-pivot {
+      background: var(--accent-purple-bg);
+      border-color: var(--accent-purple);
+      color: var(--accent-purple);
+      box-shadow: 0 0 0 2px rgba(88, 86, 214, 0.2);
+    }
+
+    /* Pointers & Array Track Visualizer */
+    .partition-track-container {
+      background: rgba(242, 242, 247, 0.5);
+      border: 1.5px dashed rgba(0, 0, 0, 0.12);
+      border-radius: 16px;
+      padding: 24px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .track-slots-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .slot-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    /* Pointer Pin Indicators above each slot */
+    .slot-pointers-zone {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .pointer-pin {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .pointer-low { background: var(--accent-blue); color: #fff; }
+    .pointer-mid { background: var(--accent-teal); color: #fff; }
+    .pointer-high { background: var(--accent-orange); color: #fff; }
+    .pointer-pivot { background: var(--accent-purple); color: #fff; animation: pulseGlow 1.5s infinite; }
+    .pointer-i { background: #5856D6; color: #fff; }
+    .pointer-j { background: #FF9500; color: #fff; }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(88, 86, 214, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(88, 86, 214, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(88, 86, 214, 0); }
+    }
+
+    /* In-Place Slot Box */
+    .slot-box {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .slot-box.is-in-window {
+      border-color: rgba(0, 113, 227, 0.4);
+      background: #F9FBFF;
+    }
+
+    .slot-box.is-pivot {
+      border-color: var(--accent-purple) !important;
+      background: var(--accent-purple-bg) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(88, 86, 214, 0.18);
+    }
+
+    .slot-box.is-comparing {
+      border-color: var(--accent-orange) !important;
+      background: var(--accent-orange-bg) !important;
+      transform: scale(1.03);
+    }
+
+    .slot-box.is-locked-sorted {
+      border-color: var(--accent-green) !important;
+      background: var(--accent-green-bg) !important;
+    }
+
+    .slot-index {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .slot-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .slot-surname {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* 2. ACTIVE SCHOLAR MEMORY BUFFER */
+    /* ------------------------------------------------------------- */
+    .array-stage-card {
+      width: 100%;
+    }
+
+    .array-track-buffer {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .array-cards-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (max-width: 1150px) {
+      .track-slots-row, .array-cards-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .scholar-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s var(--spring);
+      position: relative;
+    }
+
+    .scholar-card.is-active-pivot {
+      border-color: var(--accent-purple) !important;
+      background: #FDFBFF !important;
+      box-shadow: 0 0 0 3px rgba(88, 86, 214, 0.22) !important;
+      transform: translateY(-2px);
+    }
+
+    .scholar-card.is-active-i {
+      border-color: var(--accent-blue) !important;
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.28) !important;
+      transform: translateY(-2px);
+    }
+
+    .scholar-card.is-active-j {
+      border-color: var(--accent-orange) !important;
+      box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.28) !important;
+      transform: translateY(-2px);
+    }
+
+    .scholar-card.is-less-pivot {
+      border-left: 3.5px solid var(--accent-green);
+    }
+
+    .scholar-card.is-greater-pivot {
+      border-left: 3.5px solid var(--accent-orange);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-pos-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+    }
+
+    .card-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-income-box {
+      background: rgba(52, 199, 89, 0.08);
+      border: 1px solid rgba(52, 199, 89, 0.2);
+      border-radius: 8px;
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .income-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1B7A32;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .income-lbl {
+      font-size: 9px;
+      font-weight: 600;
+      color: #3B874F;
+      text-transform: uppercase;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--card-border);
+      padding-top: 5px;
+      margin-top: 2px;
+    }
+
+    /* Printable COA Payroll Sheet Modal / Inline Preview */
+    .coa-sheet-preview {
+      margin-top: 10px;
+      background: #1C1C1E;
+      color: #F2F2F7;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.55;
+      overflow-x: auto;
+      border: 1px solid #2C2C2E;
+      display: none;
+    }
+
+    .coa-sheet-preview.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================= */
+    /* SPOTIFY & YOUTUBE-STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) */
+    /* ============================================================= */
+    .player-bar-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 20px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 4px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      appearance: none;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s var(--spring);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .player-btn:hover {
+      background: #F2F2F7;
+      transform: scale(1.05);
+    }
+
+    .player-btn:active {
+      transform: scale(0.96);
+    }
+
+    .player-btn-main {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-blue);
+      color: #FFFFFF;
+      border-color: var(--accent-blue);
+    }
+
+    .player-btn-main:hover {
+      background: #0077ED;
+      transform: scale(1.06);
+    }
+
+    .timeline-step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      min-width: 68px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-step-sep {
+      color: var(--text-muted);
+      margin: 0 2px;
+    }
+
+    .timeline-progress-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .timeline-track-container {
+      position: relative;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .timeline-track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-track-bg {
+      height: 7px;
+    }
+
+    .timeline-track-fill {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 5px;
+      background: var(--accent-blue);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.2s var(--spring);
+    }
+
+    .timeline-track-container:hover .timeline-track-fill {
+      height: 7px;
+    }
+
+    .timeline-scrubber-thumb {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid var(--accent-blue);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: left 0.2s var(--spring), transform 0.15s ease;
+    }
+
+    .timeline-track-container:hover .timeline-scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    .timeline-chapters-pips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .chapter-pip {
+      width: 4px;
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .chapter-pip.active-passed {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .timeline-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      gap: 12px;
+    }
+
+    .timeline-chapter-name {
+      color: var(--text-main);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-time-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-main);
+      transition: all 0.2s var(--spring);
+      flex-shrink: 0;
+    }
+
+    .btn-replay-pill:hover {
+      background: #F2F2F7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="header-left">
+        <h1>Quick Sort for Alphabetical Payroll Ordering (COA Compliance)</h1>
+        <div class="header-sub">In-place median-of-three lexicographical partitioning with O(n log n) efficiency, minimal O(log n) stack space, and official COA payroll attendance sheet generation</div>
+      </div>
+
+      <div class="controls-group">
+        <button id="btnPlayPause" class="btn btn-primary" onclick="toggleAutoplay()">Play</button>
+        <button class="btn" onclick="stepTimeline(1)">Step Forward</button>
+        <button class="btn btn-pivot-focus" onclick="focusMedianPivot()">Focus Pivot</button>
+        <button class="btn" onclick="resetSimulation()">Reset</button>
+        <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+          <option value="1">1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2.0x</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- MAIN SIMULATION STAGE (FULL WIDTH) -->
+    <div class="simulation-stage">
+        
+      <!-- 1. IN-PLACE PARTITIONING & PIVOT TRACKER CARD -->
+      <div class="card partition-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">1. Lexicographical Partitioning &amp; Pivot Tracker</div>
+            <span class="badge badge-purple" id="partitionRangeBadge">Global Range [0..7]</span>
+          </div>
+          <div class="card-meta">
+            <div>Standard: <strong>COA Circular 2021-014</strong></div>
+            <div>Order: <strong>A &rarr; Z (Surname Lexicographical)</strong></div>
+            <div>Aux Space: <strong>O(log n) Stack</strong></div>
+          </div>
+        </div>
+
+        <div class="partition-body">
+          <!-- Median of Three Trio Inspector -->
+          <div class="median-trio-box" id="medianTrioBox">
+            <div class="median-trio-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+              Median-of-Three Lexicographical Selection
+            </div>
+            <div class="median-trio-chips">
+              <div class="trio-chip" id="chipLow"><span id="lblLow">Low [0]:</span> <span id="valLow">Lopez</span></div>
+              <div class="trio-chip" id="chipMid"><span id="lblMid">Mid [3]:</span> <span id="valMid">Navarro</span></div>
+              <div class="trio-chip" id="chipHigh"><span id="lblHigh">High [7]:</span> <span id="valHigh">Morales</span></div>
+              <div class="trio-chip selected-pivot" id="chipPivot"><span id="lblPivot">Selected Pivot:</span> <strong id="valPivot">Morales</strong></div>
+              <div class="trio-chip" id="chipWall" style="border-color: rgba(88, 86, 214, 0.35); background: rgba(88, 86, 214, 0.08); color: var(--accent-purple); font-weight: 700;"><span id="lblWall">Pointers:</span> <span id="valWall">i = 0 (&rarr;) &middot; j = 6 (&larr;)</span></div>
+            </div>
+          </div>
+
+          <!-- 8 In-Place Slots with Pin Pointers -->
+          <div class="partition-track-container">
+            <div class="track-slots-row" id="slotsTrackRow">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ACTIVE SCHOLAR MEMORY BUFFER -->
+      <div class="card array-stage-card">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-title">2. Approved Scholars Attendance Registry Buffer</div>
+            <span class="badge badge-purple" id="arrayStatusBadge">Initial Approved Sequence</span>
+          </div>
+          <div class="card-meta">
+            <div>Beneficiaries: <strong>8 Approved Scholars</strong></div>
+            <div>Stipend / Scholar: <strong>₱3,000.00</strong></div>
+            <div>Total Grant: <strong>₱24,000.00</strong></div>
+          </div>
+        </div>
+
+        <div class="array-track-buffer">
+          <div class="array-cards-row" id="applicantCardsRow">
+            <!-- Rendered dynamically -->
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+            <span id="quickComparisonDetail">Comparison: Initial state awaiting median-of-three lexicographical partitioning.</span>
+            <span id="sortProgressPct">0% Sorted</span>
+          </div>
+
+          <!-- Printable COA Attendance Voucher Preview (Shown at completion) -->
+          <div class="coa-sheet-preview" id="coaSheetPreview">
+            <!-- Rendered dynamically upon completion -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SPOTIFY & YOUTUBE STYLE TIMELINE PLAYER BAR (BOTTOM OF CONTAINER) -->
+    <div class="player-bar-card">
+      <div class="player-controls">
+        <button class="player-btn" id="btnTimelinePrev" onclick="stepTimeline(-1)" title="Previous Step (Left Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="player-btn player-btn-main" id="btnTimelinePlay" onclick="toggleAutoplay()" title="Play / Pause (Spacebar)">
+          <svg id="timelinePlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="timelinePauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="player-btn" id="btnTimelineNext" onclick="stepTimeline(1)" title="Next Step (Right Arrow)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="timeline-step-label">
+          <span id="timelineCurrentStep">Step 0</span>
+          <span class="timeline-step-sep">/</span>
+          <span id="timelineTotalSteps">16</span>
+        </div>
+      </div>
+
+      <div class="timeline-progress-wrapper">
+        <div class="timeline-track-container" id="timelineTrackContainer" onclick="seekTimelineByClick(event)">
+          <div class="timeline-track-bg"></div>
+          <div class="timeline-track-fill" id="timelineTrackFill"></div>
+          <div class="timeline-scrubber-thumb" id="timelineThumb"></div>
+          <div class="timeline-chapters-pips" id="timelineChaptersPips"></div>
+        </div>
+        <div class="timeline-info-row">
+          <div class="timeline-chapter-name" id="timelineChapterName">
+            <span class="badge badge-blue" id="timelineChapterBadge">Step 0</span>
+            <span id="timelineChapterTitle">Initial Candidate Pool &mdash; Approved Intake Sequence</span>
+          </div>
+          <span class="timeline-time-badge" id="timelineStatusBadge">Paused</span>
+        </div>
+      </div>
+
+      <button class="btn-replay-pill" onclick="resetSimulation()" title="Reset to Beginning">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Replay
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // SCHOLAR ROSTER DATA (8 APPROVED SCHOLARS)
+    // -------------------------------------------------------------
+    const scholars = {
+      "SCH-001": { id: "SCH-001", appId: "APP-004", surname: "Lopez", firstName: "Jerome Patrick", fullName: "Lopez, Jerome Patrick", purok: "Purok 2 Pag-asa", school: "Univ of Caloocan", stipend: "₱3,000.00" },
+      "SCH-002": { id: "SCH-002", appId: "APP-006", surname: "Castro", firstName: "Patricia Anne", fullName: "Castro, Patricia Anne", purok: "Purok 5 Kawayan", school: "Pamantasan Lungsod", stipend: "₱3,000.00" },
+      "SCH-003": { id: "SCH-003", appId: "APP-001", surname: "Del Rosario", firstName: "Hannah Sophia", fullName: "Del Rosario, Hannah Sophia", purok: "Purok 3 Riverside", school: "Barangay National HS", stipend: "₱3,000.00" },
+      "SCH-004": { id: "SCH-004", appId: "APP-008", surname: "Navarro", firstName: "Carl Matthew", fullName: "Navarro, Carl Matthew", purok: "Purok 5 Kawayan", school: "Barangay National HS", stipend: "₱3,000.00" },
+      "SCH-005": { id: "SCH-005", appId: "APP-002", surname: "Mercado", firstName: "Danilo Jose", fullName: "Mercado, Danilo Jose", purok: "Purok 1 Maligaya", school: "Rizal Tech Univ", stipend: "₱3,000.00" },
+      "SCH-006": { id: "SCH-006", appId: "APP-005", surname: "Fernandez", firstName: "Bea Camille", fullName: "Fernandez, Bea Camille", purok: "Purok 1 Maligaya", school: "City College", stipend: "₱3,000.00" },
+      "SCH-007": { id: "SCH-007", appId: "APP-007", surname: "Soriano", firstName: "Gabriel Luis", fullName: "Soriano, Gabriel Luis", purok: "Purok 3 Riverside", school: "Polytechnic Univ (PUP)", stipend: "₱3,000.00" },
+      "SCH-008": { id: "SCH-008", appId: "APP-003", surname: "Morales", firstName: "Katrina Denise", fullName: "Morales, Katrina Denise", purok: "Purok 6 Ilaya", school: "City College", stipend: "₱3,000.00" }
+    };
+
+    // -------------------------------------------------------------
+    // TIMELINE SNAPSHOTS (17 GRANULAR STEPS: 0 to 16 — ZERO SKIPPING)
+    // -------------------------------------------------------------
+    const timelineSnapshots = [
+      {
+        step: 0,
+        title: "Initial Candidate Intake &mdash; Unsorted Arrival Order (Surnames)",
+        badge: "Initial Roster",
+        badgeColor: "purple",
+        rangeBadge: "Global Array [0..7]",
+        comparisonText: "8 verified approved scholars awaiting COA alphabetical ordering: Lopez (L), Castro (C), Del Rosario (D), Navarro (N), Mercado (M), Fernandez (F), Soriano (S), Morales (M).",
+        progressPct: 0,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Awaiting Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Pending Median", wallInfo: "i (start), j (end)",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: ["low"] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: ["mid"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: ["high"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007", "SCH-008"],
+        activePivotId: null, activeIId: null, activeJId: null, lessIds: [], greaterIds: []
+      },
+      {
+        step: 1,
+        title: "Median-of-Three Selection &amp; Initial Pointer Setup (Pivot: Morales)",
+        badge: "Pivot Chosen",
+        badgeColor: "purple",
+        rangeBadge: "Pivot: Morales at [7]",
+        comparisonText: "Median of low [0]='Lopez' (L), mid [3]='Navarro' (N), and high [7]='Morales' (M) is <strong>'Morales'</strong>. Positioned at slot [7] as Pivot. Pointer <code>i</code> at [0] &rarr;, <code>j</code> at [6] &larr;.",
+        progressPct: 8,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i = 0 (→) · j = 6 (←)",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-001", activeJId: "SCH-007", lessIds: [], greaterIds: []
+      },
+      {
+        step: 2,
+        title: "Advance i Rightward: 'Lopez', 'Castro', 'Del Rosario' &le; Pivot &rarr; STOPS at Navarro [3]",
+        badge: "i STOPS at [3]",
+        badgeColor: "orange",
+        rangeBadge: "i halted at [3]",
+        comparisonText: "Pointer <code>i</code> scans right: <code>'Lopez'</code> (L < M), <code>'Castro'</code> (C < M), <code>'Del Rosario'</code> (D < M) valid. <code>'Navarro'.compareToIgnoreCase('Morales') > 0</code> ('N' > 'M') &rarr; <strong>i STOPS at [3]</strong>!",
+        progressPct: 16,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i at [3] · j at [6]",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: "SCH-007", lessIds: ["SCH-001", "SCH-002", "SCH-003"], greaterIds: ["SCH-004"]
+      },
+      {
+        step: 3,
+        title: "Advance j Leftward: 'Soriano' &gt; Pivot &rarr; STOPS at Fernandez [5] ('F' &lt; 'M')",
+        badge: "j STOPS at [5]",
+        badgeColor: "orange",
+        rangeBadge: "Both Pointers Halted",
+        comparisonText: "Pointer <code>j</code> scans left: [6] <code>'Soriano'</code> ('S' > 'M') valid on right. [5] <code>'Fernandez'.compareToIgnoreCase('Morales') < 0</code> ('F' < 'M') &rarr; <strong>j STOPS at [5]</strong>!",
+        progressPct: 24,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i at [3], j at [5] (i < j)",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: "SCH-006", lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006"], greaterIds: ["SCH-004", "SCH-007"]
+      },
+      {
+        step: 4,
+        title: "In-Place SWAP: Exchange i (Slot [3], Navarro) &harr; j (Slot [5], Fernandez)",
+        badge: "In-Place Swap",
+        badgeColor: "green",
+        rangeBadge: "Swapped: Slot [3] & [5]",
+        comparisonText: "Both pointers halted with <code>i < j (3 < 5)</code>. <strong>swap(list, 3, 5)</strong> exchanges Navarro and Fernandez in-place. Fernandez moves to left half; Navarro shifts to right half.",
+        progressPct: 32,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Fernandez", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "Swapped [3] & [5]",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005", "SCH-004", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-006", activeJId: "SCH-004", lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006"], greaterIds: ["SCH-004", "SCH-007"]
+      },
+      {
+        step: 5,
+        title: "Resume i Rightward: 'Mercado' vs 'Morales' ('e' &lt; 'o') &rarr; STOPS at Navarro [5]",
+        badge: "i STOPS at [5]",
+        badgeColor: "orange",
+        rangeBadge: "i halted at [5]",
+        comparisonText: "Character inspection: <code>'Mercado'.compareToIgnoreCase('Morales') < 0</code> (both start with 'M', but 'e' < 'o'). <code>i</code> advances past [4] to [5] (<code>'Navarro'</code> > 'Morales') and <strong>STOPS at [5]</strong>!",
+        progressPct: 40,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Fernandez", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i halted at [5]",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005", "SCH-004", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: null, lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005"], greaterIds: ["SCH-004"]
+      },
+      {
+        step: 6,
+        title: "Resume j Leftward: Pointers Cross at i = 5, j = 4",
+        badge: "Pointers Crossed!",
+        badgeColor: "purple",
+        rangeBadge: "Crossing: i=5, j=4",
+        comparisonText: "From [5], <code>j</code> moves left to [4] (<code>'Mercado'</code> &le; 'Morales') &rarr; <strong>POINTERS CROSSED: i=5 &gt; j=4</strong>! Partition scan terminates.",
+        progressPct: 48,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Fernandez", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "Crossed: i = 5, j = 4",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005", "SCH-004", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: "SCH-005", lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005"], greaterIds: ["SCH-004", "SCH-007"]
+      },
+      {
+        step: 7,
+        title: "Place Pivot at Slot [5]: swap(list, 5, 7) &mdash; 'Morales' Locked Sorted",
+        badge: "Pivot #1 Locked",
+        badgeColor: "green",
+        rangeBadge: "Slot [5] Locked Sorted",
+        comparisonText: "<code>swap(list, 5, 7)</code> places Pivot <strong>'Morales'</strong> at slot [5]. All scholars left [0..4] are lexicographically &le; Morales; all right [6..7] are &ge; Morales.",
+        progressPct: 56,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Locked Pivot:", lblWall: "Slot [5]:",
+        lowVal: "Lopez", midVal: "Fernandez", highVal: "Soriano", pivotVal: "Morales (SCH-008)", wallInfo: "Pivot Locked at Slot [5]",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: true,  isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005", "SCH-008", "SCH-007", "SCH-004"],
+        activePivotId: "SCH-008", activeIId: null, activeJId: null, lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005"], greaterIds: ["SCH-007", "SCH-004"]
+      },
+      {
+        step: 8,
+        title: "Right Subarray [6..7]: Compare 'Soriano' vs 'Navarro' ('S' &gt; 'N')",
+        badge: "Right Subarray [6..7]",
+        badgeColor: "orange",
+        rangeBadge: "Subarray [6..7] Active",
+        comparisonText: "Right partition [6..7]: <code>'Soriano'.compareToIgnoreCase('Navarro') > 0</code> ('S' > 'N'). Out of alphabetical order &rarr; in-place exchange required!",
+        progressPct: 62,
+        lblLow: "Low [6]:", lblMid: "Pivot [7]:", lblHigh: "High [7]:", lblPivot: "Subarray [6..7]:", lblWall: "Pointers:",
+        lowVal: "Soriano", midVal: "Navarro", highVal: "Navarro", pivotVal: "Navarro (SCH-004)", wallInfo: "i = 6 (→) · j = 6",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true,  isPivot: true,  isLocked: false, isScanning: true,  pointers: ["j", "pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005", "SCH-008", "SCH-007", "SCH-004"],
+        activePivotId: "SCH-004", activeIId: "SCH-007", activeJId: "SCH-004", lessIds: [], greaterIds: ["SCH-007"]
+      },
+      {
+        step: 9,
+        title: "In-Place SWAP: swap(list, 6, 7) &mdash; Slots [5..7] Locked Sorted",
+        badge: "Slots [5..7] Locked",
+        badgeColor: "green",
+        rangeBadge: "Slots [5..7] Locked",
+        comparisonText: "<code>swap(list, 6, 7)</code> executed: <strong>Navarro</strong> at [6], <strong>Soriano</strong> at [7]. Slots [5..7] permanently locked in alphabetical order!",
+        progressPct: 68,
+        lblLow: "Low [5]:", lblMid: "Slot [6]:", lblHigh: "High [7]:", lblPivot: "Subarray [5..7]:", lblWall: "State:",
+        lowVal: "Morales", midVal: "Navarro", highVal: "Soriano", pivotVal: "Slots [5..7] Locked", wallInfo: "Slots [5..7] Locked",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: false, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: null, activeIId: null, activeJId: null, lessIds: [], greaterIds: []
+      },
+      {
+        step: 10,
+        title: "Left Subarray [0..4]: Median Pivot Selected (Pivot: Lopez) &amp; Pointers Set",
+        badge: "Left Subarray Active",
+        badgeColor: "purple",
+        rangeBadge: "Subarray [0..4] Active",
+        comparisonText: "Median of low [0]='Lopez' (L), mid [2]='Del Rosario' (D), and high [4]='Mercado' (M) is <strong>'Lopez'</strong>. Swapped to [4] as pivot. Pointer <code>i</code> at [0], <code>j</code> at [3].",
+        progressPct: 74,
+        lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Mercado", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "i = 0 (→) · j = 3 (←)",
+        slots: [
+          { id: "SCH-005", surname: "Mercado", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-002", surname: "Castro", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-001", surname: "Lopez", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-005", "SCH-002", "SCH-003", "SCH-006", "SCH-001", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: "SCH-001", activeIId: "SCH-005", activeJId: "SCH-006", lessIds: [], greaterIds: ["SCH-005"]
+      },
+      {
+        step: 11,
+        title: "Advance i &amp; j: i STOPS at Mercado [0] ('M' &gt; 'L'), j STOPS at Fernandez [3] ('F' &lt; 'L')",
+        badge: "Both Pointers Halted",
+        badgeColor: "orange",
+        rangeBadge: "i at [0], j at [3]",
+        comparisonText: "Slot [0] <code>'Mercado'</code> > 'Lopez' (M > L) &rarr; <code>i</code> STOPS at [0]. Slot [3] <code>'Fernandez'</code> < 'Lopez' (F < L) &rarr; <code>j</code> STOPS at [3]!",
+        progressPct: 80,
+        lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Mercado", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "i at [0], j at [3] (i < j)",
+        slots: [
+          { id: "SCH-005", surname: "Mercado", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-002", surname: "Castro", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-001", surname: "Lopez", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-005", "SCH-002", "SCH-003", "SCH-006", "SCH-001", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: "SCH-001", activeIId: "SCH-005", activeJId: "SCH-006", lessIds: ["SCH-006"], greaterIds: ["SCH-005"]
+      },
+      {
+        step: 12,
+        title: "In-Place SWAP: Exchange i (Slot [0], Mercado) &harr; j (Slot [3], Fernandez)",
+        badge: "In-Place Swap",
+        badgeColor: "green",
+        rangeBadge: "Swapped: Slot [0] & [3]",
+        comparisonText: "<code>swap(list, 0, 3)</code> brings Fernandez to left side (Slot [0]) and shifts Mercado to right side (Slot [3]). Ready for pivot convergence.",
+        progressPct: 85,
+        lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Fernandez", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "Swapped [0] & [3]",
+        slots: [
+          { id: "SCH-006", surname: "Fernandez", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-002", surname: "Castro", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-001", surname: "Lopez", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-006", "SCH-002", "SCH-003", "SCH-005", "SCH-001", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: "SCH-001", activeIId: "SCH-006", activeJId: "SCH-005", lessIds: ["SCH-006", "SCH-002", "SCH-003"], greaterIds: ["SCH-005"]
+      },
+      {
+        step: 13,
+        title: "Resume Scanning: Pointers Cross at i = 3, j = 2",
+        badge: "Pointers Crossed!",
+        badgeColor: "purple",
+        rangeBadge: "Crossing: i=3, j=2",
+        comparisonText: "<code>i</code> advances through [1] Castro & [2] Del Rosario to [3] Mercado ('M' > 'L'); <code>j</code> moves left to [2] ('D' < 'L') &rarr; <strong>POINTERS CROSSED: i=3 &gt; j=2</strong>!",
+        progressPct: 89,
+        lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Fernandez", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "Crossed: i = 3, j = 2",
+        slots: [
+          { id: "SCH-006", surname: "Fernandez", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true,  isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-001", surname: "Lopez", isWindow: true,  isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-006", "SCH-002", "SCH-003", "SCH-005", "SCH-001", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: "SCH-001", activeIId: "SCH-005", activeJId: "SCH-003", lessIds: ["SCH-006", "SCH-002", "SCH-003"], greaterIds: ["SCH-005"]
+      },
+      {
+        step: 14,
+        title: "Place Pivot at Slot [3]: swap(list, 3, 4) &mdash; 'Lopez' &amp; 'Mercado' Locked",
+        badge: "Pivot #2 Locked",
+        badgeColor: "green",
+        rangeBadge: "Slots [3..4] Locked",
+        comparisonText: "<code>swap(list, 3, 4)</code> locks Pivot <strong>Lopez</strong> at slot [3]. Single-element partition [4] (Mercado) trivially resolves. Slots [3..7] locked!",
+        progressPct: 93,
+        lblLow: "Low [0]:", lblMid: "Pivot [3]:", lblHigh: "High [4]:", lblPivot: "Locked Pivot:", lblWall: "State:",
+        lowVal: "Fernandez", midVal: "Lopez", highVal: "Mercado", pivotVal: "Lopez (SCH-001)", wallInfo: "Slots [3..7] Locked",
+        slots: [
+          { id: "SCH-006", surname: "Fernandez", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true,  isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-001", surname: "Lopez", isWindow: false, isPivot: true,  isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-006", "SCH-002", "SCH-003", "SCH-001", "SCH-005", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: "SCH-001", activeIId: null, activeJId: null, lessIds: ["SCH-006", "SCH-002", "SCH-003"], greaterIds: ["SCH-005"]
+      },
+      {
+        step: 15,
+        title: "Subarray [0..2] Base Case: 'Castro' &harr; 'Fernandez' &mdash; All 8 Slots Locked",
+        badge: "All Slots Locked",
+        badgeColor: "green",
+        rangeBadge: "All 8 Slots Locked",
+        comparisonText: "Subarray [0..2] partitioned around median Del Rosario: <code>swap(list, 0, 1)</code> places Castro at [0] &amp; Fernandez at [2]. All 8 slots strictly ordered A &rarr; Z!",
+        progressPct: 97,
+        lblLow: "Min [0]:", lblMid: "Pivot [3]:", lblHigh: "Max [7]:", lblPivot: "All 8 Sorted:", lblWall: "State:",
+        lowVal: "Castro", midVal: "Lopez", highVal: "Soriano", pivotVal: "All 8 Slots Locked", wallInfo: "All 8 Slots Locked",
+        slots: [
+          { id: "SCH-002", surname: "Castro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-001", surname: "Lopez", isWindow: false, isPivot: true,  isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true,  isScanning: false, pointers: ["locked"] }
+        ],
+        array: ["SCH-002", "SCH-003", "SCH-006", "SCH-001", "SCH-005", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: null, activeIId: null, activeJId: null, lessIds: [], greaterIds: []
+      },
+      {
+        step: 16,
+        title: "Official COA Alphabetical Payroll Attendance Sheet Finalized",
+        badge: "COA Payroll Ready",
+        badgeColor: "green",
+        rangeBadge: "COA Payroll Complete",
+        comparisonText: "Disbursement payroll finalized strictly A &rarr; Z by surname in compliance with COA Circular 2021-014. Printable attendance voucher generated below.",
+        progressPct: 100,
+        lblLow: "Payroll #01:", lblMid: "Payroll #04:", lblHigh: "Payroll #08:", lblPivot: "Total Grant:", lblWall: "Voucher Status:",
+        lowVal: "Castro (₱3k)", midVal: "Lopez (₱3k)", highVal: "Soriano (₱3k)", pivotVal: "₱24,000.00", wallInfo: "Print-Ready Roster",
+        slots: [
+          { id: "SCH-002", surname: "Castro", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot1"] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot2"] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot3"] },
+          { id: "SCH-001", surname: "Lopez", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot4"] },
+          { id: "SCH-005", surname: "Mercado", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot5"] },
+          { id: "SCH-008", surname: "Morales", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot6"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot7"] },
+          { id: "SCH-007", surname: "Soriano", isWindow: false, isPivot: false, isLocked: true, isScanning: false, pointers: ["slot8"] }
+        ],
+        array: ["SCH-002", "SCH-003", "SCH-006", "SCH-001", "SCH-005", "SCH-008", "SCH-004", "SCH-007"],
+        activePivotId: null, activeIId: null, activeJId: null, lessIds: [], greaterIds: []
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // PLAYBACK CONTROLLER & TIMELINE ENGINE
+    // -------------------------------------------------------------
+    let currentStepIndex = 0;
+    let autoplayTimer = null;
+    let stepSpeedMs = 2400;
+
+    function initSimulation() {
+      buildTimelinePips();
+      applyTimelineStep(0, false);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          toggleAutoplay();
+        } else if (e.code === "ArrowRight") {
+          e.preventDefault();
+          stepTimeline(1);
+        } else if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          stepTimeline(-1);
+        }
+      });
+    }
+
+    function buildTimelinePips() {
+      const pipsContainer = document.getElementById("timelineChaptersPips");
+      pipsContainer.innerHTML = "";
+      const total = timelineSnapshots.length - 1;
+      for (let i = 0; i <= total; i++) {
+        const pip = document.createElement("div");
+        pip.className = `chapter-pip ${i === 0 ? 'active-passed' : ''}`;
+        pip.id = `pip-${i}`;
+        pipsContainer.appendChild(pip);
+      }
+    }
+
+    function applyTimelineStep(index, isUserSeeking = false) {
+      if (index < 0) index = 0;
+      if (index >= timelineSnapshots.length) index = timelineSnapshots.length - 1;
+
+      currentStepIndex = index;
+      const snapshot = timelineSnapshots[currentStepIndex];
+
+      // Update Player Scrubber UI
+      const totalSteps = timelineSnapshots.length - 1;
+      const pct = (currentStepIndex / totalSteps) * 100;
+      document.getElementById("timelineTrackFill").style.width = `${pct}%`;
+      document.getElementById("timelineThumb").style.left = `${pct}%`;
+      document.getElementById("timelineCurrentStep").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineTotalSteps").textContent = `${totalSteps}`;
+      document.getElementById("timelineChapterBadge").textContent = `Step ${currentStepIndex}`;
+      document.getElementById("timelineChapterTitle").textContent = snapshot.title;
+
+      // Update Chapter Pips
+      for (let i = 0; i <= totalSteps; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        if (pip) {
+          if (i <= currentStepIndex) {
+            pip.classList.add("active-passed");
+          } else {
+            pip.classList.remove("active-passed");
+          }
+        }
+      }
+
+      // Render Partition Slots and Scholar Memory Buffer
+      renderPartitionSlots(snapshot);
+      renderScholarCards(snapshot);
+
+      // Render COA Attendance Sheet on Final Step
+      const coaPreview = document.getElementById("coaSheetPreview");
+      if (currentStepIndex === totalSteps) {
+        renderCoaPayrollPreview();
+        coaPreview.classList.add("visible");
+      } else {
+        coaPreview.classList.remove("visible");
+      }
+
+      // Auto-stop when reaching final step
+      if (currentStepIndex === totalSteps && autoplayTimer) {
+        pauseAutoplay("Completed (Auto-Stopped)");
+      }
+    }
+
+    function renderPartitionSlots(snapshot) {
+      if (document.getElementById("lblLow")) document.getElementById("lblLow").textContent = snapshot.lblLow || "Low [0]:";
+      if (document.getElementById("lblMid")) document.getElementById("lblMid").textContent = snapshot.lblMid || "Mid [3]:";
+      if (document.getElementById("lblHigh")) document.getElementById("lblHigh").textContent = snapshot.lblHigh || "High [7]:";
+      if (document.getElementById("lblPivot")) document.getElementById("lblPivot").textContent = snapshot.lblPivot || "Selected Pivot:";
+      if (document.getElementById("lblWall")) document.getElementById("lblWall").textContent = snapshot.lblWall || "Pointers:";
+
+      document.getElementById("valLow").textContent = snapshot.lowVal;
+      document.getElementById("valMid").textContent = snapshot.midVal;
+      document.getElementById("valHigh").textContent = snapshot.highVal;
+      document.getElementById("valPivot").textContent = snapshot.pivotVal;
+      if (document.getElementById("valWall")) {
+        document.getElementById("valWall").textContent = snapshot.wallInfo || "";
+      }
+      
+      const rangeBadgeEl = document.getElementById("partitionRangeBadge");
+      if (rangeBadgeEl) {
+        rangeBadgeEl.textContent = snapshot.rangeBadge;
+        rangeBadgeEl.className = `badge badge-${snapshot.badgeColor || 'purple'}`;
+      }
+
+      const container = document.getElementById("slotsTrackRow");
+      container.innerHTML = "";
+
+      snapshot.slots.forEach((s, idx) => {
+        const col = document.createElement("div");
+        col.className = "slot-column";
+
+        // Pointers zone
+        const ptrsZone = document.createElement("div");
+        ptrsZone.className = "slot-pointers-zone";
+
+        s.pointers.forEach(p => {
+          const pin = document.createElement("span");
+          pin.className = "pointer-pin";
+          if (p === "low") { pin.className += " pointer-low"; pin.textContent = "LOW"; }
+          else if (p === "mid") { pin.className += " pointer-mid"; pin.textContent = "MID"; }
+          else if (p === "high") { pin.className += " pointer-high"; pin.textContent = "HIGH"; }
+          else if (p === "pivot") { pin.className += " pointer-pivot"; pin.textContent = "PIVOT"; }
+          else if (p === "i") { pin.className += " pointer-i"; pin.textContent = "i →"; }
+          else if (p === "j") { pin.className += " pointer-j"; pin.textContent = "← j"; }
+          else if (p === "locked") { pin.className += " pointer-pin"; pin.style.background = "var(--accent-green)"; pin.style.color = "#fff"; pin.textContent = "✓ LOCK"; }
+          else if (p.startsWith("slot")) {
+            const num = p.replace("slot", "0");
+            pin.className += " pointer-pin";
+            pin.style.background = "var(--accent-green)";
+            pin.style.color = "#fff";
+            pin.textContent = `COA #${num.slice(-2)}`;
+          }
+          ptrsZone.appendChild(pin);
+        });
+
+        // Slot box
+        const box = document.createElement("div");
+        box.className = `slot-box ${s.isWindow ? 'is-in-window' : ''} ${s.isPivot ? 'is-pivot' : ''} ${s.isLocked ? 'is-locked-sorted' : ''} ${s.isScanning ? 'is-comparing' : ''}`;
+        box.innerHTML = `
+          <span class="slot-index">[${idx}]</span>
+          <span class="slot-id">${s.id}</span>
+          <span class="slot-surname">${s.surname}</span>
+        `;
+
+        col.appendChild(ptrsZone);
+        col.appendChild(box);
+        container.appendChild(col);
+      });
+    }
+
+    function renderScholarCards(snapshot) {
+      const container = document.getElementById("applicantCardsRow");
+      container.innerHTML = "";
+
+      snapshot.array.forEach((schId, idx) => {
+        const s = scholars[schId];
+        const isPivot = (snapshot.activePivotId === s.id);
+        const isI = (snapshot.activeIId === s.id);
+        const isJ = (snapshot.activeJId === s.id);
+        const isLess = snapshot.lessIds && snapshot.lessIds.includes(s.id);
+        const isGreater = snapshot.greaterIds && snapshot.greaterIds.includes(s.id);
+
+        const card = document.createElement("div");
+        card.className = `scholar-card ${isPivot ? 'is-active-pivot' : ''} ${isI ? 'is-active-i' : ''} ${isJ ? 'is-active-j' : ''} ${isLess ? 'is-less-pivot' : ''} ${isGreater ? 'is-greater-pivot' : ''}`;
+
+        let slotStatusBadge = `Rank #${idx + 1}`;
+        if (snapshot.step === 16) {
+          slotStatusBadge = `<span class="badge badge-green" style="font-size: 8px;">PAYROLL #0${idx + 1}</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="card-top-row">
+            <span class="card-id">${s.id}</span>
+            <div class="card-pos-badge">${slotStatusBadge}</div>
+          </div>
+          <div class="card-name" title="${s.fullName}"><strong>${s.surname}</strong>, ${s.firstName.split(' ')[0]}</div>
+          <div class="card-income-box">
+            <span class="income-val">${s.stipend}</span>
+            <span class="income-lbl">COA Stipend Grant</span>
+          </div>
+          <div class="card-footer">
+            <span>${s.purok.replace('Purok ', 'P-')}</span>
+            <span style="font-weight: 700; color: #248a3d;">Ready</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById("quickComparisonDetail").innerHTML = snapshot.comparisonText;
+      document.getElementById("sortProgressPct").textContent = `${snapshot.progressPct}% Sorted`;
+      
+      const arrayStatusEl = document.getElementById("arrayStatusBadge");
+      if (arrayStatusEl) {
+        arrayStatusEl.textContent = snapshot.badge;
+        arrayStatusEl.className = `badge badge-${snapshot.badgeColor || 'blue'}`;
+      }
+    }
+
+    function renderCoaPayrollPreview() {
+      const coaPreview = document.getElementById("coaSheetPreview");
+      const lines = [
+        "==========================================================================================================",
+        "                          REPUBLIC OF THE PHILIPPINES &mdash; BARANGAY COUNCIL",
+        "                         SANGGUNIANG KABATAAN (SK) SCHOLARSHIP PROGRAM",
+        "                      OFFICIAL COA PAYOUT &amp; DISBURSEMENT ATTENDANCE SHEET",
+        "==========================================================================================================",
+        "Disbursement Period : 1st Semester AY 2026-2027",
+        "Generated By        : Barangay Scholarship Management System (Java Swing Offline Desk)",
+        "Sorting Standard    : Commission on Audit (COA) Circular 2021-014 (Surname Lexicographical A &rarr; Z)",
+        "Total Listed Scholars: 8 Approved Beneficiaries         Total Payroll Grant: ₱24,000.00",
+        "----------------------------------------------------------------------------------------------------------",
+        "No.  | Scholar ID   | Full Name (Surname, First) | Purok / Zone      | Grant Amount | Signature of Claimant",
+        "----------------------------------------------------------------------------------------------------------"
+      ];
+
+      const sortedIds = timelineSnapshots[16].array;
+      sortedIds.forEach((id, idx) => {
+        const s = scholars[id];
+        const num = String(idx + 1).padEnd(4, ' ');
+        const schId = s.id.padEnd(12, ' ');
+        const name = s.fullName.padEnd(26, ' ');
+        const purok = s.purok.padEnd(17, ' ');
+        const grant = s.stipend.padEnd(12, ' ');
+        lines.push(`${num} | ${schId} | ${name} | ${purok} | ${grant} | [______________________]`);
+      });
+
+      lines.push("----------------------------------------------------------------------------------------------------------");
+      lines.push("CERTIFIED CORRECT BY:                               APPROVED BY:");
+      lines.push("");
+      lines.push("__________________________________                  __________________________________");
+      lines.push("SK CHAIRPERSON / DISBURSING OFFICER                 PUNONG BARANGAY / COUNCIL CHAIR");
+
+      coaPreview.innerHTML = lines.join("<br>");
+    }
+
+    // -------------------------------------------------------------
+    // CONTROLS & TIMELINE NAVIGATION
+    // -------------------------------------------------------------
+    function toggleAutoplay() {
+      if (autoplayTimer) {
+        pauseAutoplay("Paused");
+      } else {
+        if (currentStepIndex >= timelineSnapshots.length - 1) {
+          currentStepIndex = 0;
+        }
+        startAutoplay();
+      }
+    }
+
+    function startAutoplay() {
+      if (autoplayTimer) clearInterval(autoplayTimer);
+      updatePlayIcons(true);
+      document.getElementById("timelineStatusBadge").textContent = "Playing...";
+
+      autoplayTimer = setInterval(() => {
+        if (currentStepIndex < timelineSnapshots.length - 1) {
+          applyTimelineStep(currentStepIndex + 1, false);
+        } else {
+          pauseAutoplay("Completed (Auto-Stopped)");
+        }
+      }, stepSpeedMs);
+    }
+
+    function pauseAutoplay(statusText = "Paused") {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+      updatePlayIcons(false);
+      document.getElementById("timelineStatusBadge").textContent = statusText;
+    }
+
+    function updatePlayIcons(isPlaying) {
+      const btnHeader = document.getElementById("btnPlayPause");
+      const playIcon = document.getElementById("timelinePlayIcon");
+      const pauseIcon = document.getElementById("timelinePauseIcon");
+
+      if (isPlaying) {
+        if (btnHeader) {
+          btnHeader.textContent = "Pause";
+          btnHeader.classList.add("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "none";
+        if (pauseIcon) pauseIcon.style.display = "block";
+      } else {
+        if (btnHeader) {
+          btnHeader.textContent = "Play";
+          btnHeader.classList.remove("btn-active-pause");
+        }
+        if (playIcon) playIcon.style.display = "block";
+        if (pauseIcon) pauseIcon.style.display = "none";
+      }
+    }
+
+    function stepTimeline(direction) {
+      pauseAutoplay("Paused");
+      const target = currentStepIndex + direction;
+      applyTimelineStep(target, true);
+    }
+
+    function seekTimelineByClick(event) {
+      pauseAutoplay("Paused");
+      const container = document.getElementById("timelineTrackContainer");
+      const rect = container.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      const totalSteps = timelineSnapshots.length - 1;
+      const targetStep = Math.round(ratio * totalSteps);
+      applyTimelineStep(targetStep, true);
+    }
+
+    function focusMedianPivot() {
+      pauseAutoplay("Pivot Focus");
+      applyTimelineStep(1, true);
+      const pivotCard = document.querySelector(".scholar-card.is-active-pivot");
+      if (pivotCard) {
+        pivotCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
+
+    function resetSimulation() {
+      pauseAutoplay("Paused");
+      applyTimelineStep(0, true);
+    }
+
+    function changeSpeed(val) {
+      const baseMs = 2400;
+      stepSpeedMs = baseMs / parseFloat(val);
+      if (autoplayTimer) {
+        startAutoplay();
+      }
+    }
+
+    // Launch simulation on DOM ready
+    window.addEventListener("DOMContentLoaded", initSimulation);
+  </script>
+</body>
+</html>
