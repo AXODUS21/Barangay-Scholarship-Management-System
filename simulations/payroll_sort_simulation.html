@@ -907,7 +907,7 @@
         <div class="timeline-step-label">
           <span id="timelineCurrentStep">Step 0</span>
           <span class="timeline-step-sep">/</span>
-          <span id="timelineTotalSteps">16</span>
+          <span id="timelineTotalSteps">18</span>
         </div>
       </div>
 
@@ -951,7 +951,7 @@
     };
 
     // -------------------------------------------------------------
-    // TIMELINE SNAPSHOTS (17 GRANULAR STEPS: 0 to 16 — ZERO SKIPPING)
+    // TIMELINE SNAPSHOTS (19 GRANULAR STEPS: 0 to 18 — ZERO SKIPPING)
     // -------------------------------------------------------------
     const timelineSnapshots = [
       {
@@ -1002,12 +1002,58 @@
       },
       {
         step: 2,
-        title: "Advance i Rightward: 'Lopez', 'Castro', 'Del Rosario' &le; Pivot &rarr; STOPS at Navarro [3]",
+        title: "Advance i Rightward: Inspect Castro at Slot [1] ('C' &lt; 'M')",
+        badge: "i at [1]",
+        badgeColor: "blue",
+        rangeBadge: "i advances to [1]",
+        comparisonText: "Pointer <code>i</code> advances to slot [1]. Compares <code>'Castro'</code> with Pivot <code>'Morales'</code>: <code>'Castro'.compareToIgnoreCase('Morales') &lt; 0</code> ('C' &lt; 'M'). Valid for left partition, pointer <code>i</code> continues rightward.",
+        progressPct: 11,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i at [1] · j at [6]",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-002", activeJId: "SCH-007", lessIds: ["SCH-001", "SCH-002"], greaterIds: []
+      },
+      {
+        step: 3,
+        title: "Advance i Rightward: Inspect Del Rosario at Slot [2] ('D' &lt; 'M')",
+        badge: "i at [2]",
+        badgeColor: "blue",
+        rangeBadge: "i advances to [2]",
+        comparisonText: "Pointer <code>i</code> advances to slot [2]. Compares <code>'Del Rosario'</code> with Pivot <code>'Morales'</code>: <code>'Del Rosario'.compareToIgnoreCase('Morales') &lt; 0</code> ('D' &lt; 'M'). Valid for left partition, pointer <code>i</code> continues rightward.",
+        progressPct: 17,
+        lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
+        lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i at [2] · j at [6]",
+        slots: [
+          { id: "SCH-001", surname: "Lopez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-002", surname: "Castro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-003", surname: "Del Rosario", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "SCH-004", surname: "Navarro", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-005", surname: "Mercado", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-006", surname: "Fernandez", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "SCH-007", surname: "Soriano", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "SCH-008", surname: "Morales", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006", "SCH-007", "SCH-008"],
+        activePivotId: "SCH-008", activeIId: "SCH-003", activeJId: "SCH-007", lessIds: ["SCH-001", "SCH-002", "SCH-003"], greaterIds: []
+      },
+      {
+        step: 4,
+        title: "Advance i Rightward: STOPS at Navarro at Slot [3] ('N' &gt; 'M')",
         badge: "i STOPS at [3]",
         badgeColor: "orange",
         rangeBadge: "i halted at [3]",
-        comparisonText: "Pointer <code>i</code> scans right: <code>'Lopez'</code> (L < M), <code>'Castro'</code> (C < M), <code>'Del Rosario'</code> (D < M) valid. <code>'Navarro'.compareToIgnoreCase('Morales') > 0</code> ('N' > 'M') &rarr; <strong>i STOPS at [3]</strong>!",
-        progressPct: 16,
+        comparisonText: "Pointer <code>i</code> advances to slot [3]. Compares <code>'Navarro'</code> with Pivot <code>'Morales'</code>: <code>'Navarro'.compareToIgnoreCase('Morales') &gt; 0</code> ('N' &gt; 'M'). Navarro belongs in right partition &rarr; <strong>i STOPS at [3]</strong>!",
+        progressPct: 22,
         lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i at [3] · j at [6]",
         slots: [
@@ -1024,13 +1070,13 @@
         activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: "SCH-007", lessIds: ["SCH-001", "SCH-002", "SCH-003"], greaterIds: ["SCH-004"]
       },
       {
-        step: 3,
+        step: 5,
         title: "Advance j Leftward: 'Soriano' &gt; Pivot &rarr; STOPS at Fernandez [5] ('F' &lt; 'M')",
         badge: "j STOPS at [5]",
         badgeColor: "orange",
         rangeBadge: "Both Pointers Halted",
         comparisonText: "Pointer <code>j</code> scans left: [6] <code>'Soriano'</code> ('S' > 'M') valid on right. [5] <code>'Fernandez'.compareToIgnoreCase('Morales') < 0</code> ('F' < 'M') &rarr; <strong>j STOPS at [5]</strong>!",
-        progressPct: 24,
+        progressPct: 28,
         lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Lopez", midVal: "Navarro", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i at [3], j at [5] (i < j)",
         slots: [
@@ -1047,13 +1093,13 @@
         activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: "SCH-006", lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006"], greaterIds: ["SCH-004", "SCH-007"]
       },
       {
-        step: 4,
+        step: 6,
         title: "In-Place SWAP: Exchange i (Slot [3], Navarro) &harr; j (Slot [5], Fernandez)",
         badge: "In-Place Swap",
         badgeColor: "green",
         rangeBadge: "Swapped: Slot [3] & [5]",
         comparisonText: "Both pointers halted with <code>i < j (3 < 5)</code>. <strong>swap(list, 3, 5)</strong> exchanges Navarro and Fernandez in-place. Fernandez moves to left half; Navarro shifts to right half.",
-        progressPct: 32,
+        progressPct: 33,
         lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Lopez", midVal: "Fernandez", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "Swapped [3] & [5]",
         slots: [
@@ -1070,13 +1116,13 @@
         activePivotId: "SCH-008", activeIId: "SCH-006", activeJId: "SCH-004", lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006"], greaterIds: ["SCH-004", "SCH-007"]
       },
       {
-        step: 5,
+        step: 7,
         title: "Resume i Rightward: 'Mercado' vs 'Morales' ('e' &lt; 'o') &rarr; STOPS at Navarro [5]",
         badge: "i STOPS at [5]",
         badgeColor: "orange",
         rangeBadge: "i halted at [5]",
         comparisonText: "Character inspection: <code>'Mercado'.compareToIgnoreCase('Morales') < 0</code> (both start with 'M', but 'e' < 'o'). <code>i</code> advances past [4] to [5] (<code>'Navarro'</code> > 'Morales') and <strong>STOPS at [5]</strong>!",
-        progressPct: 40,
+        progressPct: 39,
         lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Lopez", midVal: "Fernandez", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "i halted at [5]",
         slots: [
@@ -1093,13 +1139,13 @@
         activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: null, lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005"], greaterIds: ["SCH-004"]
       },
       {
-        step: 6,
+        step: 8,
         title: "Resume j Leftward: Pointers Cross at i = 5, j = 4",
         badge: "Pointers Crossed!",
         badgeColor: "purple",
         rangeBadge: "Crossing: i=5, j=4",
         comparisonText: "From [5], <code>j</code> moves left to [4] (<code>'Mercado'</code> &le; 'Morales') &rarr; <strong>POINTERS CROSSED: i=5 &gt; j=4</strong>! Partition scan terminates.",
-        progressPct: 48,
+        progressPct: 44,
         lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Lopez", midVal: "Fernandez", highVal: "Morales", pivotVal: "Morales (SCH-008)", wallInfo: "Crossed: i = 5, j = 4",
         slots: [
@@ -1116,13 +1162,13 @@
         activePivotId: "SCH-008", activeIId: "SCH-004", activeJId: "SCH-005", lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005"], greaterIds: ["SCH-004", "SCH-007"]
       },
       {
-        step: 7,
+        step: 9,
         title: "Place Pivot at Slot [5]: swap(list, 5, 7) &mdash; 'Morales' Locked Sorted",
         badge: "Pivot #1 Locked",
         badgeColor: "green",
         rangeBadge: "Slot [5] Locked Sorted",
         comparisonText: "<code>swap(list, 5, 7)</code> places Pivot <strong>'Morales'</strong> at slot [5]. All scholars left [0..4] are lexicographically &le; Morales; all right [6..7] are &ge; Morales.",
-        progressPct: 56,
+        progressPct: 50,
         lblLow: "Low [0]:", lblMid: "Mid [3]:", lblHigh: "High [7]:", lblPivot: "Locked Pivot:", lblWall: "Slot [5]:",
         lowVal: "Lopez", midVal: "Fernandez", highVal: "Soriano", pivotVal: "Morales (SCH-008)", wallInfo: "Pivot Locked at Slot [5]",
         slots: [
@@ -1139,13 +1185,13 @@
         activePivotId: "SCH-008", activeIId: null, activeJId: null, lessIds: ["SCH-001", "SCH-002", "SCH-003", "SCH-006", "SCH-005"], greaterIds: ["SCH-007", "SCH-004"]
       },
       {
-        step: 8,
+        step: 10,
         title: "Right Subarray [6..7]: Compare 'Soriano' vs 'Navarro' ('S' &gt; 'N')",
         badge: "Right Subarray [6..7]",
         badgeColor: "orange",
         rangeBadge: "Subarray [6..7] Active",
         comparisonText: "Right partition [6..7]: <code>'Soriano'.compareToIgnoreCase('Navarro') > 0</code> ('S' > 'N'). Out of alphabetical order &rarr; in-place exchange required!",
-        progressPct: 62,
+        progressPct: 56,
         lblLow: "Low [6]:", lblMid: "Pivot [7]:", lblHigh: "High [7]:", lblPivot: "Subarray [6..7]:", lblWall: "Pointers:",
         lowVal: "Soriano", midVal: "Navarro", highVal: "Navarro", pivotVal: "Navarro (SCH-004)", wallInfo: "i = 6 (→) · j = 6",
         slots: [
@@ -1162,13 +1208,13 @@
         activePivotId: "SCH-004", activeIId: "SCH-007", activeJId: "SCH-004", lessIds: [], greaterIds: ["SCH-007"]
       },
       {
-        step: 9,
+        step: 11,
         title: "In-Place SWAP: swap(list, 6, 7) &mdash; Slots [5..7] Locked Sorted",
         badge: "Slots [5..7] Locked",
         badgeColor: "green",
         rangeBadge: "Slots [5..7] Locked",
         comparisonText: "<code>swap(list, 6, 7)</code> executed: <strong>Navarro</strong> at [6], <strong>Soriano</strong> at [7]. Slots [5..7] permanently locked in alphabetical order!",
-        progressPct: 68,
+        progressPct: 61,
         lblLow: "Low [5]:", lblMid: "Slot [6]:", lblHigh: "High [7]:", lblPivot: "Subarray [5..7]:", lblWall: "State:",
         lowVal: "Morales", midVal: "Navarro", highVal: "Soriano", pivotVal: "Slots [5..7] Locked", wallInfo: "Slots [5..7] Locked",
         slots: [
@@ -1185,13 +1231,13 @@
         activePivotId: null, activeIId: null, activeJId: null, lessIds: [], greaterIds: []
       },
       {
-        step: 10,
+        step: 12,
         title: "Left Subarray [0..4]: Median Pivot Selected (Pivot: Lopez) &amp; Pointers Set",
         badge: "Left Subarray Active",
         badgeColor: "purple",
         rangeBadge: "Subarray [0..4] Active",
         comparisonText: "Median of low [0]='Lopez' (L), mid [2]='Del Rosario' (D), and high [4]='Mercado' (M) is <strong>'Lopez'</strong>. Swapped to [4] as pivot. Pointer <code>i</code> at [0], <code>j</code> at [3].",
-        progressPct: 74,
+        progressPct: 67,
         lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Mercado", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "i = 0 (→) · j = 3 (←)",
         slots: [
@@ -1208,13 +1254,13 @@
         activePivotId: "SCH-001", activeIId: "SCH-005", activeJId: "SCH-006", lessIds: [], greaterIds: ["SCH-005"]
       },
       {
-        step: 11,
+        step: 13,
         title: "Advance i &amp; j: i STOPS at Mercado [0] ('M' &gt; 'L'), j STOPS at Fernandez [3] ('F' &lt; 'L')",
         badge: "Both Pointers Halted",
         badgeColor: "orange",
         rangeBadge: "i at [0], j at [3]",
         comparisonText: "Slot [0] <code>'Mercado'</code> > 'Lopez' (M > L) &rarr; <code>i</code> STOPS at [0]. Slot [3] <code>'Fernandez'</code> < 'Lopez' (F < L) &rarr; <code>j</code> STOPS at [3]!",
-        progressPct: 80,
+        progressPct: 72,
         lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Mercado", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "i at [0], j at [3] (i < j)",
         slots: [
@@ -1231,13 +1277,13 @@
         activePivotId: "SCH-001", activeIId: "SCH-005", activeJId: "SCH-006", lessIds: ["SCH-006"], greaterIds: ["SCH-005"]
       },
       {
-        step: 12,
+        step: 14,
         title: "In-Place SWAP: Exchange i (Slot [0], Mercado) &harr; j (Slot [3], Fernandez)",
         badge: "In-Place Swap",
         badgeColor: "green",
         rangeBadge: "Swapped: Slot [0] & [3]",
         comparisonText: "<code>swap(list, 0, 3)</code> brings Fernandez to left side (Slot [0]) and shifts Mercado to right side (Slot [3]). Ready for pivot convergence.",
-        progressPct: 85,
+        progressPct: 78,
         lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Fernandez", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "Swapped [0] & [3]",
         slots: [
@@ -1254,13 +1300,13 @@
         activePivotId: "SCH-001", activeIId: "SCH-006", activeJId: "SCH-005", lessIds: ["SCH-006", "SCH-002", "SCH-003"], greaterIds: ["SCH-005"]
       },
       {
-        step: 13,
+        step: 15,
         title: "Resume Scanning: Pointers Cross at i = 3, j = 2",
         badge: "Pointers Crossed!",
         badgeColor: "purple",
         rangeBadge: "Crossing: i=3, j=2",
         comparisonText: "<code>i</code> advances through [1] Castro & [2] Del Rosario to [3] Mercado ('M' > 'L'); <code>j</code> moves left to [2] ('D' < 'L') &rarr; <strong>POINTERS CROSSED: i=3 &gt; j=2</strong>!",
-        progressPct: 89,
+        progressPct: 83,
         lblLow: "Low [0]:", lblMid: "Mid [2]:", lblHigh: "High [4]:", lblPivot: "Selected Pivot:", lblWall: "Pointers:",
         lowVal: "Fernandez", midVal: "Del Rosario", highVal: "Lopez", pivotVal: "Lopez (SCH-001)", wallInfo: "Crossed: i = 3, j = 2",
         slots: [
@@ -1277,13 +1323,13 @@
         activePivotId: "SCH-001", activeIId: "SCH-005", activeJId: "SCH-003", lessIds: ["SCH-006", "SCH-002", "SCH-003"], greaterIds: ["SCH-005"]
       },
       {
-        step: 14,
+        step: 16,
         title: "Place Pivot at Slot [3]: swap(list, 3, 4) &mdash; 'Lopez' &amp; 'Mercado' Locked",
         badge: "Pivot #2 Locked",
         badgeColor: "green",
         rangeBadge: "Slots [3..4] Locked",
         comparisonText: "<code>swap(list, 3, 4)</code> locks Pivot <strong>Lopez</strong> at slot [3]. Single-element partition [4] (Mercado) trivially resolves. Slots [3..7] locked!",
-        progressPct: 93,
+        progressPct: 89,
         lblLow: "Low [0]:", lblMid: "Pivot [3]:", lblHigh: "High [4]:", lblPivot: "Locked Pivot:", lblWall: "State:",
         lowVal: "Fernandez", midVal: "Lopez", highVal: "Mercado", pivotVal: "Lopez (SCH-001)", wallInfo: "Slots [3..7] Locked",
         slots: [
@@ -1300,13 +1346,13 @@
         activePivotId: "SCH-001", activeIId: null, activeJId: null, lessIds: ["SCH-006", "SCH-002", "SCH-003"], greaterIds: ["SCH-005"]
       },
       {
-        step: 15,
+        step: 17,
         title: "Subarray [0..2] Base Case: 'Castro' &harr; 'Fernandez' &mdash; All 8 Slots Locked",
         badge: "All Slots Locked",
         badgeColor: "green",
         rangeBadge: "All 8 Slots Locked",
         comparisonText: "Subarray [0..2] partitioned around median Del Rosario: <code>swap(list, 0, 1)</code> places Castro at [0] &amp; Fernandez at [2]. All 8 slots strictly ordered A &rarr; Z!",
-        progressPct: 97,
+        progressPct: 94,
         lblLow: "Min [0]:", lblMid: "Pivot [3]:", lblHigh: "Max [7]:", lblPivot: "All 8 Sorted:", lblWall: "State:",
         lowVal: "Castro", midVal: "Lopez", highVal: "Soriano", pivotVal: "All 8 Slots Locked", wallInfo: "All 8 Slots Locked",
         slots: [
@@ -1323,7 +1369,7 @@
         activePivotId: null, activeIId: null, activeJId: null, lessIds: [], greaterIds: []
       },
       {
-        step: 16,
+        step: 18,
         title: "Official COA Alphabetical Payroll Attendance Sheet Finalized",
         badge: "COA Payroll Ready",
         badgeColor: "green",
@@ -1515,7 +1561,7 @@
         card.className = `scholar-card ${isPivot ? 'is-active-pivot' : ''} ${isI ? 'is-active-i' : ''} ${isJ ? 'is-active-j' : ''} ${isLess ? 'is-less-pivot' : ''} ${isGreater ? 'is-greater-pivot' : ''}`;
 
         let slotStatusBadge = `Rank #${idx + 1}`;
-        if (snapshot.step === 16) {
+        if (snapshot.step === timelineSnapshots.length - 1) {
           slotStatusBadge = `<span class="badge badge-green" style="font-size: 8px;">PAYROLL #0${idx + 1}</span>`;
         }
 
@@ -1564,7 +1610,7 @@
         "----------------------------------------------------------------------------------------------------------"
       ];
 
-      const sortedIds = timelineSnapshots[16].array;
+      const sortedIds = timelineSnapshots[timelineSnapshots.length - 1].array;
       sortedIds.forEach((id, idx) => {
         const s = scholars[id];
         const num = String(idx + 1).padEnd(4, ' ');
