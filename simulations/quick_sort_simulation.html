@@ -868,7 +868,7 @@
         <div class="timeline-step-label">
           <span id="timelineCurrentStep">Step 0</span>
           <span class="timeline-step-sep">/</span>
-          <span id="timelineTotalSteps">15</span>
+          <span id="timelineTotalSteps">16</span>
         </div>
       </div>
 
@@ -1106,18 +1106,49 @@
       },
       {
         step: 6,
-        title: "Resume i Rightward: Advances to Carl (Slot [3], ₱24,000 > Pivot)",
+        title: "Resume i Rightward: Evaluates Hannah (Slot [2], ₱9,000 ≤ Pivot)",
+        badge: "i at [2]",
+        badgeColor: "orange",
+        bannerText: "From [1], <code>i</code> advances to Slot [2] (Hannah, ₱9k). ₱9,000 &le; ₱14.5k (correctly on left) &rarr; <code>i</code> continues rightward.",
+        rangeBadge: "i scanning at [2]",
+        comparisonText: "Pointer i evaluates Hannah (₱9,000 ≤ ₱14,500). Value belongs in left partition; pointer i advances right toward index 3.",
+        progressPct: 48,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "i scanning [2] · j at [4]",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-002", "APP-001", "APP-008", "APP-006", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-001",
+        activeJId: "APP-006",
+        lessIds: ["APP-003", "APP-002", "APP-001"],
+        greaterIds: ["APP-006"]
+      },
+      {
+        step: 7,
+        title: "Advance i Rightward: STOPS at Carl (Slot [3], ₱24,000 > Pivot)",
         badge: "i STOPS at [3]",
         badgeColor: "orange",
-        bannerText: "Slot [2] (Hannah, ₱9k) &le; ₱14.5k &rarr; <code>i</code> advances. Slot [3] (Carl, ₱24k) &gt; ₱14.5k &rarr; <strong>i STOPS at [3]</strong>!",
+        bannerText: "From [2], <code>i</code> advances to Slot [3] (Carl, ₱24k). ₱24,000 &gt; ₱14.5k (too wealthy for left) &rarr; <strong>i STOPS at [3]</strong>!",
         rangeBadge: "i halted at [3]",
-        comparisonText: "Pointer i advances to index 3 and stops at Carl (₱24,000 > ₱14,500).",
+        comparisonText: "Pointer i advances to index 3 and stops at Carl (₱24,000 > ₱14,500). Pointer i halts.",
         progressPct: 55,
         lowVal: "₱12,500",
         midVal: "₱24,000",
         highVal: "₱14,500",
         pivotVal: "₱14,500 (APP-004)",
-        wallInfo: "i halted at [3]",
+        wallInfo: "i halted at [3] · j at [4]",
         slots: [
           { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
           { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
@@ -1136,7 +1167,7 @@
         greaterIds: ["APP-008", "APP-006"]
       },
       {
-        step: 7,
+        step: 8,
         title: "Resume j Leftward: Pointers Cross at i = 3, j = 2",
         badge: "Pointers Crossed!",
         badgeColor: "purple",
@@ -1167,7 +1198,7 @@
         greaterIds: ["APP-008", "APP-006", "APP-005", "APP-007"]
       },
       {
-        step: 8,
+        step: 9,
         title: "Place Pivot at Crossing Index: swap(list, i, high)",
         badge: "Pivot #1 Locked",
         badgeColor: "green",
@@ -1198,7 +1229,7 @@
         greaterIds: ["APP-006", "APP-005", "APP-007", "APP-008"]
       },
       {
-        step: 9,
+        step: 10,
         title: "Left Subarray [0..2] Partitioning & Slots [0..3] Locked",
         badge: "Slots [0..3] Locked",
         badgeColor: "green",
@@ -1234,7 +1265,7 @@
         greaterIds: []
       },
       {
-        step: 10,
+        step: 11,
         title: "Right Subarray [4..7]: Median Pivot Selected & Pointers Set",
         badge: "Right Half Active",
         badgeColor: "purple",
@@ -1270,7 +1301,7 @@
         greaterIds: []
       },
       {
-        step: 11,
+        step: 12,
         title: "Advance i & j: i STOPS at Carl [4], j STOPS at Bea [5]",
         badge: "Both Pointers Halted",
         badgeColor: "orange",
@@ -1306,7 +1337,7 @@
         greaterIds: ["APP-008", "APP-007"]
       },
       {
-        step: 12,
+        step: 13,
         title: "In-Place SWAP: Exchange i (Slot [4]) & j (Slot [5])",
         badge: "In-Place Swap",
         badgeColor: "green",
@@ -1342,7 +1373,7 @@
         greaterIds: ["APP-008", "APP-007"]
       },
       {
-        step: 13,
+        step: 14,
         title: "Resume Scanning: Pointers Cross at i = 5, j = 4",
         badge: "Pointers Crossed!",
         badgeColor: "purple",
@@ -1378,7 +1409,7 @@
         greaterIds: ["APP-008", "APP-007"]
       },
       {
-        step: 14,
+        step: 15,
         title: "Place Pivot at Slot [5]: swap(list, 5, 7) — All Slots Locked",
         badge: "All Slots Locked",
         badgeColor: "green",
@@ -1414,7 +1445,7 @@
         greaterIds: []
       },
       {
-        step: 15,
+        step: 16,
         title: "Official Financial Need Masterlist & Top 5 Slot Allocation",
         badge: "Sorting Complete",
         badgeColor: "green",
