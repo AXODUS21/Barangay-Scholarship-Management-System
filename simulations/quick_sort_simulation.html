@@ -868,7 +868,7 @@
         <div class="timeline-step-label">
           <span id="timelineCurrentStep">Step 0</span>
           <span class="timeline-step-sep">/</span>
-          <span id="timelineTotalSteps">14</span>
+          <span id="timelineTotalSteps">15</span>
         </div>
       </div>
 
@@ -1013,13 +1013,44 @@
       },
       {
         step: 3,
+        title: "Advance j Leftward: Evaluates Bea (Slot [5], ₱17,000 ≥ Pivot)",
+        badge: "j at [5]",
+        badgeColor: "orange",
+        bannerText: "Slot [6] (Gabriel, ₱19k) &ge; ₱14.5k &rarr; <code>j</code> steps left to Slot [5] (Bea, ₱17k). ₱17,000 &ge; ₱14,500 (correctly on right) &rarr; <code>j</code> continues leftward.",
+        rangeBadge: "j scanning at [5]",
+        comparisonText: "Pointer j evaluates Bea Fernandez (₱17,000 ≥ ₱14,500). Value belongs in right partition; j continues scanning leftward.",
+        progressPct: 26,
+        lowVal: "₱12,500",
+        midVal: "₱24,000",
+        highVal: "₱14,500",
+        pivotVal: "₱14,500 (APP-004)",
+        wallInfo: "i at [1] · j scanning [5]",
+        slots: [
+          { id: "APP-003", income: "₱12.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-006", income: "₱18.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["i"] },
+          { id: "APP-001", income: "₱9.0k",  isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-008", income: "₱24.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-002", income: "₱11.5k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-005", income: "₱17.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: true,  pointers: ["j"] },
+          { id: "APP-007", income: "₱19.0k", isWindow: true, isPivot: false, isLocked: false, isScanning: false, pointers: [] },
+          { id: "APP-004", income: "₱14.5k", isWindow: true, isPivot: true,  isLocked: false, isScanning: false, pointers: ["pivot"] }
+        ],
+        array: ["APP-003", "APP-006", "APP-001", "APP-008", "APP-002", "APP-005", "APP-007", "APP-004"],
+        activePivotId: "APP-004",
+        activeIId: "APP-006",
+        activeJId: "APP-005",
+        lessIds: ["APP-003"],
+        greaterIds: ["APP-006", "APP-007", "APP-005"]
+      },
+      {
+        step: 4,
         title: "Advance j Leftward: STOPS at Danilo (Slot [4], ₱11,500 < Pivot)",
         badge: "j STOPS at [4]",
         badgeColor: "orange",
-        bannerText: "Slots [6] (₱19k) and [5] (₱17k) &ge; ₱14.5k &rarr; <code>j</code> moves left. Slot [4] (Danilo, ₱11.5k) &le; ₱14.5k &rarr; <strong>j STOPS at [4]</strong>!",
+        bannerText: "Slot [5] (Bea, ₱17k) &ge; ₱14.5k &rarr; <code>j</code> steps left to Slot [4]. Slot [4] (Danilo, ₱11.5k) &lt; ₱14.5k &rarr; <strong>j STOPS at [4]</strong> (misplaced on right side)!",
         rangeBadge: "Both Pointers Halted",
         comparisonText: "Pointer j searches for values < Pivot (higher financial need misplaced on right). Finds Danilo (₱11,500 < ₱14,500) and halts at index 4.",
-        progressPct: 32,
+        progressPct: 35,
         lowVal: "₱12,500",
         midVal: "₱24,000",
         highVal: "₱14,500",
@@ -1043,7 +1074,7 @@
         greaterIds: ["APP-006", "APP-005", "APP-007"]
       },
       {
-        step: 4,
+        step: 5,
         title: "In-Place SWAP: Exchange i (Slot [1]) & j (Slot [4])",
         badge: "In-Place Swap",
         badgeColor: "green",
@@ -1074,7 +1105,7 @@
         greaterIds: ["APP-006", "APP-005", "APP-007"]
       },
       {
-        step: 5,
+        step: 6,
         title: "Resume i Rightward: Advances to Carl (Slot [3], ₱24,000 > Pivot)",
         badge: "i STOPS at [3]",
         badgeColor: "orange",
@@ -1105,7 +1136,7 @@
         greaterIds: ["APP-008", "APP-006"]
       },
       {
-        step: 6,
+        step: 7,
         title: "Resume j Leftward: Pointers Cross at i = 3, j = 2",
         badge: "Pointers Crossed!",
         badgeColor: "purple",
@@ -1136,7 +1167,7 @@
         greaterIds: ["APP-008", "APP-006", "APP-005", "APP-007"]
       },
       {
-        step: 7,
+        step: 8,
         title: "Place Pivot at Crossing Index: swap(list, i, high)",
         badge: "Pivot #1 Locked",
         badgeColor: "green",
@@ -1167,7 +1198,7 @@
         greaterIds: ["APP-006", "APP-005", "APP-007", "APP-008"]
       },
       {
-        step: 8,
+        step: 9,
         title: "Left Subarray [0..2] Partitioning & Slots [0..3] Locked",
         badge: "Slots [0..3] Locked",
         badgeColor: "green",
@@ -1203,7 +1234,7 @@
         greaterIds: []
       },
       {
-        step: 9,
+        step: 10,
         title: "Right Subarray [4..7]: Median Pivot Selected & Pointers Set",
         badge: "Right Half Active",
         badgeColor: "purple",
@@ -1239,7 +1270,7 @@
         greaterIds: []
       },
       {
-        step: 10,
+        step: 11,
         title: "Advance i & j: i STOPS at Carl [4], j STOPS at Bea [5]",
         badge: "Both Pointers Halted",
         badgeColor: "orange",
@@ -1275,7 +1306,7 @@
         greaterIds: ["APP-008", "APP-007"]
       },
       {
-        step: 11,
+        step: 12,
         title: "In-Place SWAP: Exchange i (Slot [4]) & j (Slot [5])",
         badge: "In-Place Swap",
         badgeColor: "green",
@@ -1311,7 +1342,7 @@
         greaterIds: ["APP-008", "APP-007"]
       },
       {
-        step: 12,
+        step: 13,
         title: "Resume Scanning: Pointers Cross at i = 5, j = 4",
         badge: "Pointers Crossed!",
         badgeColor: "purple",
@@ -1347,7 +1378,7 @@
         greaterIds: ["APP-008", "APP-007"]
       },
       {
-        step: 13,
+        step: 14,
         title: "Place Pivot at Slot [5]: swap(list, 5, 7) — All Slots Locked",
         badge: "All Slots Locked",
         badgeColor: "green",
@@ -1383,7 +1414,7 @@
         greaterIds: []
       },
       {
-        step: 14,
+        step: 15,
         title: "Official Financial Need Masterlist & Top 5 Slot Allocation",
         badge: "Sorting Complete",
         badgeColor: "green",
@@ -1573,7 +1604,7 @@
         card.className = `applicant-card ${isPivot ? 'is-active-pivot' : ''} ${isI ? 'is-active-i' : ''} ${isJ ? 'is-active-j' : ''} ${isLess ? 'is-less-pivot' : ''} ${isGreater ? 'is-greater-pivot' : ''}`;
 
         let slotStatusBadge = `Rank #${idx + 1}`;
-        if (snapshot.step === 14) {
+        if (snapshot.step === timelineSnapshots.length - 1) {
           if (idx < 5) {
             slotStatusBadge = `<span class="badge badge-green" style="font-size: 8px;">SLOT 0${idx + 1}</span>`;
           } else {
