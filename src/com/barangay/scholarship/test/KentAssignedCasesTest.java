@@ -108,10 +108,9 @@ public class KentAssignedCasesTest {
         AlgorithmUtils.mergeSortByGWA(previewList, true);
 
         // Verification of normalized Merge Sort ordering:
-        // College scale: 1.00 is best. High school scale: e.g. 94.5% converts to 5.0 - ((94.5-75)/25)*4 = ~1.88.
-        // Candidate GWAs:
+        // Candidate GWAs (Collegiate scale 1.00 - 5.00):
         // Katrina Denise Morales: 1.70
-        // Hannah Sophia Del Rosario: 94.5% (~1.88)
+        // Hannah Sophia Del Rosario: 1.80
         // Danilo Jose Mercado: 1.95
         // Bea Camille Fernandez: 2.00
         // Jerome Patrick Lopez: 2.10
@@ -127,7 +126,7 @@ public class KentAssignedCasesTest {
         }
 
         assertEquals("Katrina Denise Morales", previewList.get(0).getFullName(), "Rank 1 should be Katrina (1.70)");
-        assertEquals("Hannah Sophia Del Rosario", previewList.get(1).getFullName(), "Rank 2 should be Hannah (94.5% normalized)");
+        assertEquals("Hannah Sophia Del Rosario", previewList.get(1).getFullName(), "Rank 2 should be Hannah (1.80)");
         assertEquals("Danilo Jose Mercado", previewList.get(2).getFullName(), "Rank 3 should be Danilo (1.95)");
         assertEquals("Bea Camille Fernandez", previewList.get(3).getFullName(), "Rank 4 should be Bea (2.00)");
         assertEquals("Jerome Patrick Lopez", previewList.get(4).getFullName(), "Rank 5 should be Jerome (2.10)");

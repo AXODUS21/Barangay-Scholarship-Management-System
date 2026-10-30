@@ -30,7 +30,20 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             // Load the benchmark dataset before opening any portal.
             ScholarshipManager manager = new ScholarshipManager(150000.0, 3000.0);
-            SampleDataSeeder.seedDemoData(manager);
+
+            boolean useFiveDemo = false;
+            for (String arg : args) {
+                if ("5".equalsIgnoreCase(arg) || "demo5".equalsIgnoreCase(arg) || "sim5".equalsIgnoreCase(arg)) {
+                    useFiveDemo = true;
+                    break;
+                }
+            }
+
+            if (useFiveDemo) {
+                SampleDataSeeder.seedFiveDemoData(manager);
+            } else {
+                SampleDataSeeder.seedDemoData(manager);
+            }
 
             // Launch designated portal or default landing gateway
             if (args.length > 0 && "student".equalsIgnoreCase(args[0])) {

@@ -104,11 +104,33 @@ public class SettingsView extends JPanel {
         dTitle.setFont(Theme.FONT_SMALL_BOLD);
         dTitle.setForeground(Theme.TEXT_MUTED);
 
-        JPanel dBody = new JPanel(new GridLayout(2, 1, 8, 8));
+        JPanel dBody = new JPanel(new GridLayout(4, 1, 8, 8));
         dBody.setOpaque(false);
         dBody.setBorder(new EmptyBorder(12, 0, 0, 0));
 
-        JButton btnSeed = Theme.createStyledButton("Reset & Preload Demo Data (20 Students)", Theme.ACCENT, Color.WHITE);
+        JButton btnSeed5 = Theme.createStyledButton("Preload 5 Students (DSA Simulation Preset)", Theme.PRIMARY, Color.WHITE);
+        btnSeed5.setToolTipText("Loads 5 students: 3 Approved (BST), 1 Waitlisted (FIFO Head), 1 Verified (Screening)");
+        btnSeed5.addActionListener(e -> {
+            int c = JOptionPane.showConfirmDialog(this, "Preload 5 students configured for DSA simulations (Queue, Stack, BST, Sorts)?", "Confirm Preload", JOptionPane.YES_NO_OPTION);
+            if (c == JOptionPane.YES_OPTION) {
+                SampleDataSeeder.seedFiveDemoData(manager);
+                JOptionPane.showMessageDialog(this, "5 DSA Simulation records preloaded successfully!\n• 3 Approved Scholars in ScholarBST\n• 1 Waitlisted Applicant at FIFO Head\n• 1 Verified Applicant in Screening Queue", "5 Records Loaded", JOptionPane.INFORMATION_MESSAGE);
+                refreshValues();
+            }
+        });
+
+        JButton btnSeed5Candidates = Theme.createStyledButton("Preload 5 Verified Candidates (Ranking Lab)", Theme.ACCENT, Color.WHITE);
+        btnSeed5Candidates.setToolTipText("Loads 5 verified applicants ready for Merge Sort and Quick Sort live ranking");
+        btnSeed5Candidates.addActionListener(e -> {
+            int c = JOptionPane.showConfirmDialog(this, "Preload 5 verified applicants ready for live ranking in Slot Allocation?", "Confirm Preload", JOptionPane.YES_NO_OPTION);
+            if (c == JOptionPane.YES_OPTION) {
+                SampleDataSeeder.seedFiveVerifiedCandidates(manager);
+                JOptionPane.showMessageDialog(this, "5 Verified Candidates preloaded!\nOpen 'Slot Allocation & Ranking Engine' to test Merge Sort (Merit) and Quick Sort (Financial Need).", "Ranking Lab Loaded", JOptionPane.INFORMATION_MESSAGE);
+                refreshValues();
+            }
+        });
+
+        JButton btnSeed = new JButton("Reset & Preload Full Demo (20 Students)");
         btnSeed.addActionListener(e -> {
             int c = JOptionPane.showConfirmDialog(this, "Preload 20 realistic student records and reset queues?", "Confirm Preload", JOptionPane.YES_NO_OPTION);
             if (c == JOptionPane.YES_OPTION) {
@@ -129,6 +151,8 @@ public class SettingsView extends JPanel {
             }
         });
 
+        dBody.add(btnSeed5);
+        dBody.add(btnSeed5Candidates);
         dBody.add(btnSeed);
         dBody.add(btnClear);
 

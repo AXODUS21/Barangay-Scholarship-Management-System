@@ -60,6 +60,7 @@ public class TestRunner {
         runTest("Student Portal formatted inputs and registration", TestRunner::testStudentPortalRequestedRegistration);
         runTest("Student Portal guidelines render formatted content", TestRunner::testStudentGuidelinesFormatting);
         runTest("Seeded startup dashboard initial state", TestRunner::testInitialDashboardState);
+        runTest("Preloaded 5 DSA Benchmark Datasets", TestRunner::testFiveStudentBenchmark);
         runTest("TC-07, TC-08, TC-09: Kent Assigned QA Test Cases (Ranking & Payout)",
                 () -> KentAssignedCasesTest.main(new String[0]));
 
@@ -709,6 +710,44 @@ public class TestRunner {
                 "Academic scales should render as separate lines");
         assertTrue(academicGuideline.getRows() >= 2,
                 "Academic guideline should reserve space for both scales");
+    }
+
+    private static void testFiveStudentBenchmark() {
+        ScholarshipManager manager = new ScholarshipManager(150000.0, 3000.0);
+        SampleDataSeeder.seedFiveDemoData(manager);
+
+        assertEquals(5, manager.getMasterList().size(), "Master list must have exactly 5 applicants");
+        assertEquals(3, manager.getScholarDirectory().size(), "ScholarBST must contain 3 approved scholars");
+        assertEquals(1, manager.getWaitlistQueue().size(), "Waitlist queue must have 1 student");
+        assertEquals(1, manager.getScreeningQueue().size(), "Screening queue must have 1 student");
+
+        // Check collegiate scale on all 5
+        for (Applicant a : manager.getMasterList()) {
+            assertTrue(a.isCollegeScale(), "All GWAs must be collegiate scale (<= 5.0): " + a.getFullName());
+            assertTrue(a.getGwa() <= 2.50, "All demo GWAs must be <= 2.50: " + a.getFullName());
+        }
+
+        // Check head of waitlist is Bea Fernandez
+        Applicant headWaitlist = manager.getWaitlistQueue().peek();
+        assertEquals("Bea Camille Fernandez", headWaitlist.getFullName(), "Head of waitlist must be Bea");
+
+        // Verify dropping a scholar promotes Bea from waitlist
+        Scholar promoted = manager.dropScholarAndPromoteWaitlist("SCH-2026-001", "Testing promotion");
+        assertTrue(promoted != null, "Waitlist candidate should be auto-promoted");
+        assertEquals("Bea Camille Fernandez", promoted.getFullName(), "Promoted scholar should be Bea");
+        assertEquals(0, manager.getWaitlistQueue().size(), "Waitlist should now be empty");
+
+        // Verify seedFiveVerifiedCandidates
+        SampleDataSeeder.seedFiveVerifiedCandidates(manager);
+        assertEquals(5, manager.getMasterList().size(), "Master list must have 5 verified candidates");
+        List<Applicant> candidateList = new ArrayList<>(manager.getMasterList());
+        AlgorithmUtils.mergeSortByGWA(candidateList, true);
+        assertEquals("Katrina Denise Morales", candidateList.get(0).getFullName(), "Rank 1 Merit must be Katrina");
+        assertEquals("Jerome Patrick Lopez", candidateList.get(4).getFullName(), "Rank 5 Merit must be Jerome");
+
+        AlgorithmUtils.quickSortByIncome(candidateList, true);
+        assertEquals("Hannah Sophia Del Rosario", candidateList.get(0).getFullName(), "Rank 1 Need must be Hannah");
+        assertEquals("Bea Camille Fernandez", candidateList.get(4).getFullName(), "Rank 5 Need must be Bea");
     }
 
     private static void collectTextAreas(Container container, List<JTextArea> textAreas) {

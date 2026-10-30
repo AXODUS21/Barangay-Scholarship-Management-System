@@ -48,9 +48,9 @@ public class SampleDataSeeder {
             {"Rochelle Marie Tolentino", "Pamantasan ng Lungsod", "1st Year College", 1.60, 13500.0, "Purok 4 San Jose", false, ApplicationStatus.PENDING_VERIFICATION},
             {"Ezekiel Vance Perez", "University of the Philippines", "2nd Year College", 1.45, 16500.0, "Purok 2 Pag-asa", false, ApplicationStatus.PENDING_VERIFICATION},
 
-            // High school / percentage scale applicants
-            {"Hannah Sophia Del Rosario", "Barangay National High School", "Grade 12", 94.5, 9000.0, "Purok 3 Riverside", true, ApplicationStatus.VERIFIED},
-            {"Carl Matthew Navarro", "Barangay National High School", "Grade 11", 82.0, 32000.0, "Purok 5 Kawayan", false, ApplicationStatus.REJECTED}
+            // Additional collegiate applicants
+            {"Hannah Sophia Del Rosario", "Pamantasan ng Lungsod", "1st Year College", 1.80, 9000.0, "Purok 3 Riverside", true, ApplicationStatus.VERIFIED},
+            {"Carl Matthew Navarro", "Batangas State University", "2nd Year College", 2.80, 32000.0, "Purok 5 Kawayan", false, ApplicationStatus.REJECTED}
         };
 
         int appNum = 1;
@@ -79,40 +79,7 @@ public class SampleDataSeeder {
 
             // Pre-seed mock uploaded digital files for demo scholars
             if (docsComplete && appNum <= 4) {
-                try {
-                    String sampleDir = "data/uploads/" + appId;
-                    new File(sampleDir).mkdirs();
-                    File indFile = new File(sampleDir, "Indigency_Certificate_Barangay.txt");
-                    if (!indFile.exists()) {
-                        try (FileWriter fw = new FileWriter(indFile)) {
-                            fw.write("=====================================================\n"
-                                    + "       BARANGAY COUNCIL - CERTIFICATE OF INDIGENCY   \n"
-                                    + "=====================================================\n"
-                                    + "This certifies that " + name + ", residing at " + purok + ",\n"
-                                    + "belongs to an indigent family qualified for the Barangay\n"
-                                    + "Scholarship & Educational Aid Program.\n"
-                                    + "Monthly Household Income: ₱" + String.format("%,.2f", income) + "\n"
-                                    + "Issued by: Barangay Hall Administration\n");
-                        }
-                    }
-                    docs.setIndigencyFilePath(indFile.getPath());
-
-                    File corFile = new File(sampleDir, "Enrollment_COR_Official.txt");
-                    if (!corFile.exists()) {
-                        try (FileWriter fw = new FileWriter(corFile)) {
-                            fw.write("=====================================================\n"
-                                    + "      OFFICIAL CERTIFICATE OF REGISTRATION (COR)    \n"
-                                    + "=====================================================\n"
-                                    + "Student Name : " + name + "\n"
-                                    + "Institution  : " + school + "\n"
-                                    + "Year Level   : " + year + "\n"
-                                    + "Academic Term: 1st Semester AY 2026-2027\n"
-                                    + "Status       : Officially Enrolled (Regular)\n");
-                        }
-                    }
-                    docs.setEnrollmentFilePath(corFile.getPath());
-                } catch (Exception ignored) {
-                }
+                createMockFiles(appId, name, school, year, income, purok, docs);
             }
 
             Applicant applicant = new Applicant(
@@ -137,5 +104,147 @@ public class SampleDataSeeder {
 
         manager.setApplicantCounter(appNum);
         manager.setScholarCounter(schNum);
+    }
+
+    /**
+     * Seeds exactly 5 benchmark student records configured to simulate all 8 DS&A components:
+     * - 3 Approved Scholars in ScholarBST (ready for BST Traversals, Payouts, and Drop/Promotion)
+     * - 1 Waitlisted Applicant at Head of FIFO ScholarshipQueue (ready for auto-promotion)
+     * - 1 Verified Applicant in Screening Queue
+     */
+    public static void seedFiveDemoData(ScholarshipManager manager) {
+        manager.clearAll();
+
+        Object[][] fiveApplicants = new Object[][]{
+            // Full Name, School, Year Level, GWA, Monthly Income, Purok, DocsComplete, InitialStatus
+            {"Katrina Denise Morales", "City College", "2nd Year College", 1.70, 12500.0, "Purok 6 Ilaya", true, ApplicationStatus.APPROVED},
+            {"Hannah Sophia Del Rosario", "Pamantasan ng Lungsod", "1st Year College", 1.80, 9000.0, "Purok 3 Riverside", true, ApplicationStatus.APPROVED},
+            {"Danilo Jose Mercado", "Rizal Technological University", "4th Year College", 1.95, 11500.0, "Purok 1 Maligaya", true, ApplicationStatus.APPROVED},
+            {"Bea Camille Fernandez", "Polytechnic University of the Philippines", "3rd Year College", 2.00, 17000.0, "Purok 1 Maligaya", true, ApplicationStatus.WAITLISTED},
+            {"Jerome Patrick Lopez", "University of Caloocan City", "2nd Year College", 2.10, 14500.0, "Purok 2 Pag-asa", true, ApplicationStatus.VERIFIED}
+        };
+
+        int appNum = 1;
+        int schNum = 1;
+
+        for (Object[] row : fiveApplicants) {
+            String name = (String) row[0];
+            String school = (String) row[1];
+            String year = (String) row[2];
+            double gwa = (Double) row[3];
+            double income = (Double) row[4];
+            String purok = (String) row[5];
+            boolean docsComplete = (Boolean) row[6];
+            ApplicationStatus targetStatus = (ApplicationStatus) row[7];
+
+            String appId = String.format("APP-2026-%03d", appNum++);
+            String email = name.toLowerCase().replace(" ", ".") + "@email.ph";
+            String phone = "09" + (170000000 + (appNum * 12345));
+
+            DocumentChecklist docs = new DocumentChecklist(docsComplete, docsComplete, docsComplete, true);
+            createMockFiles(appId, name, school, year, income, purok, docs);
+
+            Applicant applicant = new Applicant(
+                    appId, name, email, phone, school, year, gwa, income, purok,
+                    docs, targetStatus, LocalDateTime.now().minusDays(10 - appNum)
+            );
+
+            if (targetStatus == ApplicationStatus.APPROVED) {
+                String schId = String.format("SCH-2026-%03d", schNum++);
+                Scholar scholar = new Scholar(applicant, schId, manager.getGrantPerScholar(), "1st Sem AY 2026-2027");
+                manager.recordDirectApproved(scholar);
+            } else if (targetStatus == ApplicationStatus.WAITLISTED) {
+                manager.recordDirectWaitlisted(applicant);
+            } else if (targetStatus == ApplicationStatus.VERIFIED) {
+                manager.recordDirectVerified(applicant);
+            }
+        }
+
+        manager.setApplicantCounter(appNum);
+        manager.setScholarCounter(schNum);
+    }
+
+    /**
+     * Seeds the 5 benchmark students as VERIFIED candidates.
+     * Perfect for demonstrating Merge Sort (Merit) and Quick Sort (Financial Need)
+     * live in the Slot Allocation & Ranking Engine view.
+     */
+    public static void seedFiveVerifiedCandidates(ScholarshipManager manager) {
+        manager.clearAll();
+
+        Object[][] fiveCandidates = new Object[][]{
+            {"Katrina Denise Morales", "City College", "2nd Year College", 1.70, 12500.0, "Purok 6 Ilaya", true, ApplicationStatus.VERIFIED},
+            {"Hannah Sophia Del Rosario", "Pamantasan ng Lungsod", "1st Year College", 1.80, 9000.0, "Purok 3 Riverside", true, ApplicationStatus.VERIFIED},
+            {"Danilo Jose Mercado", "Rizal Technological University", "4th Year College", 1.95, 11500.0, "Purok 1 Maligaya", true, ApplicationStatus.VERIFIED},
+            {"Bea Camille Fernandez", "Polytechnic University of the Philippines", "3rd Year College", 2.00, 17000.0, "Purok 1 Maligaya", true, ApplicationStatus.VERIFIED},
+            {"Jerome Patrick Lopez", "University of Caloocan City", "2nd Year College", 2.10, 14500.0, "Purok 2 Pag-asa", true, ApplicationStatus.VERIFIED}
+        };
+
+        int appNum = 1;
+
+        for (Object[] row : fiveCandidates) {
+            String name = (String) row[0];
+            String school = (String) row[1];
+            String year = (String) row[2];
+            double gwa = (Double) row[3];
+            double income = (Double) row[4];
+            String purok = (String) row[5];
+            boolean docsComplete = (Boolean) row[6];
+            ApplicationStatus targetStatus = (ApplicationStatus) row[7];
+
+            String appId = String.format("APP-2026-%03d", appNum++);
+            String email = name.toLowerCase().replace(" ", ".") + "@email.ph";
+            String phone = "09" + (170000000 + (appNum * 12345));
+
+            DocumentChecklist docs = new DocumentChecklist(docsComplete, docsComplete, docsComplete, true);
+            createMockFiles(appId, name, school, year, income, purok, docs);
+
+            Applicant applicant = new Applicant(
+                    appId, name, email, phone, school, year, gwa, income, purok,
+                    docs, targetStatus, LocalDateTime.now().minusDays(10 - appNum)
+            );
+
+            manager.recordDirectVerified(applicant);
+        }
+
+        manager.setApplicantCounter(appNum);
+        manager.setScholarCounter(1);
+    }
+
+    private static void createMockFiles(String appId, String name, String school, String year, double income, String purok, DocumentChecklist docs) {
+        try {
+            String sampleDir = "data/uploads/" + appId;
+            new File(sampleDir).mkdirs();
+            File indFile = new File(sampleDir, "Indigency_Certificate_Barangay.txt");
+            if (!indFile.exists()) {
+                try (FileWriter fw = new FileWriter(indFile)) {
+                    fw.write("=====================================================\n"
+                            + "       BARANGAY COUNCIL - CERTIFICATE OF INDIGENCY   \n"
+                            + "=====================================================\n"
+                            + "This certifies that " + name + ", residing at " + purok + ",\n"
+                            + "belongs to an indigent family qualified for the Barangay\n"
+                            + "Scholarship & Educational Aid Program.\n"
+                            + "Monthly Household Income: ₱" + String.format("%,.2f", income) + "\n"
+                            + "Issued by: Barangay Hall Administration\n");
+                }
+            }
+            docs.setIndigencyFilePath(indFile.getPath());
+
+            File corFile = new File(sampleDir, "Enrollment_COR_Official.txt");
+            if (!corFile.exists()) {
+                try (FileWriter fw = new FileWriter(corFile)) {
+                    fw.write("=====================================================\n"
+                            + "      OFFICIAL CERTIFICATE OF REGISTRATION (COR)    \n"
+                            + "=====================================================\n"
+                            + "Student Name : " + name + "\n"
+                            + "Institution  : " + school + "\n"
+                            + "Year Level   : " + year + "\n"
+                            + "Academic Term: 1st Semester AY 2026-2027\n"
+                            + "Status       : Officially Enrolled (Regular)\n");
+                }
+            }
+            docs.setEnrollmentFilePath(corFile.getPath());
+        } catch (Exception ignored) {
+        }
     }
 }

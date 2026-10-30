@@ -77,9 +77,28 @@ public class DashboardView extends JPanel {
         JPanel quickActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         quickActions.setOpaque(false);
 
+        JButton btnSeed5 = Theme.createStyledButton("Preload 5 DSA Records", Theme.ACCENT, Color.WHITE);
+        btnSeed5.setToolTipText("Preload exactly 5 benchmark students to simulate Queue, Stack, BST, and Sorts");
+        btnSeed5.addActionListener(e -> {
+            int c = JOptionPane.showConfirmDialog(this,
+                    "Preload 5 student records for algorithm and data structure simulations?",
+                    "Confirm Preload", JOptionPane.YES_NO_OPTION);
+            if (c == JOptionPane.YES_OPTION) {
+                com.barangay.scholarship.util.SampleDataSeeder.seedFiveDemoData(manager);
+                JOptionPane.showMessageDialog(this,
+                        "5 DSA Simulation records loaded!\n"
+                        + "• 3 Approved Scholars in ScholarBST\n"
+                        + "• 1 Waitlisted Applicant at FIFO Head (ScholarshipQueue)\n"
+                        + "• 1 Verified Applicant in Screening Queue",
+                        "Preload Complete", JOptionPane.INFORMATION_MESSAGE);
+                refreshData();
+            }
+        });
+
         JButton btnNewApp = Theme.createStyledButton("+ New Applicant", Theme.PRIMARY, Color.WHITE);
         btnNewApp.addActionListener(e -> navigator.accept("REGISTRATION"));
 
+        quickActions.add(btnSeed5);
         quickActions.add(btnNewApp);
         headerPanel.add(quickActions, BorderLayout.EAST);
 
